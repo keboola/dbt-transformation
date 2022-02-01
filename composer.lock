@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bb66d3f568638d8f0751f761602d3ce1",
+    "content-hash": "61e84a58833db6a90670bf8af883c452",
     "packages": [
         {
             "name": "keboola/common-exceptions",

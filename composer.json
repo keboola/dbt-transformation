@@ -1,6 +1,6 @@
 {
-    "name": "keboola/my-component",
-    "description": "MyComponent description",
+    "name": "keboola/dbt-transformation",
+    "description": "DBT transformation POC component",
     "license": "MIT",
     "require": {
         "php": "^7.4",
@@ -17,13 +17,13 @@
     },
     "autoload": {
         "psr-4": {
-            "MyComponent\\": "src/"
+            "DbtTransformation\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MyComponent\\Tests\\": "tests/phpunit/",
-            "MyComponent\\FunctionalTests\\": "tests/functional/"
+            "DbtTransformation\\Tests\\": "tests/phpunit/",
+            "DbtTransformation\\FunctionalTests\\": "tests/functional/"
         }
     },
     "scripts": {

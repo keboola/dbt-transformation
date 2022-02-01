@@ -13,8 +13,8 @@
 Clone this repository and init the workspace with following command:
 
 ```
-git clone https://github.com/keboola/dbt-transformation.git
-cd dbt-transformation
+git clone https://github.com/keboola/my-component
+cd my-component
 docker-compose build
 docker-compose run --rm dev composer install --no-scripts
 ```

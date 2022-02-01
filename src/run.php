@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use DbtTransformation\Component;
 use Keboola\Component\Logger;
 use Keboola\Component\UserException;
-use DbtTransformation\Component;
 
 require __DIR__ . '/../vendor/autoload.php';
 

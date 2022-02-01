@@ -14,6 +14,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         locales \
         unzip \
+        libpq-dev \
+        python-dev \
+        python3-pip \
+    && pip install --upgrade cffi \
+    && pip install cryptography~=3.4  \
+       dbt-snowflake \
 	&& rm -r /var/lib/apt/lists/* \
 	&& sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
 	&& locale-gen \

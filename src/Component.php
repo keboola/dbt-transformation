@@ -16,6 +16,8 @@ class Component extends BaseComponent
         foreach ($files as $file) {
             echo $file . PHP_EOL;
         }
+        echo PHP_EOL . 'dbt --version output:' . PHP_EOL;
+        echo shell_exec('dbt --version');
     }
 
     protected function getConfigClass(): string

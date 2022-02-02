@@ -1,2 +1,6 @@
 {
+  "authorization": {
+    "user": "test",
+    "password": "test"
+  }
 }

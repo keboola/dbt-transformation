@@ -12,7 +12,7 @@ class Component extends BaseComponent
     protected function run(): void
     {
         $yaml = Yaml::dump($this->getConfig()->getAuthorization());
-        file_put_contents($this->getDataDir() . '/out/profile.yaml', $yaml);
+        file_put_contents($this->getDataDir() . '/out/files/profile.yaml', $yaml);
 
         echo $this->getConfig()->getGitRepositoryUrl();
     }

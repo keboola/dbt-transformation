@@ -10,16 +10,7 @@ class Component extends BaseComponent
 {
     protected function run(): void
     {
-        $path = '/data/in/tables';
-        $files = array_diff(scandir($path) ?: [], ['.', '..']);
-        echo 'input tables loaded:' . PHP_EOL;
-        foreach ($files as $file) {
-            echo $file . PHP_EOL;
-        }
-        echo PHP_EOL . 'dbt --version output:' . PHP_EOL;
-        echo shell_exec('dbt --version');
-
-        var_dump($this->getConfig()->getAuthorization());
+        echo var_export($this->getConfig()->getAuthorization(), true);
 
         echo $this->getConfig()->getGitRepositoryUrl();
     }

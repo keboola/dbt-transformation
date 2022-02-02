@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DbtTransformation;
 
 use Keboola\Component\BaseComponent;
-use Psr\Log\LoggerInterface;
 
 class Component extends BaseComponent
 {
@@ -23,6 +22,13 @@ class Component extends BaseComponent
         var_dump($this->getConfig()->getAuthorization());
 
         echo $this->getConfig()->getGitRepositoryUrl();
+    }
+
+    public function getConfig(): Config
+    {
+        /** @var Config $config */
+        $config = parent::getConfig();
+        return $config;
     }
 
     protected function getConfigClass(): string

@@ -16,8 +16,10 @@ class ConfigDefinition extends BaseConfigDefinition
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
             ->children()
-                ->scalarNode('foo')
-                    ->defaultValue('baz')
+                ->arrayNode('git')
+                    ->children()->
+                        scalarNode('repo')->
+                            cannotBeEmpty()
                 ->end()
             ->end()
         ;

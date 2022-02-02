@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace DbtTransformation;
 
 use Keboola\Component\BaseComponent;
+use Symfony\Component\Yaml\Yaml;
 
 class Component extends BaseComponent
 {
     protected function run(): void
     {
-        echo var_export($this->getConfig()->getAuthorization(), true);
+        $yaml = Yaml::dump($this->getConfig()->getAuthorization());
+        file_put_contents($this->getDataDir() . '/out/profile.yaml', $yaml);
 
         echo $this->getConfig()->getGitRepositoryUrl();
     }

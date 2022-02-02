@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation;
 
 use Keboola\Component\BaseComponent;
+use Psr\Log\LoggerInterface;
 
 class Component extends BaseComponent
 {
@@ -18,6 +19,11 @@ class Component extends BaseComponent
         }
         echo PHP_EOL . 'dbt --version output:' . PHP_EOL;
         echo shell_exec('dbt --version');
+
+        var_dump($this->getConfig()->getAuthorization());
+
+        echo $this->getConfig()->getGitRepositoryUrl();
+
     }
 
     protected function getConfigClass(): string

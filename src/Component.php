@@ -23,7 +23,6 @@ class Component extends BaseComponent
         var_dump($this->getConfig()->getAuthorization());
 
         echo $this->getConfig()->getGitRepositoryUrl();
-
     }
 
     protected function getConfigClass(): string

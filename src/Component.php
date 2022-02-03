@@ -68,7 +68,7 @@ class Component extends BaseComponent
     }
 
     /**
-     * @param string[] $workspace
+     * @param string[] $command
      */
     protected function runProcessInDataDir(array $command): Process
     {

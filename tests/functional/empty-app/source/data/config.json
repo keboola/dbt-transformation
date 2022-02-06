@@ -13,5 +13,20 @@
     "git": {
       "repo": "https://github.com/AdamVyborny/dbt-test-project.git"
     }
+  },
+  "storage": {
+    "input": {
+      "tables": [
+        {
+          "columns": [
+            "id",
+            "col1",
+            "col2",
+            "col3"
+          ],
+          "source": "in.c-ex-dummy.dummy"
+        }
+      ]
+    }
   }
 }

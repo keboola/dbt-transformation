@@ -9,6 +9,7 @@ use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Generator;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class DbtYamlCreateTest extends TestCase
 {
@@ -17,24 +18,26 @@ class DbtYamlCreateTest extends TestCase
 
     /**
      * @dataProvider profileYamlDataProvider
+     * @param array<string, mixed> $config
      * @throws \Keboola\Component\UserException
      */
     public function testCreateProfileYamlFromConfigData(
         array $config,
         string $generatedFilePath,
         string $expectedSourceFilePath
-    ): void
-    {
+    ): void {
         $service = new DbtProfileYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
             sprintf('%s/dbt_project.yml', $this->providerDataDir),
-            $config['authorization']['workspace']);
+            $config['authorization']['workspace']
+        );
         self::assertFileEquals($expectedSourceFilePath, $generatedFilePath);
     }
 
     /**
      * @dataProvider profileYamlDataProvider
+     * @param array<string, mixed> $config
      * @throws \Keboola\Component\UserException
      */
     public function testCreateProfileYamlMissingDbtProjectFile(array $config): void
@@ -46,28 +49,34 @@ class DbtYamlCreateTest extends TestCase
         $service->dumpYaml(
             $this->dataDir,
             sprintf('%s/non-exist.yml', $this->providerDataDir),
-            $config['authorization']['workspace']);
+            $config['authorization']['workspace']
+        );
     }
 
     /**
      * @dataProvider sourceYamlDataProvider
+     * @param array<string, mixed> $config
      */
     public function testCreateSourceYamlFromConfigData(
         array $config,
         string $generatedFilePath,
         string $expectedSourceFilePath
-    ): void
-    {
+    ): void {
         $service = new DbtSourceYamlCreateService();
-        $service->dumpYaml($this->dataDir, $config['authorization']['workspace'], $config['storage']['input']['tables']);
+        $service->dumpYaml(
+            $this->dataDir,
+            $config['authorization']['workspace'],
+            $config['storage']['input']['tables']
+        );
+
         self::assertFileEquals($expectedSourceFilePath, $generatedFilePath);
     }
 
     /**
-     * @return Generator<string, string, string>
+     * @return Generator<int, mixed>
      * @throws \JsonException
      */
-    public function ProfileYamlDataProvider(): Generator
+    public function profileYamlDataProvider(): Generator
     {
         yield [
             'config' => $this->getConfig(),
@@ -77,7 +86,7 @@ class DbtYamlCreateTest extends TestCase
     }
 
     /**
-     * @return Generator<string, string, string>
+     * @return Generator<int, mixed>
      * @throws \JsonException
      */
     public function sourceYamlDataProvider(): Generator
@@ -86,7 +95,11 @@ class DbtYamlCreateTest extends TestCase
 
         yield [
             'config' => $config,
-            'generatedFilePath' => sprintf('%s/models/src_%s.yml', $this->dataDir, $config['authorization']['workspace']['schema']),
+            'generatedFilePath' => sprintf(
+                '%s/models/src_%s.yml',
+                $this->dataDir,
+                $config['authorization']['workspace']['schema']
+            ),
             'expectedSourceFilePath' => sprintf('%s/expectedSource.yml', $this->providerDataDir),
         ];
     }
@@ -97,8 +110,14 @@ class DbtYamlCreateTest extends TestCase
      */
     protected function getConfig()
     {
+
+        $configJson = file_get_contents(sprintf('%s/config.json', $this->providerDataDir));
+        if ($configJson === false) {
+            throw new RuntimeException('Failed to get contents of config.json');
+        }
+
         return json_decode(
-            file_get_contents(sprintf('%s/config.json', $this->providerDataDir)),
+            $configJson,
             true,
             512,
             JSON_THROW_ON_ERROR

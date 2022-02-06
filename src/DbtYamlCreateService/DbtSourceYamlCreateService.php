@@ -1,14 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DbtTransformation\DbtYamlCreateService;
-
 
 use Symfony\Component\Yaml\Yaml;
 
 class DbtSourceYamlCreateService extends DbtYamlCreateService
 {
+    /**
+     * @param string[] $workspace
+     * @param array<array<string, string>> $inputTables
+     */
     public function dumpYaml(string $projectPath, array $workspace, array $inputTables): void
     {
         $modelFolderPath = sprintf('%s/models', $projectPath);
@@ -24,7 +27,9 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                         'database' => $workspace['database'],
                         'schema' => $workspace['schema'],
                         'tables' => array_map(
-                            static function($table) { return ['name' => $table['source']]; },
+                            static function ($table) {
+                                return ['name' => $table['source']];
+                            },
                             $inputTables
                         ),
                     ],

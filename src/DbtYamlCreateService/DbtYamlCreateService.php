@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DbtTransformation\DbtYamlCreateService;
-
 
 use RuntimeException;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;

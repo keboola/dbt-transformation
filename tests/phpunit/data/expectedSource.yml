@@ -1,0 +1,9 @@
+version: 2
+sources:
+    -
+        name: WORKSPACE_xxxxx
+        database: KEBOOLA_xxxxxx
+        schema: WORKSPACE_xxxxx
+        tables:
+            -
+                name: in.c-ex-dummy.dummy

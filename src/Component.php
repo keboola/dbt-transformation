@@ -7,21 +7,19 @@ namespace DbtTransformation;
 use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Yaml\Yaml;
 
 class Component extends BaseComponent
 {
-    protected Filesystem $filesystem;
+    private DbtYamlCreateService\DbtSourceYamlCreateService $createSourceFileService;
+    private DbtYamlCreateService\DbtProfileYamlCreateService $createProfileFileService;
 
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
-        $this->filesystem = new Filesystem();
+        $this->createProfileFileService = new DbtYamlCreateService\DbtProfileYamlCreateService;
+        $this->createSourceFileService = new DbtYamlCreateService\DbtSourceYamlCreateService;
     }
 
     /**
@@ -33,6 +31,11 @@ class Component extends BaseComponent
         $config = $this->getConfig();
         $gitRepositoryUrl = $config->getGitRepositoryUrl();
 
+        $inputTables = $config->getInputTables();
+        if (!count($inputTables)) {
+            throw new UserException('There are no tables on input');
+        }
+
         try {
             $this->runProcessInDataDir(['git', 'clone', $gitRepositoryUrl]);
         } catch (ProcessFailedException $e) {
@@ -40,14 +43,15 @@ class Component extends BaseComponent
         }
 
         $projectPath = $this->getProjectPath($dataDir, $gitRepositoryUrl);
-        $this->addProfileYamlToProject($projectPath, $config->getAuthorization()['workspace']);
+        $workspace = $config->getAuthorization()['workspace'];
+        $this->createProfileFileService->dumpYaml(
+            $projectPath,
+            sprintf('%s/dbt_project.yml', $projectPath),
+            $workspace
+        );
+        $this->createSourceFileService->dumpYaml($projectPath, $workspace, $config->getInputTables());
 
-        $files = array_diff(scandir($projectPath) ?: [], ['.', '..']);
-        foreach ($files as $file) {
-            echo $file . PHP_EOL;
-        }
-
-        readfile(sprintf('%s/.dbt/profile.yml', $projectPath));
+        readfile(sprintf('%s/models/src_%s.yml', $projectPath, $workspace['schema']));
     }
 
     public function getConfig(): Config
@@ -80,41 +84,6 @@ class Component extends BaseComponent
         }
 
         return $process;
-    }
-
-    protected function createDbtFolderIfNotExist(string $projectPath): void
-    {
-        $dbtFolderPath = sprintf('%s/.dbt', $projectPath);
-        try {
-            if (!$this->filesystem->exists($dbtFolderPath)) {
-                $this->filesystem->mkdir($dbtFolderPath);
-            }
-        } catch (IOExceptionInterface $e) {
-            throw new RuntimeException(sprintf('An error occurred while creating directory %s', $dbtFolderPath));
-        }
-    }
-
-    /**
-     * @param string[] $workspace
-     * @throws \Keboola\Component\UserException
-     */
-    protected function addProfileYamlToProject(string $projectPath, array $workspace): void
-    {
-        $this->createDbtFolderIfNotExist($projectPath);
-        $dbtProjectYamlPath = $projectPath . '/dbt_project.yml';
-        if (!$this->filesystem->exists($dbtProjectYamlPath)) {
-            throw new UserException(sprintf('Missing file %s in your project', $dbtProjectYamlPath));
-        }
-        $dbtProjectYaml = Yaml::parseFile($dbtProjectYamlPath);
-        $this->filesystem->dumpFile(
-            sprintf('%s/.dbt/profile.yml', $projectPath),
-            Yaml::dump([
-                $dbtProjectYaml['profile'] => [
-                    'target' => 'dev',
-                    'outputs' => ['dev' => $workspace],
-                ],
-            ], 4)
-        );
     }
 
     protected function getProjectPath(string $dataDir, string $gitRepositoryUrl): string

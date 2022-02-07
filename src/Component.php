@@ -37,7 +37,7 @@ class Component extends BaseComponent
         }
 
         try {
-            $this->runProcessInDataDir(['git', 'clone', $gitRepositoryUrl]);
+            $this->runProcess(['git', 'clone', $gitRepositoryUrl], $this->getDataDir());
         } catch (ProcessFailedException $e) {
             throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
         }
@@ -51,7 +51,11 @@ class Component extends BaseComponent
         );
         $this->createSourceFileService->dumpYaml($projectPath, $workspace, $config->getInputTables());
 
-        readfile(sprintf('%s/models/src_%s.yml', $projectPath, $workspace['schema']));
+        try {
+            $this->runProcess(['dbt', 'run', '--profiles-dir', sprintf('%s/.dbt/', $projectPath)], $projectPath);
+        } catch (ProcessFailedException $e) {
+            throw new UserException($e->getMessage());
+        }
     }
 
     public function getConfig(): Config

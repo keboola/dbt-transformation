@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
-use DbtTransformation\DbtYamlCreateService\DbtProfileYamlCreateService;
+use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Generator;
 use Keboola\Component\UserException;
@@ -26,7 +26,7 @@ class DbtYamlCreateTest extends TestCase
         string $generatedFilePath,
         string $expectedSourceFilePath
     ): void {
-        $service = new DbtProfileYamlCreateService();
+        $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
             sprintf('%s/dbt_project.yml', $this->providerDataDir),
@@ -45,7 +45,7 @@ class DbtYamlCreateTest extends TestCase
         $this->expectException(UserException::class);
         $this->expectErrorMessage(sprintf('Missing file %s/non-exist.yml in your project', $this->providerDataDir));
 
-        $service = new DbtProfileYamlCreateService();
+        $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
             sprintf('%s/non-exist.yml', $this->providerDataDir),
@@ -80,8 +80,8 @@ class DbtYamlCreateTest extends TestCase
     {
         yield [
             'config' => $this->getConfig(),
-            'generatedFilePath' => sprintf('%s/.dbt/profile.yml', $this->dataDir),
-            'expectedSourceFilePath' => sprintf('%s/expectedProfile.yml', $this->providerDataDir),
+            'generatedFilePath' => sprintf('%s/.dbt/profiles.yml', $this->dataDir),
+            'expectedSourceFilePath' => sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
         ];
     }
 

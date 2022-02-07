@@ -7,8 +7,10 @@ namespace DbtTransformation\DbtYamlCreateService;
 use Keboola\Component\UserException;
 use Symfony\Component\Yaml\Yaml;
 
-class DbtProfileYamlCreateService extends DbtYamlCreateService
+class DbtProfilesYamlCreateService extends DbtYamlCreateService
 {
+    private const STRING_TO_REMOVE_FROM_HOST = '.snowflakecomputing.com';
+
     /**
      * @param string[] $workspace
      * @throws \Keboola\Component\UserException
@@ -23,12 +25,15 @@ class DbtProfileYamlCreateService extends DbtYamlCreateService
         $dbtFolderPath = sprintf('%s/.dbt', $projectPath);
         $this->createFolderIfNotExist($dbtFolderPath);
 
+        $workspace['account'] = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
+        unset($workspace['host']);
+
         $this->filesystem->dumpFile(
-            sprintf('%s/profile.yml', $dbtFolderPath),
+            sprintf('%s/profiles.yml', $dbtFolderPath),
             Yaml::dump([
                 $dbtProjectYaml['profile'] => [
                     'target' => 'dev',
-                    'outputs' => ['dev' => $workspace],
+                    'outputs' => ['dev' => ['type' => 'snowflake'] + $workspace],
                 ],
             ], 4)
         );

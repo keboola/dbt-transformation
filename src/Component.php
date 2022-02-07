@@ -13,12 +13,12 @@ use Symfony\Component\Process\Process;
 class Component extends BaseComponent
 {
     private DbtYamlCreateService\DbtSourceYamlCreateService $createSourceFileService;
-    private DbtYamlCreateService\DbtProfileYamlCreateService $createProfileFileService;
+    private DbtYamlCreateService\DbtProfilesYamlCreateService $createProfilesFileService;
 
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
-        $this->createProfileFileService = new DbtYamlCreateService\DbtProfileYamlCreateService;
+        $this->createProfilesFileService = new DbtYamlCreateService\DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtYamlCreateService\DbtSourceYamlCreateService;
     }
 
@@ -44,7 +44,7 @@ class Component extends BaseComponent
 
         $projectPath = $this->getProjectPath($dataDir, $gitRepositoryUrl);
         $workspace = $config->getAuthorization()['workspace'];
-        $this->createProfileFileService->dumpYaml(
+        $this->createProfilesFileService->dumpYaml(
             $projectPath,
             sprintf('%s/dbt_project.yml', $projectPath),
             $workspace
@@ -74,9 +74,9 @@ class Component extends BaseComponent
     /**
      * @param string[] $command
      */
-    protected function runProcessInDataDir(array $command): Process
+    protected function runProcess(array $command, string $cwd): Process
     {
-        $process = new Process($command, $this->getDataDir());
+        $process = new Process($command, $cwd);
         $process->run();
 
         if (!$process->isSuccessful()) {

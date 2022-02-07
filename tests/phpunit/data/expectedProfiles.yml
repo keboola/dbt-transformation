@@ -2,9 +2,10 @@ default:
     target: dev
     outputs:
         dev:
-            host: keboola.eu-central-1.snowflakecomputing.com
+            type: snowflake
             warehouse: KEBOOLA_PROD
             database: KEBOOLA_xxxxxx
             schema: WORKSPACE_xxxxx
             user: KEBOOLA_WORKSPACE_xxxxx
             password: xxxxxxxxxxxxxxx
+            account: keboola.eu-central-1

@@ -24,7 +24,7 @@ abstract class DbtYamlCreateService
                 $this->filesystem->mkdir($folderPath);
             }
         } catch (IOExceptionInterface $e) {
-            throw new RuntimeException(sprintf('An error occurred while creating directory %s', $folderPath));
+            throw new RuntimeException(sprintf('An error occurred while creating directory "%s"', $folderPath));
         }
     }
 }

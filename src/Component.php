@@ -33,7 +33,7 @@ class Component extends BaseComponent
 
         $inputTables = $config->getInputTables();
         if (!count($inputTables)) {
-            throw new UserException('There are no tables on input');
+            throw new UserException('There are no tables on Input Mapping.');
         }
 
         try {

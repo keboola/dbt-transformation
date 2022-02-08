@@ -18,7 +18,7 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
     public function dumpYaml(string $projectPath, string $dbtProjectYamlPath, array $workspace): void
     {
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
-            throw new UserException(sprintf('Missing file %s in your project', $dbtProjectYamlPath));
+            throw new UserException(sprintf('Missing file "%s" in your project', $dbtProjectYamlPath));
         }
         $dbtProjectYaml = Yaml::parseFile($dbtProjectYamlPath);
 

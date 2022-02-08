@@ -43,7 +43,7 @@ class DbtYamlCreateTest extends TestCase
     public function testCreateProfileYamlMissingDbtProjectFile(array $config): void
     {
         $this->expectException(UserException::class);
-        $this->expectErrorMessage(sprintf('Missing file %s/non-exist.yml in your project', $this->providerDataDir));
+        $this->expectErrorMessage(sprintf('Missing file "%s/non-exist.yml" in your project', $this->providerDataDir));
 
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(

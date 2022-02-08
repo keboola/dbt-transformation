@@ -17,18 +17,26 @@ class ConfigDefinition extends BaseConfigDefinition
         $parametersNode
             ->children()
                 ->arrayNode('git')
-                    ->children()->
-                        scalarNode('repo')->
-                            cannotBeEmpty()
+                    ->isRequired()
+                    ->children()
+                        ->scalarNode('repo')
+                            ->isRequired()
+                            ->cannotBeEmpty()
                     ->end()
-                ->end()
+            ->end();
+
+        /** @noinspection NullPointerExceptionInspection */
+        $parametersNode
+            ->children()
                 ->arrayNode('dbt')
-                    ->children()->
-                        scalarNode('sourceName')->
-                            cannotBeEmpty()
+                    ->isRequired()
+                    ->children()
+                        ->scalarNode('sourceName')
+                            ->isRequired()
+                            ->cannotBeEmpty()
                 ->end()
-            ->end()
-        ;
+            ->end();
+
         // @formatter:on
         return $parametersNode;
     }

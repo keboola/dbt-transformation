@@ -21,13 +21,6 @@
     "input": {
       "tables": [
         {
-          "columns": [
-            "id",
-            "col1",
-            "col2",
-            "col3"
-          ],
-          "source": "in.c-ex-dummy.dummy",
           "destination": "table_name"
         }
       ]

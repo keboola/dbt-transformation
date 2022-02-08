@@ -20,6 +20,12 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->children()->
                         scalarNode('repo')->
                             cannotBeEmpty()
+                    ->end()
+                ->end()
+                ->arrayNode('dbt')
+                    ->children()->
+                        scalarNode('sourceName')->
+                            cannotBeEmpty()
                 ->end()
             ->end()
         ;

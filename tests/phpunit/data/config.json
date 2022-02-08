@@ -12,6 +12,9 @@
   "parameters": {
     "git": {
       "repo": "https://github.com/AdamVyborny/dbt-test-project.git"
+    },
+    "dbt": {
+      "sourceName": "my_source"
     }
   },
   "storage": {
@@ -24,7 +27,8 @@
             "col2",
             "col3"
           ],
-          "source": "in.c-ex-dummy.dummy"
+          "source": "in.c-ex-dummy.dummy",
+          "destination": "table_name"
         }
       ]
     }

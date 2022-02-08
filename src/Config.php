@@ -12,4 +12,9 @@ class Config extends BaseConfig
     {
         return $this->getValue(['parameters', 'git', 'repo']);
     }
+
+    public function getDbtSourceName(): string
+    {
+        return $this->getValue(['parameters', 'dbt', 'sourceName']);
+    }
 }

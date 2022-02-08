@@ -43,13 +43,7 @@ class Component extends BaseComponent
         }
 
         $projectPath = $this->getProjectPath($dataDir, $gitRepositoryUrl);
-        $workspace = $config->getAuthorization()['workspace'];
-        $this->createProfilesFileService->dumpYaml(
-            $projectPath,
-            sprintf('%s/dbt_project.yml', $projectPath),
-            $workspace
-        );
-        $this->createSourceFileService->dumpYaml($projectPath, $workspace, $config->getInputTables());
+        $this->createDbtYamlFiles($config, $projectPath);
 
         try {
             $this->runProcess(['dbt', 'run', '--profiles-dir', sprintf('%s/.dbt/', $projectPath)], $projectPath);
@@ -94,5 +88,22 @@ class Component extends BaseComponent
     {
         $explodedUrl = explode('/', $gitRepositoryUrl);
         return sprintf('%s/%s', $dataDir, pathinfo(end($explodedUrl), PATHINFO_FILENAME));
+    }
+
+    protected function createDbtYamlFiles(Config $config, string $projectPath): void
+    {
+        $workspace = $config->getAuthorization()['workspace'];
+        $this->createProfilesFileService->dumpYaml(
+            $projectPath,
+            sprintf('%s/dbt_project.yml', $projectPath),
+            $workspace
+        );
+
+        $this->createSourceFileService->dumpYaml(
+            $projectPath,
+            $config->getDbtSourceName(),
+            $workspace,
+            $config->getInputTables()
+        );
     }
 }

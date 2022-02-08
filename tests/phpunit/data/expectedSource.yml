@@ -1,9 +1,9 @@
 version: 2
 sources:
     -
-        name: WORKSPACE_xxxxx
+        name: my_source
         database: KEBOOLA_xxxxxx
         schema: WORKSPACE_xxxxx
         tables:
             -
-                name: in.c-ex-dummy.dummy
+                name: table_name

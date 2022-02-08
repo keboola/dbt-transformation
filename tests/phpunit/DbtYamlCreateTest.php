@@ -65,6 +65,7 @@ class DbtYamlCreateTest extends TestCase
         $service = new DbtSourceYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
+            $config['parameters']['dbt']['sourceName'],
             $config['authorization']['workspace'],
             $config['storage']['input']['tables']
         );
@@ -98,19 +99,18 @@ class DbtYamlCreateTest extends TestCase
             'generatedFilePath' => sprintf(
                 '%s/models/src_%s.yml',
                 $this->dataDir,
-                $config['authorization']['workspace']['schema']
+                $config['parameters']['dbt']['sourceName']
             ),
             'expectedSourceFilePath' => sprintf('%s/expectedSource.yml', $this->providerDataDir),
         ];
     }
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      * @throws \JsonException
      */
-    protected function getConfig()
+    protected function getConfig(): array
     {
-
         $configJson = file_get_contents(sprintf('%s/config.json', $this->providerDataDir));
         if ($configJson === false) {
             throw new RuntimeException('Failed to get contents of config.json');

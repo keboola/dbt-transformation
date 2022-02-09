@@ -28,7 +28,10 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                         'schema' => $workspace['schema'],
                         'tables' => array_map(
                             static function ($table) {
-                                return ['name' => $table['destination']];
+                                return [
+                                    'name' => $table['destination'],
+                                    'quoting' => ['identifier' =>  true],
+                                ];
                             },
                             $inputTables
                         ),

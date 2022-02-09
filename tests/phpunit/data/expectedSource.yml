@@ -7,3 +7,5 @@ sources:
         tables:
             -
                 name: table_name
+                quoting:
+                    identifier: true

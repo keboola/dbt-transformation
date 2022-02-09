@@ -20,7 +20,10 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
             throw new UserException(sprintf('Missing file "%s" in your project', $dbtProjectYamlPath));
         }
+
         $dbtProjectYaml = Yaml::parseFile($dbtProjectYamlPath);
+        $dbtProjectYaml['quoting'] = ['identifier' =>  true];
+        $this->filesystem->dumpFile($dbtProjectYamlPath, $dbtProjectYaml);
 
         $dbtFolderPath = sprintf('%s/.dbt', $projectPath);
         $this->createFolderIfNotExist($dbtFolderPath);

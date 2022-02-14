@@ -15,6 +15,7 @@ class ConfigDefinition extends BaseConfigDefinition
         // @formatter:off
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
+            ->isRequired()
             ->children()
                 ->arrayNode('git')
                     ->isRequired()

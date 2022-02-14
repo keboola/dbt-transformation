@@ -8,6 +8,16 @@ env:
     KBC_DEVELOPERPORTAL_APP: keboola-test.dbt-transformation
     KBC_DEVELOPERPORTAL_USERNAME: keboola-test+dbt_transformation
     KBC_DEVELOPERPORTAL_PASSWORD: '${{ secrets.KBC_DEVELOPERPORTAL_PASSWORD }}'
+
+    # Snowflake Credentials
+    SNOWFLAKE_HOST: "kebooladev.snowflakecomputing.com"
+    SNOWFLAKE_PORT: 443
+    SNOWFLAKE_WAREHOUSE: "DEV"
+    SNOWFLAKE_DATABASE: "dbt_transformation_ci"
+    SNOWFLAKE_SCHEMA: "dbt_transformation_ci"
+    SNOWFLAKE_USER: "dbt_transformation_ci"
+    SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+
     DOCKERHUB_USER: '${{ secrets.DOCKERHUB_USER }}'
     DOCKERHUB_TOKEN: '${{ secrets.DOCKERHUB_TOKEN }}'
     KBC_STORAGE_TOKEN: '${{ secrets.KBC_STORAGE_TOKEN }}'

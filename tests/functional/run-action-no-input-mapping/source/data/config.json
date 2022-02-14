@@ -1,0 +1,26 @@
+{
+  "authorization": {
+    "workspace": {
+      "host": "%env(string:SNOWFLAKE_HOST)%",
+      "warehouse": "%env(string:SNOWFLAKE_WAREHOUSE)%",
+      "database": "%env(string:SNOWFLAKE_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_SCHEMA)%",
+      "user": "%env(string:SNOWFLAKE_USER)%",
+      "password": "%env(string:SNOWFLAKE_PASSWORD)%"
+    }
+  },
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/AdamVyborny/dbt-test-project.git"
+    },
+    "dbt": {
+      "sourceName": "my_source"
+    }
+  },
+  "storage": {
+    "input": {
+      "tables": [
+      ]
+    }
+  }
+}

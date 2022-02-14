@@ -11,7 +11,7 @@
   },
   "parameters": {
     "git": {
-      "repo": "https://github.com/AdamVyborny/dbt-test-project.git"
+      "repo": "https://github.com/keboola/dbt-test-project.git"
     },
     "dbt": {
       "sourceName": "my_source"

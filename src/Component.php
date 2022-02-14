@@ -42,8 +42,13 @@ class Component extends BaseComponent
             throw new UserException('There are no tables on Input Mapping.');
         }
 
+        $branch = [];
+        if ($config->getGitRepositoryBranch()) {
+            $branch = ['-b', $config->getGitRepositoryBranch()];
+        }
+
         try {
-            $this->runProcess(['git', 'clone', $gitRepositoryUrl], $this->getDataDir());
+            $this->runProcess(['git', 'clone', ...$branch, $gitRepositoryUrl], $this->getDataDir());
         } catch (ProcessFailedException $e) {
             throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
         }

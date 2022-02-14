@@ -24,6 +24,10 @@ class ConfigDefinition extends BaseConfigDefinition
                             ->isRequired()
                             ->cannotBeEmpty()
                     ->end()
+                ->end()
+                    ->children()
+                        ->scalarNode('branch')
+                    ->end()
             ->end();
 
         /** @noinspection NullPointerExceptionInspection */

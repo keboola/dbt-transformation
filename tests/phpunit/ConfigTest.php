@@ -49,7 +49,7 @@ class ConfigTest extends TestCase
     {
         yield 'empty config' => [
             'configData' => [],
-            'expectedError' => 'The child config "parameters" under "root" must be configured.'
+            'expectedError' => 'The child config "parameters" under "root" must be configured.',
         ];
 
         yield 'empty parameters' => [

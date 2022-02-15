@@ -8,4 +8,6 @@ sources:
             -
                 name: table_name
                 quoting:
+                    database: true
+                    schema: true
                     identifier: true

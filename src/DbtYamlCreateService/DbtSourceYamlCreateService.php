@@ -30,7 +30,11 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                             static function ($table) {
                                 return [
                                     'name' => $table['destination'],
-                                    'quoting' => ['identifier' =>  true],
+                                    'quoting' => [
+                                        'database' =>  true,
+                                        'schema' =>  true,
+                                        'identifier' =>  true,
+                                    ],
                                 ];
                             },
                             $inputTables

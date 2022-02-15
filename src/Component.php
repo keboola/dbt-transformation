@@ -116,6 +116,18 @@ class Component extends BaseComponent
             $branch = ['-b', $gitRepositoryBranch];
         }
 
+        $gitRepositoryUsername = $config->getGitRepositoryUsername();
+        $gitRepositoryPassword = $config->getGitRepositoryPassword();
+        if ($gitRepositoryUsername && $gitRepositoryPassword) {
+            $githubUrl = 'github.com';
+            $gitRepositoryUrl = str_replace($githubUrl, sprintf(
+                '%s:%s@%s',
+                $gitRepositoryUsername,
+                $gitRepositoryPassword,
+                $githubUrl
+            ), $gitRepositoryUrl);
+        }
+
         try {
             $this->runProcess(['git', 'clone', ...$branch, $gitRepositoryUrl], $this->getDataDir());
         } catch (ProcessFailedException $e) {

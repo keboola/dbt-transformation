@@ -59,7 +59,7 @@ class ConfigTest extends TestCase
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
-                        'branch' => 'master'
+                        'branch' => 'master',
                     ],
                     'dbt' => [
                         'sourceName' => 'my_source',

@@ -83,7 +83,8 @@ jobs:
                     tag_as_latest: true
             -
                 name: 'Run tests'
-                run: 'docker run \
+                run: |
+                    docker run \
                     -e SNOWFLAKE_HOST \
                     -e SNOWFLAKE_PORT \
                     -e SNOWFLAKE_WAREHOUSE \
@@ -93,7 +94,7 @@ jobs:
                     -e SNOWFLAKE_PASSWORD \
                     -e SNOWFLAKE_PASSWORD \
                     -e SNOWFLAKE_PASSWORD \
-                    ${{env.APP_IMAGE}} composer ci'
+                    ${{env.APP_IMAGE}} composer ci
     tests-in-kbc:
         needs: build
         runs-on: ubuntu-latest

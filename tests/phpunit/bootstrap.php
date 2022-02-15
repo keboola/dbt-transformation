@@ -14,6 +14,8 @@ $environments = [
     'SNOWFLAKE_SCHEMA',
     'SNOWFLAKE_USER',
     'SNOWFLAKE_PASSWORD',
+    'GITHUB_USERNAME',
+    'GITHUB_PASSWORD',
 ];
 
 foreach ($environments as $environment) {

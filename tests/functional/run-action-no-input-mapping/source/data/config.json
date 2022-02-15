@@ -1,6 +1,7 @@
 {
   "authorization": {
     "workspace": {
+      "backend": "snowflake",
       "host": "%env(string:SNOWFLAKE_HOST)%",
       "warehouse": "%env(string:SNOWFLAKE_WAREHOUSE)%",
       "database": "%env(string:SNOWFLAKE_DATABASE)%",

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
+use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
+use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
 use Psr\Log\LoggerInterface;
@@ -12,14 +14,14 @@ use Symfony\Component\Process\Process;
 
 class Component extends BaseComponent
 {
-    private DbtYamlCreateService\DbtSourceYamlCreateService $createSourceFileService;
-    private DbtYamlCreateService\DbtProfilesYamlCreateService $createProfilesFileService;
+    private DbtSourceYamlCreateService $createSourceFileService;
+    private DbtProfilesYamlCreateService $createProfilesFileService;
 
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
-        $this->createProfilesFileService = new DbtYamlCreateService\DbtProfilesYamlCreateService;
-        $this->createSourceFileService = new DbtYamlCreateService\DbtSourceYamlCreateService;
+        $this->createProfilesFileService = new DbtProfilesYamlCreateService;
+        $this->createSourceFileService = new DbtSourceYamlCreateService;
     }
 
     /**
@@ -30,6 +32,10 @@ class Component extends BaseComponent
         $dataDir = $this->getDataDir();
         $config = $this->getConfig();
         $gitRepositoryUrl = $config->getGitRepositoryUrl();
+
+        if ($config->getAuthorization()['workspace']['backend'] !== 'snowflake') {
+            throw new UserException('Only Snowflake backend is supported at the moment');
+        }
 
         $inputTables = $config->getInputTables();
         if (!count($inputTables)) {
@@ -75,11 +81,7 @@ class Component extends BaseComponent
     protected function runProcess(array $command, string $cwd): Process
     {
         $process = new Process($command, $cwd);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
+        $process->mustRun();
 
         return $process;
     }

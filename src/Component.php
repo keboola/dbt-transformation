@@ -48,7 +48,7 @@ class Component extends BaseComponent
         }
 
         try {
-            $this->runProcess(['git', 'clone', ...$branch, $gitRepositoryUrl], $this->getDataDir());
+            $this->runProcess(['git', 'clone', ...array_values($branch), $gitRepositoryUrl], $this->getDataDir());
         } catch (ProcessFailedException $e) {
             throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
         }

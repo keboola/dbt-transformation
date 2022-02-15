@@ -12,7 +12,7 @@ env:
     # Snowflake Credentials
     SNOWFLAKE_HOST: "kebooladev.snowflakecomputing.com"
     SNOWFLAKE_PORT: 443
-    SNOWFLAKE_WAREHOUSE: "DEV"
+    SNOWFLAKE_WAREHOUSE: "dbt_transformation_ci"
     SNOWFLAKE_DATABASE: "dbt_transformation_ci"
     SNOWFLAKE_SCHEMA: "dbt_transformation_ci"
     SNOWFLAKE_USER: "dbt_transformation_ci"

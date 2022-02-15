@@ -92,8 +92,6 @@ jobs:
                     -e SNOWFLAKE_SCHEMA \
                     -e SNOWFLAKE_USER \
                     -e SNOWFLAKE_PASSWORD \
-                    -e SNOWFLAKE_PASSWORD \
-                    -e SNOWFLAKE_PASSWORD \
                     ${{env.APP_IMAGE}} composer ci
     tests-in-kbc:
         needs: build

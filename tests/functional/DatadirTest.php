@@ -19,7 +19,7 @@ class DatadirTest extends DatadirTestCase
         $testProjectDir = $this->getTestFileDir() . '/' . $this->dataName();
 
         $this->connection = OdbcTestConnection::createConnection();
-        $this->removeAllTables();
+        $this->removeAllTablesAndViews();
 
         // Load setUp.php file - used to init database state
         $setUpPhpFile = $testProjectDir . '/setUp.php';
@@ -35,13 +35,13 @@ class DatadirTest extends DatadirTestCase
         }
     }
 
-    protected function removeAllTables(): void
+    protected function removeAllTablesAndViews(): void
     {
         $dropQueries = $this->connection->fetchAll("
-            select 'drop table \"' || table_name || '\";' QUERY
-            from information_schema.tables
-            where  table_schema = current_schema();
-        ");
+             select 'DROP '  || IFF(table_type = 'VIEW', 'VIEW', 'TABLE') || ' \"' || table_name || '\";' QUERY
+             from information_schema.tables
+             where  table_schema = current_schema();
+         ");
 
         foreach ($dropQueries as $dropQuery) {
             $this->connection->query($dropQuery['QUERY']);

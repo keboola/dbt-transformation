@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MyComponent;
+namespace DbtTransformation;
 
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -16,11 +16,27 @@ class ConfigDefinition extends BaseConfigDefinition
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
             ->children()
-                ->scalarNode('foo')
-                    ->defaultValue('baz')
+                ->arrayNode('git')
+                    ->isRequired()
+                    ->children()
+                        ->scalarNode('repo')
+                            ->isRequired()
+                            ->cannotBeEmpty()
+                    ->end()
+            ->end();
+
+        /** @noinspection NullPointerExceptionInspection */
+        $parametersNode
+            ->children()
+                ->arrayNode('dbt')
+                    ->isRequired()
+                    ->children()
+                        ->scalarNode('sourceName')
+                            ->isRequired()
+                            ->cannotBeEmpty()
                 ->end()
-            ->end()
-        ;
+            ->end();
+
         // @formatter:on
         return $parametersNode;
     }

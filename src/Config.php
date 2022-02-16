@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
-namespace MyComponent;
+namespace DbtTransformation;
 
 use Keboola\Component\Config\BaseConfig;
 
 class Config extends BaseConfig
 {
-    // @todo implement your custom getters
-    public function getFoo(): string
+    public function getGitRepositoryUrl(): string
     {
-        return $this->getValue(['parameters', 'foo']);
+        return $this->getValue(['parameters', 'git', 'repo']);
+    }
+
+    public function getDbtSourceName(): string
+    {
+        return $this->getValue(['parameters', 'dbt', 'sourceName']);
     }
 }

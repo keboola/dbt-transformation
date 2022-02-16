@@ -1,10 +1,13 @@
 {
-    "name": "keboola/my-component",
-    "description": "MyComponent description",
+    "name": "keboola/dbt-transformation",
+    "description": "DBT transformation POC component",
     "license": "MIT",
     "require": {
         "php": "^7.4",
-        "keboola/php-component": "^8.1"
+        "keboola/php-component": "^8.1",
+        "symfony/filesystem": "^5.4",
+        "symfony/process": "^5.4",
+        "symfony/yaml": "^5.4"
     },
     "require-dev": {
         "php-parallel-lint/php-parallel-lint": "^1.2",
@@ -12,18 +15,17 @@
         "keboola/datadir-tests": "^5.2",
         "keboola/php-temp": "^2.0",
         "phpstan/phpstan": "^0.12.14",
-        "phpunit/phpunit": "^9.0",
-        "symfony/process": "^5.0"
+        "phpunit/phpunit": "^9.0"
     },
     "autoload": {
         "psr-4": {
-            "MyComponent\\": "src/"
+            "DbtTransformation\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MyComponent\\Tests\\": "tests/phpunit/",
-            "MyComponent\\FunctionalTests\\": "tests/functional/"
+            "DbtTransformation\\Tests\\": "tests/phpunit/",
+            "DbtTransformation\\FunctionalTests\\": "tests/functional/"
         }
     },
     "scripts": {
@@ -51,6 +53,9 @@
     },
     "config": {
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

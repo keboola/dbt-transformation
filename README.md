@@ -1,20 +1,14 @@
-# my-component
+# DBT transformation
 
-[![Build Status](https://travis-ci.com/keboola/my-component.svg?branch=master)](https://travis-ci.com/keboola/my-component)
-
-> Fill in description
-
-# Usage
-
-> fill in usage instructions
+> DBT transformation POC component
 
 ## Development
  
 Clone this repository and init the workspace with following command:
 
 ```
-git clone https://github.com/keboola/my-component
-cd my-component
+git clone https://github.com/keboola/dbt-transformation.git
+cd dbt-transformation
 docker-compose build
 docker-compose run --rm dev composer install --no-scripts
 ```

@@ -1,0 +1,29 @@
+{
+  "authorization": {
+    "workspace": {
+      "host": "keboola.eu-central-1.snowflakecomputing.com",
+      "warehouse": "KEBOOLA_PROD",
+      "database": "KEBOOLA_xxxxxx",
+      "schema": "WORKSPACE_xxxxx",
+      "user": "KEBOOLA_WORKSPACE_xxxxx",
+      "password": "xxxxxxxxxxxxxxx"
+    }
+  },
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/AdamVyborny/dbt-test-project.git"
+    },
+    "dbt": {
+      "sourceName": "my_source"
+    }
+  },
+  "storage": {
+    "input": {
+      "tables": [
+        {
+          "destination": "table_name"
+        }
+      ]
+    }
+  }
+}

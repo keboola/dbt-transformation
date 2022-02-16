@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MyComponent\FunctionalTests;
+namespace DbtTransformation\FunctionalTests;
 
 use Keboola\DatadirTests\DatadirTestCase;
 

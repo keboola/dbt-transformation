@@ -15,6 +15,7 @@ class ConfigDefinition extends BaseConfigDefinition
         // @formatter:off
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
+            ->isRequired()
             ->children()
                 ->arrayNode('git')
                     ->isRequired()
@@ -22,6 +23,10 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->scalarNode('repo')
                             ->isRequired()
                             ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                    ->children()
+                        ->scalarNode('branch')
                     ->end()
             ->end();
 

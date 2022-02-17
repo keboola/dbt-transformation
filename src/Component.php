@@ -42,11 +42,7 @@ class Component extends BaseComponent
             throw new UserException('There are no tables on Input Mapping.');
         }
 
-        try {
-            $this->runProcess(['git', 'clone', $gitRepositoryUrl], $this->getDataDir());
-        } catch (ProcessFailedException $e) {
-            throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
-        }
+        $this->cloneRepository($config, $gitRepositoryUrl);
 
         $projectPath = $this->getProjectPath($dataDir, $gitRepositoryUrl);
         $this->createDbtYamlFiles($config, $projectPath);
@@ -107,5 +103,23 @@ class Component extends BaseComponent
             $workspace,
             $config->getInputTables()
         );
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    protected function cloneRepository(Config $config, string $gitRepositoryUrl): void
+    {
+        $branch = [];
+        $gitRepositoryBranch = $config->getGitRepositoryBranch();
+        if ($gitRepositoryBranch) {
+            $branch = ['-b', $gitRepositoryBranch];
+        }
+
+        try {
+            $this->runProcess(['git', 'clone', ...$branch, $gitRepositoryUrl], $this->getDataDir());
+        } catch (ProcessFailedException $e) {
+            throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
+        }
     }
 }

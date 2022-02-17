@@ -47,6 +47,11 @@ class ConfigTest extends TestCase
      */
     public function invalidConfigsData(): Generator
     {
+        yield 'empty config' => [
+            'configData' => [],
+            'expectedError' => 'The child config "parameters" under "root" must be configured.',
+        ];
+
         yield 'empty parameters' => [
             'configData' => [
                 'parameters' => [],

@@ -1,0 +1,24 @@
+{
+  "authorization": {
+    "workspace": {
+      "backend": "redshift"
+    }
+  },
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project-public.git"
+    },
+    "dbt": {
+      "sourceName": "my_source"
+    }
+  },
+  "storage": {
+    "input": {
+      "tables": [
+        {
+          "destination": "test"
+        }
+      ]
+    }
+  }
+}

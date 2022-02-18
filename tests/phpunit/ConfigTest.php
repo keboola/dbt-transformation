@@ -12,19 +12,13 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigTest extends TestCase
 {
-    public function testValidConfig(): void
+    /**
+     * @param array<string, mixed> $configData
+     * @dataProvider validConfigsData
+     */
+    public function testValidConfig(array $configData): void
     {
-        $configData['parameters'] = [
-            'git' => [
-                'repo' => 'https://github.com/my-repo',
-            ],
-            'dbt' => [
-                'sourceName' => 'my_source',
-            ],
-        ];
-
         $config = new Config($configData, new ConfigDefinition());
-
         $this->assertEquals($configData, $config->getData());
     }
 
@@ -40,6 +34,70 @@ class ConfigTest extends TestCase
         } catch (InvalidConfigurationException $e) {
             $this->assertStringContainsString($expectedError, $e->getMessage());
         }
+    }
+
+    /**
+     * @return Generator<string, array<string, mixed>>
+     */
+    public function validConfigsData(): Generator
+    {
+        yield 'minimal config' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'sourceName' => 'my_source',
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with branch' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'branch' => 'master',
+                    ],
+                    'dbt' => [
+                        'sourceName' => 'my_source',
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with credentials' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'username' => 'test',
+                        'password' => 'test',
+                    ],
+                    'dbt' => [
+                        'sourceName' => 'my_source',
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with branch and credentials' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'branch' => 'master',
+                        'username' => 'test',
+                        'password' => 'test',
+                    ],
+                    'dbt' => [
+                        'sourceName' => 'my_source',
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -77,6 +135,30 @@ class ConfigTest extends TestCase
                 ],
             ],
             'expectedError' => 'The path "root.parameters.git.repo" cannot contain an empty value, but got ""',
+        ];
+
+        yield 'git repo has username but not password' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'username' => 'test',
+                    ],
+                ],
+            ],
+            'expectedError' => 'Both username and password has to be set.',
+        ];
+
+        yield 'git repo has password but not username' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'password' => 'test',
+                    ],
+                ],
+            ],
+            'expectedError' => 'Both username and password has to be set.',
         ];
 
         yield 'empty dbt' => [

@@ -18,6 +18,9 @@ env:
     SNOWFLAKE_USER: "dbt_transformation_ci"
     SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
 
+    GITHUB_USERNAME: "dbt-test-project-user"
+    GITHUB_PASSWORD: ${{ secrets.GH_PAT }}
+
     DOCKERHUB_USER: '${{ secrets.DOCKERHUB_USER }}'
     DOCKERHUB_TOKEN: '${{ secrets.DOCKERHUB_TOKEN }}'
     KBC_STORAGE_TOKEN: '${{ secrets.KBC_STORAGE_TOKEN }}'
@@ -92,6 +95,8 @@ jobs:
                     -e SNOWFLAKE_SCHEMA \
                     -e SNOWFLAKE_USER \
                     -e SNOWFLAKE_PASSWORD \
+                    -e GITHUB_USERNAME \
+                    -e GITHUB_PASSWORD \
                     ${{env.APP_IMAGE}} composer ci
     tests-in-kbc:
         needs: build

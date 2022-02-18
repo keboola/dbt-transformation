@@ -23,6 +23,24 @@ class Config extends BaseConfig
         }
     }
 
+    public function getGitRepositoryUsername(): ?string
+    {
+        try {
+            return $this->getValue(['parameters', 'git', 'username']);
+        } catch (InvalidArgumentException $e) {
+            return null;
+        }
+    }
+
+    public function getGitRepositoryPassword(): ?string
+    {
+        try {
+            return $this->getValue(['parameters', 'git', 'password']);
+        } catch (InvalidArgumentException $e) {
+            return null;
+        }
+    }
+
     public function getDbtSourceName(): string
     {
         return $this->getValue(['parameters', 'dbt', 'sourceName']);

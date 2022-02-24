@@ -46,6 +46,11 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'dbt', 'sourceName']);
     }
 
+    public function showSqls(): bool
+    {
+        return $this->getValue(['parameters', 'showExecutedSqls']);
+    }
+
     /**
      * @return array<string>
      */

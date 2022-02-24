@@ -68,6 +68,13 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->end()
             ->end();
 
+        /** @noinspection NullPointerExceptionInspection */
+        $parametersNode
+            ->children()
+            ->booleanNode('showExecutedSqls')
+            ->defaultFalse()
+            ->end();
+
         // @formatter:on
         return $parametersNode;
     }

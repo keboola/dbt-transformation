@@ -9,7 +9,6 @@ use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
 use Psr\Log\LoggerInterface;
-use SplFileObject;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -73,7 +72,10 @@ class Component extends BaseComponent
         }
 
         if ($config->showSqls()) {
-            $this->printExecutedSqls();
+            $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
+            foreach ($sqls as $sql) {
+                echo $sql . PHP_EOL;
+            }
         }
     }
 
@@ -155,29 +157,6 @@ class Component extends BaseComponent
             $this->runProcess(['git', 'clone', ...$branch, $gitRepositoryUrl], $this->getDataDir());
         } catch (ProcessFailedException $e) {
             throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
-        }
-    }
-
-    private function queryExcerpt(string $query): string
-    {
-        if (mb_strlen($query) > 1000) {
-            return mb_substr($query, 0, 500, 'UTF-8') . "\n...\n" . mb_substr($query, -500, null, 'UTF-8');
-        }
-        return $query;
-    }
-
-    protected function printExecutedSqls(): void
-    {
-        $file = new SplFileObject(sprintf('%s/logs/dbt.log', $this->projectPath));
-        $logs = [];
-        while (!$file->eof()) {
-            $logs[] = $file->fgets() !== false ? json_decode($file->fgets(), true) : null;
-        }
-
-        foreach ($logs as $log) {
-            if ($log && array_key_exists('sql', $log['data'])) {
-                echo $this->queryExcerpt(preg_replace('!/\*.*?\*/!s', '', $log['data']['sql'])) . PHP_EOL;
-            }
         }
     }
 }

@@ -9,6 +9,7 @@ use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
 use Psr\Log\LoggerInterface;
+use SplFileObject;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -16,6 +17,7 @@ class Component extends BaseComponent
 {
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
+    private string $projectPath;
 
     public function __construct(LoggerInterface $logger)
     {
@@ -44,8 +46,8 @@ class Component extends BaseComponent
 
         $this->cloneRepository($config, $gitRepositoryUrl);
 
-        $projectPath = $this->getProjectPath($dataDir, $gitRepositoryUrl);
-        $this->createDbtYamlFiles($config, $projectPath);
+        $this->setProjectPath($dataDir, $gitRepositoryUrl);
+        $this->createDbtYamlFiles($config);
 
         $selectParameter = [];
         $modelNames = $config->getModelNames();
@@ -53,12 +55,25 @@ class Component extends BaseComponent
             $selectParameter = ['--select', ...$modelNames];
         }
 
-        $profilesYamlPath = sprintf('%s/.dbt/', $projectPath);
-        $dbtCommand = ['dbt', '--warn-error', 'run', ...$selectParameter, '--profiles-dir', $profilesYamlPath];
+        $dbtCommand = [
+            'dbt',
+            '--log-format',
+            'json',
+            '--warn-error',
+            'run',
+            ...$selectParameter,
+            '--profiles-dir',
+            sprintf('%s/.dbt/', $this->projectPath),
+        ];
+
         try {
-            $this->runProcess($dbtCommand, $projectPath);
+            $this->runProcess($dbtCommand, $this->projectPath);
         } catch (ProcessFailedException $e) {
             throw new UserException($e->getMessage());
+        }
+
+        if ($config->showSqls()) {
+            $this->printExecutedSqls();
         }
     }
 
@@ -90,23 +105,23 @@ class Component extends BaseComponent
         return $process;
     }
 
-    protected function getProjectPath(string $dataDir, string $gitRepositoryUrl): string
+    protected function setProjectPath(string $dataDir, string $gitRepositoryUrl): void
     {
         $explodedUrl = explode('/', $gitRepositoryUrl);
-        return sprintf('%s/%s', $dataDir, pathinfo(end($explodedUrl), PATHINFO_FILENAME));
+        $this->projectPath = sprintf('%s/%s', $dataDir, pathinfo(end($explodedUrl), PATHINFO_FILENAME));
     }
 
-    protected function createDbtYamlFiles(Config $config, string $projectPath): void
+    protected function createDbtYamlFiles(Config $config): void
     {
         $workspace = $config->getAuthorization()['workspace'];
         $this->createProfilesFileService->dumpYaml(
-            $projectPath,
-            sprintf('%s/dbt_project.yml', $projectPath),
+            $this->projectPath,
+            sprintf('%s/dbt_project.yml', $this->projectPath),
             $workspace
         );
 
         $this->createSourceFileService->dumpYaml(
-            $projectPath,
+            $this->projectPath,
             $config->getDbtSourceName(),
             $workspace,
             $config->getInputTables()
@@ -140,6 +155,29 @@ class Component extends BaseComponent
             $this->runProcess(['git', 'clone', ...$branch, $gitRepositoryUrl], $this->getDataDir());
         } catch (ProcessFailedException $e) {
             throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
+        }
+    }
+
+    private function queryExcerpt(string $query): string
+    {
+        if (mb_strlen($query) > 1000) {
+            return mb_substr($query, 0, 500, 'UTF-8') . "\n...\n" . mb_substr($query, -500, null, 'UTF-8');
+        }
+        return $query;
+    }
+
+    protected function printExecutedSqls(): void
+    {
+        $file = new SplFileObject(sprintf('%s/logs/dbt.log', $this->projectPath));
+        $logs = [];
+        while (!$file->eof()) {
+            $logs[] = $file->fgets() !== false ? json_decode($file->fgets(), true) : null;
+        }
+
+        foreach ($logs as $log) {
+            if ($log && array_key_exists('sql', $log['data'])) {
+                echo $this->queryExcerpt(preg_replace('!/\*.*?\*/!s', '', $log['data']['sql'])) . PHP_EOL;
+            }
         }
     }
 }

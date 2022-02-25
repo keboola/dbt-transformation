@@ -19,6 +19,7 @@ class ConfigTest extends TestCase
     public function testValidConfig(array $configData): void
     {
         $config = new Config($configData, new ConfigDefinition());
+        $configData = $this->addDefaultValues($configData);
         $this->assertEquals($configData, $config->getData());
     }
 
@@ -94,6 +95,23 @@ class ConfigTest extends TestCase
                     ],
                     'dbt' => [
                         'sourceName' => 'my_source',
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with model names' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'branch' => 'master',
+                        'username' => 'test',
+                        'password' => 'test',
+                    ],
+                    'dbt' => [
+                        'sourceName' => 'my_source',
+                        'modelNames' => ['stg_model'],
                     ],
                 ],
             ],
@@ -186,5 +204,18 @@ class ConfigTest extends TestCase
             ],
             'expectedError' => 'The path "root.parameters.dbt.sourceName" cannot contain an empty value, but got ""',
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $configData
+     * @return array<string, mixed>
+     */
+    protected function addDefaultValues(array $configData): array
+    {
+        if (empty($configData['parameters']['dbt']['modelNames'])) {
+            $configData['parameters']['dbt']['modelNames'] = [];
+        }
+
+        return $configData;
     }
 }

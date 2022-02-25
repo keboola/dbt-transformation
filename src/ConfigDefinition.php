@@ -59,6 +59,12 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->scalarNode('sourceName')
                             ->isRequired()
                             ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                    ->children()
+                        ->arrayNode('modelNames')
+                            ->scalarPrototype()->end()
+                    ->end()
                 ->end()
             ->end();
 

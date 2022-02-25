@@ -47,8 +47,15 @@ class Component extends BaseComponent
         $projectPath = $this->getProjectPath($dataDir, $gitRepositoryUrl);
         $this->createDbtYamlFiles($config, $projectPath);
 
+        $selectParameter = [];
+        $modelNames = $config->getModelNames();
+        if (!empty($modelNames)) {
+            $selectParameter = ['--select', ...$modelNames];
+        }
+
         try {
-            $this->runProcess(['dbt', 'run', '--profiles-dir', sprintf('%s/.dbt/', $projectPath)], $projectPath);
+            $profilesYamlPath = sprintf('%s/.dbt/', $projectPath);
+            $this->runProcess(['dbt', '--warn-error', 'run', ...$selectParameter, '--profiles-dir', $profilesYamlPath], $projectPath);
         } catch (ProcessFailedException $e) {
             throw new UserException($e->getMessage());
         }

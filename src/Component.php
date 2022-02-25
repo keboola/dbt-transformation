@@ -53,9 +53,10 @@ class Component extends BaseComponent
             $selectParameter = ['--select', ...$modelNames];
         }
 
+        $profilesYamlPath = sprintf('%s/.dbt/', $projectPath);
+        $dbtCommand = ['dbt', '--warn-error', 'run', ...$selectParameter, '--profiles-dir', $profilesYamlPath];
         try {
-            $profilesYamlPath = sprintf('%s/.dbt/', $projectPath);
-            $this->runProcess(['dbt', '--warn-error', 'run', ...$selectParameter, '--profiles-dir', $profilesYamlPath], $projectPath);
+            $this->runProcess($dbtCommand, $projectPath);
         } catch (ProcessFailedException $e) {
             throw new UserException($e->getMessage());
         }

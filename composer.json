@@ -5,6 +5,7 @@
     "require": {
         "php": "^7.4",
         "keboola/php-component": "^8.1",
+        "symfony/console": "^5.4",
         "symfony/filesystem": "^5.4",
         "symfony/process": "^5.4",
         "symfony/yaml": "^5.4"

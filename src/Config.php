@@ -45,4 +45,12 @@ class Config extends BaseConfig
     {
         return $this->getValue(['parameters', 'dbt', 'sourceName']);
     }
+
+    /**
+     * @return array<string>
+     */
+    public function getModelNames(): array
+    {
+        return $this->getValue(['parameters', 'dbt', 'modelNames']);
+    }
 }

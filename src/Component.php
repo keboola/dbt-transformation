@@ -74,7 +74,7 @@ class Component extends BaseComponent
         if ($config->showSqls()) {
             $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
             foreach ($sqls as $sql) {
-                echo $sql . PHP_EOL;
+                $this->getLogger()->info($sql);
             }
         }
     }

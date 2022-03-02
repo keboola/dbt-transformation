@@ -25,7 +25,8 @@ class ParseLogFileService
         $file = new SplFileObject($this->logFilePath);
         $logs = [];
         while (!$file->eof()) {
-            $logs[] = $file->fgets() !== false ? json_decode($file->fgets(), true) : null;
+            $fgets = $file->fgets();
+            $logs[] = $fgets !== false ? json_decode($fgets, true) : null;
         }
 
         foreach ($logs as $log) {

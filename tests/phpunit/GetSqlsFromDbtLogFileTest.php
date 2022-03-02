@@ -26,7 +26,10 @@ class GetSqlsFromDbtLogFileTest extends TestCase
     private function getExpectedSqls(): array
     {
         return [
-          'create or replace  view "KEBOOLA_3194"."WORKSPACE_380649405"."stg_model" 
+            'show terse schemas in database "KEBOOLA_3194"
+    limit 10000',
+            'show terse objects in "KEBOOLA_3194"."WORKSPACE_380649405"',
+            'create or replace  view "KEBOOLA_3194"."WORKSPACE_380649405"."stg_model" 
   
    as (
     with source as (

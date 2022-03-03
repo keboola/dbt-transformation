@@ -1,0 +1,4 @@
+show terse schemas in database "%s"     limit 10000
+show terse objects in "%s"."%s"
+create or replace  view "%s"."%s"."stg_model"        as (     with source as (                  select * from "%s"."%s"."test"              ),          renamed as (                  select             "id",             "col2",             "col3",             "col4"         from source          )          select * from renamed   );
+create or replace  view "%s"."%s"."fct_model"        as (     -- Use the `ref` function to select from other models  select * from "%s"."%s"."stg_model" where "id" = 1   );

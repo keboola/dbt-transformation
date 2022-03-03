@@ -16,6 +16,7 @@ class Component extends BaseComponent
 {
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
+    private string $projectPath;
 
     public function __construct(LoggerInterface $logger)
     {
@@ -44,8 +45,8 @@ class Component extends BaseComponent
 
         $this->cloneRepository($config, $gitRepositoryUrl);
 
-        $projectPath = $this->getProjectPath($dataDir, $gitRepositoryUrl);
-        $this->createDbtYamlFiles($config, $projectPath);
+        $this->setProjectPath($dataDir, $gitRepositoryUrl);
+        $this->createDbtYamlFiles($config);
 
         $selectParameter = [];
         $modelNames = $config->getModelNames();
@@ -53,12 +54,28 @@ class Component extends BaseComponent
             $selectParameter = ['--select', ...$modelNames];
         }
 
-        $profilesYamlPath = sprintf('%s/.dbt/', $projectPath);
-        $dbtCommand = ['dbt', '--warn-error', 'run', ...$selectParameter, '--profiles-dir', $profilesYamlPath];
+        $dbtCommand = [
+            'dbt',
+            '--log-format',
+            'json',
+            '--warn-error',
+            'run',
+            ...$selectParameter,
+            '--profiles-dir',
+            sprintf('%s/.dbt/', $this->projectPath),
+        ];
+
         try {
-            $this->runProcess($dbtCommand, $projectPath);
+            $this->runProcess($dbtCommand, $this->projectPath);
         } catch (ProcessFailedException $e) {
             throw new UserException($e->getMessage());
+        }
+
+        if ($config->showSqls()) {
+            $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
+            foreach ($sqls as $sql) {
+                $this->getLogger()->info($sql);
+            }
         }
     }
 
@@ -90,23 +107,23 @@ class Component extends BaseComponent
         return $process;
     }
 
-    protected function getProjectPath(string $dataDir, string $gitRepositoryUrl): string
+    protected function setProjectPath(string $dataDir, string $gitRepositoryUrl): void
     {
         $explodedUrl = explode('/', $gitRepositoryUrl);
-        return sprintf('%s/%s', $dataDir, pathinfo(end($explodedUrl), PATHINFO_FILENAME));
+        $this->projectPath = sprintf('%s/%s', $dataDir, pathinfo(end($explodedUrl), PATHINFO_FILENAME));
     }
 
-    protected function createDbtYamlFiles(Config $config, string $projectPath): void
+    protected function createDbtYamlFiles(Config $config): void
     {
         $workspace = $config->getAuthorization()['workspace'];
         $this->createProfilesFileService->dumpYaml(
-            $projectPath,
-            sprintf('%s/dbt_project.yml', $projectPath),
+            $this->projectPath,
+            sprintf('%s/dbt_project.yml', $this->projectPath),
             $workspace
         );
 
         $this->createSourceFileService->dumpYaml(
-            $projectPath,
+            $this->projectPath,
             $config->getDbtSourceName(),
             $workspace,
             $config->getInputTables()

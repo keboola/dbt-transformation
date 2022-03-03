@@ -100,6 +100,20 @@ class ConfigTest extends TestCase
             ],
         ];
 
+        yield 'config with show executed SQLs parameter' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'sourceName' => 'my_source',
+                    ],
+                    'showExecutedSqls' => true,
+                ],
+            ],
+        ];
+
         yield 'config with model names' => [
             'configData' => [
                 'parameters' => [
@@ -212,6 +226,10 @@ class ConfigTest extends TestCase
      */
     protected function addDefaultValues(array $configData): array
     {
+        if (!array_key_exists('showExecutedSqls', $configData['parameters'])) {
+            $configData['parameters']['showExecutedSqls'] = false;
+        }
+
         if (empty($configData['parameters']['dbt']['modelNames'])) {
             $configData['parameters']['dbt']['modelNames'] = [];
         }

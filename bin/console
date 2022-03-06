@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__.'/../vendor/autoload.php';
+
+use DbtTransformation\Command\CloneGitRepositoryCommand;
+use DbtTransformation\Command\CreateWorkspaceCommand;
+use DbtTransformation\Command\GenerateProfilesAndSourcesCommand;
+use DbtTransformation\Command\RunDbtCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+
+$application->addCommands([
+        new CloneGitRepositoryCommand(),
+        new CreateWorkspaceCommand(),
+        new GenerateProfilesAndSourcesCommand(),
+        new RunDbtCommand(),
+]);
+
+$application->run();

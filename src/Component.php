@@ -16,6 +16,7 @@ class Component extends BaseComponent
 {
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
+    private CloneRepositoryService $cloneRepositoryService;
     private string $projectPath;
 
     public function __construct(LoggerInterface $logger)
@@ -23,6 +24,7 @@ class Component extends BaseComponent
         parent::__construct($logger);
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
+        $this->cloneRepositoryService = new CloneRepositoryService;
     }
 
     /**
@@ -135,28 +137,12 @@ class Component extends BaseComponent
      */
     protected function cloneRepository(Config $config, string $gitRepositoryUrl): void
     {
-        $branch = [];
-        $gitRepositoryBranch = $config->getGitRepositoryBranch();
-        if ($gitRepositoryBranch) {
-            $branch = ['-b', $gitRepositoryBranch];
-        }
-
-        $gitRepositoryUsername = $config->getGitRepositoryUsername();
-        $gitRepositoryPassword = $config->getGitRepositoryPassword();
-        if ($gitRepositoryUsername && $gitRepositoryPassword) {
-            $githubUrl = 'github.com';
-            $gitRepositoryUrl = str_replace($githubUrl, sprintf(
-                '%s:%s@%s',
-                $gitRepositoryUsername,
-                $gitRepositoryPassword,
-                $githubUrl
-            ), $gitRepositoryUrl);
-        }
-
-        try {
-            $this->runProcess(['git', 'clone', ...$branch, $gitRepositoryUrl], $this->getDataDir());
-        } catch (ProcessFailedException $e) {
-            throw new UserException(sprintf('Failed to clone your repository: %s', $gitRepositoryUrl));
-        }
+        $this->cloneRepositoryService->clone(
+            $this->getDataDir(),
+            $gitRepositoryUrl,
+            $config->getGitRepositoryBranch(),
+            $config->getGitRepositoryUsername(),
+            $config->getGitRepositoryPassword()
+        );
     }
 }

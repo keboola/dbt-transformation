@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace DbtTransformation\FunctionalTests;
 
+use DbtTransformation\Traits\SnowflakeTestQueriesTrait;
 use Keboola\DatadirTests\DatadirTestCase;
-use Keboola\SnowflakeDbAdapter\Connection;
 use RuntimeException;
 
 class DatadirTest extends DatadirTestCase
 {
-    private Connection $connection;
+    use SnowflakeTestQueriesTrait;
 
     protected function setUp(): void
     {
@@ -32,19 +32,6 @@ class DatadirTest extends DatadirTestCase
 
             // Invoke callback
             $initCallback($this);
-        }
-    }
-
-    protected function removeAllTablesAndViews(): void
-    {
-        $dropQueries = $this->connection->fetchAll("
-             select 'DROP '  || IFF(table_type = 'VIEW', 'VIEW', 'TABLE') || ' \"' || table_name || '\";' QUERY
-             from information_schema.tables
-             where  table_schema = current_schema();
-         ");
-
-        foreach ($dropQueries as $dropQuery) {
-            $this->connection->query($dropQuery['QUERY']);
         }
     }
 }

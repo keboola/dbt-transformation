@@ -13,7 +13,7 @@ use RuntimeException;
 
 class DbtYamlCreateTest extends TestCase
 {
-    protected string $dataDir = __DIR__ . '/../data';
+    protected string $dataDir = __DIR__ . '/../../data';
     protected string $providerDataDir = __DIR__ . '/data';
 
     /**

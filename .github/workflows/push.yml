@@ -21,6 +21,10 @@ env:
     GITHUB_USERNAME: "dbt-test-project-user"
     GITHUB_PASSWORD: ${{ secrets.GH_PAT }}
 
+    KBC_URL: "https://connection.keboola.com"
+    KBC_API_TOKEN: ${{ secrets.KBC_API_TOKEN }}
+    WORKSPACE_CONFIGURATION_ID: "821998106"
+
     DOCKERHUB_USER: '${{ secrets.DOCKERHUB_USER }}'
     DOCKERHUB_TOKEN: '${{ secrets.DOCKERHUB_TOKEN }}'
     KBC_STORAGE_TOKEN: '${{ secrets.KBC_STORAGE_TOKEN }}'
@@ -97,6 +101,9 @@ jobs:
                     -e SNOWFLAKE_PASSWORD \
                     -e GITHUB_USERNAME \
                     -e GITHUB_PASSWORD \
+                    -e KBC_URL \
+                    -e KBC_API_TOKEN \
+                    -e WORKSPACE_CONFIGURATION_ID \
                     ${{env.APP_IMAGE}} composer ci
     tests-in-kbc:
         needs: build

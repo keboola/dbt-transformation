@@ -55,8 +55,9 @@ class CreateWorkspaceCommand extends Command
             '4. Enter workspace name (description is optional)',
             '5. Go to detail of your newly created workspace',
             '6. Set input mappings corresponding to your DBT models',
-            '7. Note configuration ID (last number in URL) for next step',
-            '8. Continue with command "app:generate-profiles-and-sources"',
+            '7. Click on "Load Data"',
+            '8. Note configuration ID (last number in URL) for next step',
+            '9. Continue with command "app:generate-profiles-and-sources"',
         ]);
 
         return Command::SUCCESS;

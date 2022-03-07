@@ -111,7 +111,8 @@ class GenerateProfilesAndSourcesCommand extends Command
             $configurationDetail['configuration']['storage']['input']['tables']
         );
 
-        $output->writeln('Sources and profiles.yml files generated. You can now run command app:run-dbt');
+        $output->writeln('Sources and profiles.yml files generated. You can now run command ' .
+            'app:run-dbt-command');
 
         return Command::SUCCESS;
     }

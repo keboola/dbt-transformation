@@ -5,6 +5,9 @@
     "require": {
         "php": "^7.4",
         "keboola/php-component": "^8.1",
+        "keboola/sandboxes-api-php-client": "^6.12",
+        "keboola/storage-api-client": "^12.10",
+        "symfony/console": "^5.4",
         "symfony/filesystem": "^5.4",
         "symfony/process": "^5.4",
         "symfony/yaml": "^5.4"
@@ -28,7 +31,8 @@
     "autoload-dev": {
         "psr-4": {
             "DbtTransformation\\Tests\\": "tests/phpunit/",
-            "DbtTransformation\\FunctionalTests\\": "tests/functional/"
+            "DbtTransformation\\FunctionalTests\\": "tests/functional/",
+            "DbtTransformation\\Traits\\": "tests/traits/"
         }
     },
     "scripts": {

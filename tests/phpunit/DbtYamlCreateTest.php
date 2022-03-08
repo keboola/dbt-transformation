@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace DbtTransformation\Tests;
 
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
@@ -13,7 +13,7 @@ use RuntimeException;
 
 class DbtYamlCreateTest extends TestCase
 {
-    protected string $dataDir = __DIR__ . '/../data';
+    protected string $dataDir = __DIR__ . '/../../data';
     protected string $providerDataDir = __DIR__ . '/data';
 
     /**

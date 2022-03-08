@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace DbtTransformation\Tests;
 
 use DbtTransformation\Config;
 use DbtTransformation\ConfigDefinition;

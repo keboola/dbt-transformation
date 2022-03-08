@@ -18,7 +18,7 @@ Clones GIT repository with your DBT project. You input path to your repository w
 ### app:create-workspace
 Guides you to creating Snowflake Workspace in your Keboola project with input mapping for your DBT project. You will need your Keboola Connection URL and storage API token. If you have already created correctly setup workspace before, you can skip this command.
 
-### app:create-workspace
+### app:generate-profiles-and-sources
 Generates file `profiles.yml` with credentials to Snowflake Workspace and sources file with your input mapping based on your workspace. You will need your Keboola Connection URL, storage API token, workspace configuration ID (you know where to get it from previous command) and source name which you are using in you DBT project. Once you have these files generated, you are able to run DBT with your local installation or with next command `app:run-dbt-command`.
 
 ### app:run-dbt-command

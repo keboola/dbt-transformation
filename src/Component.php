@@ -34,10 +34,6 @@ class Component extends BaseComponent
         $config = $this->getConfig();
         $gitRepositoryUrl = $config->getGitRepositoryUrl();
 
-        if ($config->getAuthorization()['workspace']['backend'] !== 'snowflake') {
-            throw new UserException('Only Snowflake backend is supported at the moment');
-        }
-
         $inputTables = $config->getInputTables();
         if (!count($inputTables)) {
             throw new UserException('There are no tables on Input Mapping.');

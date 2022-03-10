@@ -136,7 +136,6 @@ class RunDbtCommandTest extends TestCase
         $credentials = $this->getSnowflakeCredentials();
 
         $workspace = [
-              'backend' => 'snowflake',
               'host' => $credentials['SNOWFLAKE_HOST'],
               'warehouse' => $credentials['SNOWFLAKE_WAREHOUSE'],
               'database' => $credentials['SNOWFLAKE_DATABASE'],

@@ -22,7 +22,7 @@ env:
     GITHUB_PASSWORD: ${{ secrets.GH_PAT }}
 
     KBC_URL: "https://connection.keboola.com"
-    KBC_TOKEN: ${{ secrets.KBC_TOKEN }}
+    KBC_TOKEN: ${{ secrets.KBC_API_TOKEN }}
     KBC_RUNID: 1234567890
     WORKSPACE_CONFIGURATION_ID: "821998106"
 

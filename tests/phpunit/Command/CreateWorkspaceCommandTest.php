@@ -91,7 +91,7 @@ class CreateWorkspaceCommandTest extends TestCase
     private function getEnvVars(): array
     {
         $kbcUrl = getenv('KBC_URL');
-        $kbcToken = getenv('KBC_API_TOKEN');
+        $kbcToken = getenv('KBC_TOKEN');
 
         if ($kbcUrl === false || $kbcToken === false) {
             throw new RuntimeException('Missing KBC env variables!');

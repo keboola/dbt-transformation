@@ -174,7 +174,7 @@ sources:
     private function getEnvVars(): array
     {
         $kbcUrl = getenv('KBC_URL');
-        $kbcToken = getenv('KBC_API_TOKEN');
+        $kbcToken = getenv('KBC_TOKEN');
         $wsConfId = getenv('WORKSPACE_CONFIGURATION_ID');
 
         if ($kbcUrl === false || $kbcToken === false || $wsConfId === false) {

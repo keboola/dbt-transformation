@@ -15,6 +15,7 @@ class Component extends BaseComponent
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
     private CloneRepositoryService $cloneRepositoryService;
+    private OutputMappingService $outputMappingService;
     private string $projectPath;
 
     public function __construct(LoggerInterface $logger)
@@ -23,6 +24,7 @@ class Component extends BaseComponent
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
         $this->cloneRepositoryService = new CloneRepositoryService;
+        $this->outputMappingService = new OutputMappingService($logger, $this->getConfig());
     }
 
     /**
@@ -51,6 +53,10 @@ class Component extends BaseComponent
             foreach ($sqls as $sql) {
                 $this->getLogger()->info($sql);
             }
+        }
+
+        if (!empty($config->getExpectedOutputTables())) {
+            $this->outputMappingService->runExtractorJob();
         }
     }
 

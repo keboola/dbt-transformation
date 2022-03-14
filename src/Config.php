@@ -6,6 +6,7 @@ namespace DbtTransformation;
 
 use InvalidArgumentException;
 use Keboola\Component\Config\BaseConfig;
+use RuntimeException;
 
 class Config extends BaseConfig
 {
@@ -57,5 +58,32 @@ class Config extends BaseConfig
     public function getModelNames(): array
     {
         return $this->getValue(['parameters', 'dbt', 'modelNames']);
+    }
+
+    public function getStorageApiToken(): string
+    {
+        $token = getenv('KBC_TOKEN');
+        if (!$token) {
+            throw new RuntimeException('KBC_TOKEN environment variable must be set');
+        }
+        return $token;
+    }
+
+    public function getRunId(): string
+    {
+        $runId = getenv('KBC_RUNID');
+        if (!$runId) {
+            throw new RuntimeException('KBC_RUNID environment variable must be set');
+        }
+        return $runId;
+    }
+
+    public function getStorageApiUrl(): string
+    {
+        $url = getenv('KBC_URL');
+        if (!$url) {
+            throw new RuntimeException('KBC_URL environment variable must be set');
+        }
+        return $url;
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "21ce68e125feab7bae9dd28605c758d9",
+    "content-hash": "2ed6e51575113c5b89620f9cd46f49ff",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -488,6 +488,64 @@
             "time": "2016-04-21T20:46:22+00:00"
         },
         {
+            "name": "keboola/job-queue-api-php-client",
+            "version": "0.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/keboola/job-queue-api-php-client.git",
+                "reference": "ef675023b527c93c3542cc3c6e39b302ba0c0960"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/keboola/job-queue-api-php-client/zipball/ef675023b527c93c3542cc3c6e39b302ba0c0960",
+                "reference": "ef675023b527c93c3542cc3c6e39b302ba0c0960",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^6.3|^7.2",
+                "php": "^7.3",
+                "psr/log": "^1.1",
+                "symfony/config": "^4.4|^5.2",
+                "symfony/validator": "^4.4|^5.2  !=4.4.33 !=4.4.34  !=5.3.10 !=5.3.11"
+            },
+            "require-dev": {
+                "infection/infection": "^0.18.2|^0.21.2",
+                "keboola/coding-standard": ">=11.0.0",
+                "keboola/storage-api-client": "^12.0",
+                "php-parallel-lint/php-parallel-lint": "^1.2",
+                "phpstan/phpstan": "^0.12.80",
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Keboola\\JobQueueClient\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Keboola",
+                    "email": "devel@keboola.com"
+                }
+            ],
+            "description": "Client for Job queue API",
+            "keywords": [
+                "client",
+                "job",
+                "keboola",
+                "queue"
+            ],
+            "support": {
+                "source": "https://github.com/keboola/job-queue-api-php-client/tree/0.5.0"
+            },
+            "time": "2021-12-20T11:52:16+00:00"
+        },
+        {
             "name": "keboola/php-component",
             "version": "8.3.0",
             "source": {
@@ -662,6 +720,51 @@
                 "source": "https://github.com/keboola/storage-api-php-client/tree/v12.10.0"
             },
             "time": "2022-02-26T20:17:42+00:00"
+        },
+        {
+            "name": "keboola/syrup-php-client",
+            "version": "5.6.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/keboola/syrup-php-client.git",
+                "reference": "0d918db5d68889e295162301b5d50ffc5887de55"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/keboola/syrup-php-client/zipball/0d918db5d68889e295162301b5d50ffc5887de55",
+                "reference": "0d918db5d68889e295162301b5d50ffc5887de55",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.3"
+            },
+            "require-dev": {
+                "monolog/monolog": "^1.24",
+                "phpunit/phpunit": "^5.7",
+                "squizlabs/php_codesniffer": "^3.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Keboola": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Keboola",
+                    "email": "devel@keboola.com"
+                }
+            ],
+            "description": "Keboola Syrup PHP Client",
+            "support": {
+                "issues": "https://github.com/keboola/syrup-php-client/issues",
+                "source": "https://github.com/keboola/syrup-php-client/tree/5.6.1"
+            },
+            "time": "2021-11-17T07:22:45+00:00"
         },
         {
             "name": "microsoft/azure-storage-blob",

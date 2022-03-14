@@ -29,11 +29,7 @@
       "tables": [
         {
           "destination": "out.c-test.stg_model",
-          "source": "stg_model"
-        },
-        {
-          "destination": "out.c-test.fct_model",
-          "source": "fct_model"
+          "source": "non-existing-table"
         }
       ]
     }

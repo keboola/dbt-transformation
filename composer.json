@@ -4,11 +4,9 @@
     "license": "MIT",
     "require": {
         "php": "^7.4",
-        "keboola/job-queue-api-php-client": "^0.5.0",
         "keboola/php-component": "^8.1",
         "keboola/sandboxes-api-php-client": "^6.12",
         "keboola/storage-api-client": "^12.10",
-        "keboola/syrup-php-client": "^5.6",
         "symfony/console": "^5.4",
         "symfony/filesystem": "^5.4",
         "symfony/process": "^5.4",

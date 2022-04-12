@@ -81,7 +81,7 @@ class DbtYamlCreateTest extends TestCase
     {
         yield [
             'config' => $this->getConfig(),
-            'generatedFilePath' => sprintf('%s/.dbt/profiles.yml', $this->dataDir),
+            'generatedFilePath' => sprintf('%s/../.dbt/profiles.yml', $this->dataDir),
             'expectedSourceFilePath' => sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
         ];
     }

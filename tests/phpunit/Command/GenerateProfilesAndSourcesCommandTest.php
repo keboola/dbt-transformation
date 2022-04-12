@@ -36,7 +36,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
     /**
      * @dataProvider validInputsProvider
      */
-    public function testCreateWorkspaceCommand(
+    public function testGenerateProfilesAndSourcesCommand(
         string $url,
         string $token,
         string $workspaceConfigurationId,
@@ -68,7 +68,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
     /**
      * @dataProvider invalidInputsProvider
      */
-    public function testCreateWorkspaceCommandWithInvalidInputs(
+    public function testGenerateProfilesAndSourcesCommandWithInvalidInputs(
         string $url,
         string $token,
         string $workspaceConfigurationId,

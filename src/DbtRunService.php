@@ -61,7 +61,7 @@ class DbtRunService
             'run',
             ...$selectParameter,
             '--profiles-dir',
-            sprintf('%s/.dbt/', $this->projectPath),
+            sprintf('%s/../.dbt/', $this->projectPath),
         ];
     }
 }

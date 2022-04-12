@@ -23,7 +23,7 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
 
         $dbtProjectYaml = Yaml::parseFile($dbtProjectYamlPath);
 
-        $dbtFolderPath = sprintf('%s/.dbt', $projectPath);
+        $dbtFolderPath = sprintf('%s/../.dbt', $projectPath);
         $this->createFolderIfNotExist($dbtFolderPath);
 
         $workspace['account'] = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);

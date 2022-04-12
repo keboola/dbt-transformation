@@ -36,7 +36,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
     /**
      * @dataProvider validInputsProvider
      */
-    public function testCreateWorkspaceCommand(
+    public function testGenerateProfilesAndSourcesCommand(
         string $url,
         string $token,
         string $workspaceConfigurationId,
@@ -49,7 +49,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $this->assertEquals(Command::SUCCESS, $exitCode);
         $this->assertStringContainsString('Sources and profiles.yml files generated.', $output);
 
-        $profilesPath = sprintf('%s/dbt-project/.dbt/profiles.yml', $this->dataDir);
+        $profilesPath = sprintf('%s/.dbt/profiles.yml', $this->dataDir);
         $sourcesPath = sprintf('%s/dbt-project/models/src_%s.yml', $this->dataDir, $sourceName);
 
         $this->assertFileExists($profilesPath);
@@ -68,7 +68,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
     /**
      * @dataProvider invalidInputsProvider
      */
-    public function testCreateWorkspaceCommandWithInvalidInputs(
+    public function testGenerateProfilesAndSourcesCommandWithInvalidInputs(
         string $url,
         string $token,
         string $workspaceConfigurationId,

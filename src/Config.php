@@ -41,6 +41,11 @@ class Config extends BaseConfig
         }
     }
 
+    public function shouldGenerateSources(): bool
+    {
+        return $this->getValue(['parameters', 'dbt', 'generateSources']);
+    }
+
     public function getDbtSourceName(): string
     {
         return $this->getValue(['parameters', 'dbt', 'sourceName']);

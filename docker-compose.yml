@@ -1,7 +1,14 @@
 version: '3'
 services:
-  dev:
+  app:
     build: .
+    image: keboola/dbt-transformation
     volumes:
       - ./:/code
       - ./data:/data
+
+  app-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile-tests
+    command: composer ci

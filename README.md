@@ -1,3 +1,4 @@
+
 # DBT transformation
 
 ## Configuration
@@ -19,12 +20,12 @@ The configuration `config.json` contains following properties in `parameters` ke
 ## CLI usage
 You can use this component to run your DBT project locally using Keboola Snowflake Workspace as backend. For this purpose you can use following interactive CLI commands:
 ```
-docker-compose run --rm dev bin/console app:clone-repository
-docker-compose run --rm dev bin/console app:create-workspace
-docker-compose run --rm dev bin/console app:generate-profiles-and-sources
-docker-compose run --rm dev bin/console app:run-dbt-command
+docker-compose run --rm app bin/console app:clone-repository
+docker-compose run --rm app bin/console app:create-workspace
+docker-compose run --rm app bin/console app:generate-profiles-and-sources
+docker-compose run --rm app bin/console app:run-dbt-command
 ```
-For first time you have to run `docker-compose build` before.
+For first time you have to run `docker-compose build app` before.
 
 ### app:clone-repository
 Clones GIT repository with your DBT project. You input path to your repository when you are asked, branch what you want to use (leave blank if you want clone from master branch) and optionally GitHub credentials if repository is private. If you are using another GIT service than GitHub or you just want to clone your project manually, just skip this command and clone your project to folder `/data` and rename it `dbt-project`, so your project root will be in path `/data/dbt-project/`.
@@ -47,13 +48,13 @@ Clone this repository and init the workspace with following command:
 git clone https://github.com/keboola/dbt-transformation.git
 cd dbt-transformation
 docker-compose build
-docker-compose run --rm dev composer install --no-scripts
+docker-compose run --rm app composer install --no-scripts
 ```
 
 Run the test suite using this command:
 
 ```
-docker-compose run --rm dev composer tests
+docker-compose run --rm app-tests
 ```
  
 # Integration

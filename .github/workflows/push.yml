@@ -3,7 +3,7 @@ name: 'GitHub Actions'
     - push
 concurrency: 'ci-${{ github.ref }}'
 env:
-    APP_IMAGE: keboola-component
+    APP_IMAGE: keboola/dbt-transformation
     KBC_DEVELOPERPORTAL_VENDOR: keboola-test
     KBC_DEVELOPERPORTAL_APP: keboola-test.dbt-transformation
     KBC_DEVELOPERPORTAL_USERNAME: keboola-test+dbt_transformation
@@ -91,7 +91,7 @@ jobs:
             -
                 name: 'Run tests'
                 run: |
-                    docker run \
+                    docker-compose run \
                     -e SNOWFLAKE_HOST \
                     -e SNOWFLAKE_PORT \
                     -e SNOWFLAKE_WAREHOUSE \
@@ -104,7 +104,7 @@ jobs:
                     -e KBC_URL \
                     -e KBC_TOKEN \
                     -e WORKSPACE_CONFIGURATION_ID \
-                    ${{env.APP_IMAGE}} composer ci
+                    app-tests
     tests-in-kbc:
         needs: build
         runs-on: ubuntu-latest

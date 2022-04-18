@@ -85,12 +85,14 @@ class Component extends BaseComponent
             $workspace
         );
 
-        $this->createSourceFileService->dumpYaml(
-            $this->projectPath,
-            $config->getDbtSourceName(),
-            $workspace,
-            $config->getInputTables()
-        );
+        if ($config->shouldGenerateSources()) {
+            $this->createSourceFileService->dumpYaml(
+                $this->projectPath,
+                $config->getDbtSourceName(),
+                $workspace,
+                $config->getInputTables()
+            );
+        }
     }
 
     /**

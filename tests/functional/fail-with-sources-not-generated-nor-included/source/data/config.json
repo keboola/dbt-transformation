@@ -14,7 +14,7 @@
       "repo": "https://github.com/keboola/dbt-test-project-public.git"
     },
     "dbt": {
-      "generateSources": true,
+      "generateSources": false,
       "sourceName": "my_source"
     }
   },

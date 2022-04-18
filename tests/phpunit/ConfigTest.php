@@ -49,7 +49,7 @@ class ConfigTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'sourceName' => 'my_source',
+                        'generateSources' => false,
                     ],
                 ],
             ],
@@ -63,6 +63,7 @@ class ConfigTest extends TestCase
                         'branch' => 'master',
                     ],
                     'dbt' => [
+                        'generateSources' => true,
                         'sourceName' => 'my_source',
                     ],
                 ],
@@ -78,6 +79,7 @@ class ConfigTest extends TestCase
                         'password' => 'test',
                     ],
                     'dbt' => [
+                        'generateSources' => true,
                         'sourceName' => 'my_source',
                     ],
                 ],
@@ -94,6 +96,7 @@ class ConfigTest extends TestCase
                         'password' => 'test',
                     ],
                     'dbt' => [
+                        'generateSources' => true,
                         'sourceName' => 'my_source',
                     ],
                 ],
@@ -107,6 +110,7 @@ class ConfigTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
+                        'generateSources' => true,
                         'sourceName' => 'my_source',
                     ],
                     'showExecutedSqls' => true,
@@ -124,6 +128,7 @@ class ConfigTest extends TestCase
                         'password' => 'test',
                     ],
                     'dbt' => [
+                        'generateSources' => true,
                         'sourceName' => 'my_source',
                         'modelNames' => ['stg_model'],
                     ],
@@ -202,7 +207,7 @@ class ConfigTest extends TestCase
                     'dbt' => [],
                 ],
             ],
-            'expectedError' => 'The child config "sourceName" under "root.parameters.dbt" must be configured.',
+            'expectedError' => 'The child config "generateSources" under "root.parameters.dbt" must be configured.',
         ];
 
         yield 'empty sourceName' => [
@@ -212,11 +217,12 @@ class ConfigTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
+                        'generateSources' => true,
                         'sourceName' => '',
                     ],
                 ],
             ],
-            'expectedError' => 'The path "root.parameters.dbt.sourceName" cannot contain an empty value, but got ""',
+            'expectedError' => '"sourceName" must be specified if "generateSources" is true',
         ];
     }
 

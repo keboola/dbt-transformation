@@ -18,7 +18,13 @@ The configuration `config.json` contains following properties in `parameters` ke
 - `showExecutedSqls` - boolean (optional): Default `false`, if set to `true` SQL queries executed by DBT transformation are printed to output.
 
 ## CLI usage
-You can use this component to run your DBT project locally using Keboola Snowflake Workspace as backend. For this purpose you can use following interactive CLI commands:
+You can use this component to run your DBT project locally using Keboola Snowflake Workspace as backend. Before using following CLI commands, run 
+```
+docker-compose run --rm cli composer install --prefer-dist --no-interaction --no-dev
+```
+to initiate repository for interacting with `dbt`. 
+
+When preparing the repository, you can use following interactive CLI commands:
 ```
 docker-compose run --rm cli bin/console app:clone-repository
 docker-compose run --rm cli bin/console app:create-workspace

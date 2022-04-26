@@ -1,5 +1,5 @@
 
-# DBT transformation
+# dbt transformation
 
 ## Configuration
 

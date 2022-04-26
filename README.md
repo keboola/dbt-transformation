@@ -17,6 +17,23 @@ The configuration `config.json` contains following properties in `parameters` ke
     - `modelNames` - array of strings (optional): If you want to run DBT only with certain models, you can specify their names here. Otherwise, all models will be run.
 - `showExecutedSqls` - boolean (optional): Default `false`, if set to `true` SQL queries executed by DBT transformation are printed to output.
 
+Example:
+```
+{
+  "git": {
+    "repo": "https://github.com/padak/dbt-demo.git"
+  },
+  "dbt": {
+    "generateSources": true,
+    "sourceName": "padak_data",
+    "modelNames": [
+      "+final_visit_hour"
+    ]
+  },
+  "showExecutedSqls": true
+}
+```
+
 ## CLI usage
 
 

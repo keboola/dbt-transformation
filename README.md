@@ -37,7 +37,7 @@ Example:
 ## CLI usage
 
 
-You can use this component to run your DBT project locally using Keboola Snowflake Workspace as backend. Before using following CLI commands, clone this repository and init the workspace with following command:
+You can use this component to run your DBT project locally using Keboola Snowflake Workspace as backend. Before using following CLI commands, clone this repository and init the workspace with following command. If you encounter bad CPU type in executable error message, please **install rosetta on M1 Mac** via `softwareupdate --install-rosetta --agree-to-license` 
 
 ```
 git clone https://github.com/keboola/dbt-transformation.git

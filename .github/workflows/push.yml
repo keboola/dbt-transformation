@@ -23,7 +23,7 @@ env:
 
     KBC_URL: "https://connection.keboola.com"
     KBC_TOKEN: ${{ secrets.KBC_API_TOKEN }}
-    WORKSPACE_CONFIGURATION_ID: "821998106"
+    KBC_TOKEN_NO_RO_MAPPING: ${{ secrets.KBC_API_TOKEN_NO_RO_MAPPING }}
 
     DOCKERHUB_USER: '${{ secrets.DOCKERHUB_USER }}'
     DOCKERHUB_TOKEN: '${{ secrets.DOCKERHUB_TOKEN }}'
@@ -103,7 +103,7 @@ jobs:
                     -e GITHUB_PASSWORD \
                     -e KBC_URL \
                     -e KBC_TOKEN \
-                    -e WORKSPACE_CONFIGURATION_ID \
+                    -e KBC_TOKEN_NO_RO_MAPPING \
                     ${{env.APP_IMAGE}} composer ci
     tests-in-kbc:
         needs: build

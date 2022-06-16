@@ -41,7 +41,7 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     protected function getOutputDefinition(string $configurationName): array
     {

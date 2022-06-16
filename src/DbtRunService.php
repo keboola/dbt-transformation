@@ -35,8 +35,8 @@ class DbtRunService
     }
 
     /**
-     * @param array<string> $modelNames
-     * @return array<string>
+     * @param array<int, string> $modelNames
+     * @return array<int, string>
      */
     protected function getSelectParameter(array $modelNames): array
     {
@@ -49,10 +49,10 @@ class DbtRunService
     }
 
     /**
-     * @param array<string> $selectParameter
-     * @return array<string>
+     * @param array<int, string> $selectParameter
+     * @return array<int, string>
      */
-    protected function prepareCommand(array $selectParameter, $target): array
+    protected function prepareCommand(array $selectParameter, string $target): array
     {
         return [
             'dbt',

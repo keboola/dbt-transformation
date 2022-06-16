@@ -7,7 +7,6 @@ namespace DbtTransformation;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\Component\BaseComponent;
-use Keboola\Component\UserException;
 use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
 
@@ -92,7 +91,7 @@ class Component extends BaseComponent
             $tables = $client->listTables();
             $tablesData = [];
             foreach ($tables as $table) {
-                $tablesData[$table['bucket']['id']][] = $table;
+                $tablesData[(string) $table['bucket']['id']][] = $table;
             }
 
             $this->createSourceFileService->dumpYaml(
@@ -118,9 +117,9 @@ class Component extends BaseComponent
     }
 
     /**
-     * @param string[] $workspace
+     * @param array<string, string> $workspace
      */
-    private function setEnvVars(array $workspace)
+    private function setEnvVars(array $workspace): void
     {
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));

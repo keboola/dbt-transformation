@@ -9,10 +9,13 @@ use Symfony\Component\Yaml\Yaml;
 
 class DbtSourceYamlCreateService extends DbtYamlCreateService
 {
+    /**
+     * @param array<string, array<int, array<string, mixed>>> $tablesData
+     */
     public function dumpYaml(
         string $projectPath,
         string $sourceName,
-        array  $tablesData,
+        array $tablesData,
         string $dbEnvVarName = 'DBT_KBC_PROD_DATABASE'
     ): void {
         $modelFolderPath = sprintf('%s/models/_sources/', $projectPath);
@@ -26,7 +29,7 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                     'sources' => [
                         [
                             'name' => $sourceName,
-                            'database' => sprintf("{{ env_var(\"%s\") }}", $dbEnvVarName),
+                            'database' => sprintf('{{ env_var("%s") }}', $dbEnvVarName),
                             'schema' => $bucket,
                             'loaded_at_field' => '_timestamp',
                             'tables' => array_map($this->formatTableSources(), $tables),
@@ -37,9 +40,6 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
         }
     }
 
-    /**
-     * @return \Closure
-     */
     protected function formatTableSources(): Closure
     {
         return static function ($table) {

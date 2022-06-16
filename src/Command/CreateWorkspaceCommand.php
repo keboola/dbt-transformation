@@ -83,6 +83,5 @@ class CreateWorkspaceCommand extends Command
 
         $configuration->setConfiguration(['parameters' => ['id' => $workspace['id']]]);
         $components->updateConfiguration($configuration);
-
     }
 }

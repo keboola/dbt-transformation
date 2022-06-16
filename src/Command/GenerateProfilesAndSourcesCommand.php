@@ -96,7 +96,7 @@ class GenerateProfilesAndSourcesCommand extends Command
             $tables = $client->listTables();
             $tablesData = [];
             foreach ($tables as $table) {
-                $tablesData[$table['bucket']['id']][] = $table;
+                $tablesData[(string) $table['bucket']['id']][] = $table;
             }
         } catch (ClientException $e) {
             if ($e->getCode() === 401) {
@@ -130,6 +130,10 @@ class GenerateProfilesAndSourcesCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @param array<string, array<string, string>> $workspace
+     * @return Generator<string>
+     */
     private function getEnvVars(string $name, array $workspace, string $password): Generator
     {
         yield sprintf('export DBT_%s_TYPE=%s', $name, $workspace['connection']['backend']);

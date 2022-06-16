@@ -27,7 +27,8 @@ class DbtYamlCreateTest extends TestCase
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function testCreateProfileYaml(): void {
+    public function testCreateProfileYaml(): void
+    {
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
@@ -60,14 +61,15 @@ class DbtYamlCreateTest extends TestCase
     /**
      * @throws \JsonException
      */
-    public function testCreateSourceYaml(): void {
+    public function testCreateSourceYaml(): void
+    {
         $service = new DbtSourceYamlCreateService();
 
         $tablesData = [
-            'bucket-1' => [['id' => 'table1', 'primaryKey' => ['id']]],
+            'bucket-1' => [['name' => 'table1', 'primaryKey' => ['id']]],
             'bucket-2' => [
-                ['id' => 'table2', 'primaryKey' => ['vatId']],
-                ['id' => 'table3', 'primaryKey' => []],
+                ['name' => 'table2', 'primaryKey' => ['vatId']],
+                ['name' => 'table3', 'primaryKey' => []],
             ],
         ];
 
@@ -79,8 +81,8 @@ class DbtYamlCreateTest extends TestCase
 
         foreach ($tablesData as $bucket => $tables) {
             self::assertFileEquals(
-                sprintf("%s/models/_sources/%s.yml", $this->providerDataDir, $bucket),
-                sprintf("%s/models/_sources/%s.yml", $this->dataDir, $bucket)
+                sprintf('%s/models/_sources/%s.yml', $this->providerDataDir, $bucket),
+                sprintf('%s/models/_sources/%s.yml', $this->dataDir, $bucket)
             );
         }
     }

@@ -10,12 +10,12 @@ env:
     KBC_DEVELOPERPORTAL_PASSWORD: '${{ secrets.KBC_DEVELOPERPORTAL_PASSWORD }}'
 
     # Snowflake Credentials
-    SNOWFLAKE_HOST: "kebooladev.snowflakecomputing.com"
+    SNOWFLAKE_HOST: "keboola.snowflakecomputing.com"
     SNOWFLAKE_PORT: 443
-    SNOWFLAKE_WAREHOUSE: "dbt_transformation_ci"
-    SNOWFLAKE_DATABASE: "dbt_transformation_ci"
-    SNOWFLAKE_SCHEMA: "dbt_transformation_ci"
-    SNOWFLAKE_USER: "dbt_transformation_ci"
+    SNOWFLAKE_WAREHOUSE: "KEBOOLA_PROD"
+    SNOWFLAKE_DATABASE: "SAPI_9108"
+    SNOWFLAKE_SCHEMA: "WORKSPACE_867477713"
+    SNOWFLAKE_USER: "SAPI_WORKSPACE_867477713"
     SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
 
     GITHUB_USERNAME: "dbt-test-project-user"
@@ -49,7 +49,7 @@ jobs:
                 run: 'docker login --username "$DOCKERHUB_USER" --password "$DOCKERHUB_TOKEN"'
             -
                 name: 'Build image'
-                run: 'docker build -t keboola/dbt-transformation-cli -f Dockerfile-cli . &&  docker build -t $APP_IMAGE .'
+                run: 'docker build -t $APP_IMAGE .'
             -
                 name: 'Set image tag'
                 id: tag

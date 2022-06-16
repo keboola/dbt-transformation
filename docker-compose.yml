@@ -1,16 +1,9 @@
 version: '3'
 services:
-  cli:
+  app:
     build:
       context: .
-      dockerfile: Dockerfile-cli
-    image: keboola/dbt-transformation-cli
-    volumes:
-      - ./:/code
-      - ./data:/data
-
-  app:
-    build: .
+      dockerfile: Dockerfile
     image: keboola/dbt-transformation
     volumes:
       - ./:/code

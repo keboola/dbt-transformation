@@ -8,7 +8,6 @@ use Keboola\StorageApi\Client;
 use Keboola\StorageApi\ClientException;
 use Keboola\StorageApi\Components;
 use Keboola\StorageApi\Options\Components\Configuration;
-use Keboola\StorageApi\Workspaces;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -70,17 +69,20 @@ class CreateWorkspaceCommand extends Command
     protected function createWorkspace(Client $client, string $wsName): void
     {
         $components = new Components($client);
-
         $configuration = new Configuration();
-        $configuration->setComponentId(self::SANDBOXES_COMPONENT_ID);
+        $configuration->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID);
         $configuration->setName($wsName);
         $configuration->setConfigurationId($wsName);
         $components->addConfiguration($configuration);
 
-        $components->createConfigurationWorkspace(
-            self::SANDBOXES_COMPONENT_ID,
+        $workspace = $components->createConfigurationWorkspace(
+            CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID,
             $wsName,
             ['backend' => 'snowflake']
         );
+
+        $configuration->setConfiguration(['parameters' => ['id' => $workspace['id']]]);
+        $components->updateConfiguration($configuration);
+
     }
 }

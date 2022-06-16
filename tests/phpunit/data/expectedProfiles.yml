@@ -1,11 +1,19 @@
 default:
     target: dev
     outputs:
-        dev:
-            type: snowflake
-            warehouse: KEBOOLA_PROD
-            database: KEBOOLA_xxxxxx
-            schema: WORKSPACE_xxxxx
-            user: KEBOOLA_WORKSPACE_xxxxx
-            password: xxxxxxxxxxxxxxx
-            account: keboola.eu-central-1
+        kbc_dev_chocho:
+            type: '{{ env_var("DBT_KBC_DEV_CHOCHO_TYPE") }}'
+            user: '{{ env_var("DBT_KBC_DEV_CHOCHO_USER") }}'
+            password: '{{ env_var("DBT_KBC_DEV_CHOCHO_PASSWORD") }}'
+            schema: '{{ env_var("DBT_KBC_DEV_CHOCHO_SCHEMA") }}'
+            warehouse: '{{ env_var("DBT_KBC_DEV_CHOCHO_WAREHOUSE") }}'
+            database: '{{ env_var("DBT_KBC_DEV_CHOCHO_DATABASE") }}'
+            account: '{{ env_var("DBT_KBC_DEV_CHOCHO_ACCOUNT") }}'
+        kbc_dev_padak:
+            type: '{{ env_var("DBT_KBC_DEV_PADAK_TYPE") }}'
+            user: '{{ env_var("DBT_KBC_DEV_PADAK_USER") }}'
+            password: '{{ env_var("DBT_KBC_DEV_PADAK_PASSWORD") }}'
+            schema: '{{ env_var("DBT_KBC_DEV_PADAK_SCHEMA") }}'
+            warehouse: '{{ env_var("DBT_KBC_DEV_PADAK_WAREHOUSE") }}'
+            database: '{{ env_var("DBT_KBC_DEV_PADAK_DATABASE") }}'
+            account: '{{ env_var("DBT_KBC_DEV_PADAK_ACCOUNT") }}'

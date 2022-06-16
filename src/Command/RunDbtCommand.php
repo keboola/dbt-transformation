@@ -31,9 +31,15 @@ class RunDbtCommand extends Command
             '(optional, if not specified, all models will be run): ');
         $modelNames = $helper->ask($input, $output, $questionModelNames);
 
+        $questionTarget = new Question('Enter output target name: ');
+        $target = $helper->ask($input, $output, $questionTarget);
+
         $dbtRunService = new DbtRunService(sprintf('%s/dbt-project', CloneGitRepositoryCommand::DATA_DIR));
         try {
-            $output->writeln($dbtRunService->run($modelNames ? explode(' ', $modelNames) : []));
+            $output->writeln($dbtRunService->run(
+                $modelNames ? explode(' ', $modelNames) : [],
+                $target
+            ));
         } catch (UserException $e) {
             $output->writeln($e->getMessage());
             return Command::FAILURE;

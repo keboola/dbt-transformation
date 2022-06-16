@@ -9,13 +9,11 @@ use Symfony\Component\Yaml\Yaml;
 
 class DbtProfilesYamlCreateService extends DbtYamlCreateService
 {
-    private const STRING_TO_REMOVE_FROM_HOST = '.snowflakecomputing.com';
-
     /**
-     * @param string[] $workspace
+     * @param array<int, string> $configurationNames
      * @throws \Keboola\Component\UserException
      */
-    public function dumpYaml(string $projectPath, string $dbtProjectYamlPath, array $workspace): void
+    public function dumpYaml(string $projectPath, string $dbtProjectYamlPath, array $configurationNames = []): void
     {
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
             throw new UserException('Missing file "dbt_project.yml" in your project root');
@@ -23,20 +21,38 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
 
         $dbtProjectYaml = Yaml::parseFile($dbtProjectYamlPath);
 
-        $dbtFolderPath = sprintf('%s/../.dbt', $projectPath);
-        $this->createFolderIfNotExist($dbtFolderPath);
-
-        $workspace['account'] = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
-        unset($workspace['host']);
+        $outputs = [];
+        if (empty($configurationNames)) {
+            $outputs['kbc_prod'] = $this->getOutputDefinition('KBC_PROD');
+        }
+        foreach ($configurationNames as $configurationName) {
+            $outputs[strtolower($configurationName)] = $this->getOutputDefinition($configurationName);
+        }
 
         $this->filesystem->dumpFile(
-            sprintf('%s/profiles.yml', $dbtFolderPath),
+            sprintf('%s/profiles.yml', $projectPath),
             Yaml::dump([
                 $dbtProjectYaml['profile'] => [
                     'target' => 'dev',
-                    'outputs' => ['dev' => ['type' => 'snowflake'] + $workspace],
+                    'outputs' => $outputs,
                 ],
-            ], 4)
+            ], 5)
         );
+    }
+
+    /**
+     * @return array
+     */
+    protected function getOutputDefinition(string $configurationName): array
+    {
+        return [
+            'type' => sprintf('{{ env_var("DBT_%s_TYPE") }}', $configurationName),
+            'user' => sprintf('{{ env_var("DBT_%s_USER") }}', $configurationName),
+            'password' => sprintf('{{ env_var("DBT_%s_PASSWORD") }}', $configurationName),
+            'schema' => sprintf('{{ env_var("DBT_%s_SCHEMA") }}', $configurationName),
+            'warehouse' => sprintf('{{ env_var("DBT_%s_WAREHOUSE") }}', $configurationName),
+            'database' => sprintf('{{ env_var("DBT_%s_DATABASE") }}', $configurationName),
+            'account' => sprintf('{{ env_var("DBT_%s_ACCOUNT") }}', $configurationName),
+        ];
     }
 }

@@ -8,10 +8,6 @@ use DbtTransformation\Command\CreateWorkspaceCommand;
 use DbtTransformation\Traits\StorageApiClientTrait;
 use Generator;
 use Keboola\StorageApi\Client;
-use Keboola\StorageApi\Components;
-use Keboola\StorageApi\Options\Components\Configuration;
-use Keboola\StorageApi\Options\Components\ListConfigurationWorkspacesOptions;
-use Keboola\StorageApi\Workspaces;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Application;
@@ -40,7 +36,7 @@ class CreateWorkspaceCommandTest extends TestCase
     {
         if ($this->getName(false) === 'testCreateWorkspaceCommand') {
             foreach ($this->validInputsProvider() as $inputProvider) {
-                $this->deleteWorkspacesAndConfigurationsByConfigurationId(
+                $this->deleteWorkspacesAndConfigurations(
                     sprintf('KBC_DEV_%s', $inputProvider['wsName'])
                 );
             }

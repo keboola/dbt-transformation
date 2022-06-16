@@ -22,10 +22,11 @@ class DbtRunService
      * @param array<string> $modelNames
      * @throws \Keboola\Component\UserException
      */
-    public function run(array $modelNames = []): string
+    public function run(array $modelNames = [], string $target = 'kbc_prod'): string
     {
         try {
-            $process = new Process($this->prepareCommand($this->getSelectParameter($modelNames)), $this->projectPath);
+            $command = $this->prepareCommand($this->getSelectParameter($modelNames), $target);
+            $process = new Process($command, $this->projectPath, getenv());
             $process->mustRun();
             return $process->getOutput();
         } catch (ProcessFailedException $e) {
@@ -51,7 +52,7 @@ class DbtRunService
      * @param array<string> $selectParameter
      * @return array<string>
      */
-    protected function prepareCommand(array $selectParameter): array
+    protected function prepareCommand(array $selectParameter, $target): array
     {
         return [
             'dbt',
@@ -59,9 +60,11 @@ class DbtRunService
             'json',
             '--warn-error',
             'run',
+            '-t',
+            $target,
             ...$selectParameter,
             '--profiles-dir',
-            sprintf('%s/../.dbt/', $this->projectPath),
+            $this->projectPath,
         ];
     }
 }

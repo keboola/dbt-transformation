@@ -5,22 +5,30 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Command;
 
 use DbtTransformation\CloneRepositoryService;
+use DbtTransformation\Command\CreateWorkspaceCommand;
 use DbtTransformation\Command\RunDbtCommand;
+use DbtTransformation\Component;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
-use DbtTransformation\FunctionalTests\OdbcTestConnection;
-use DbtTransformation\Traits\SnowflakeTestQueriesTrait;
+use DbtTransformation\Traits\StorageApiClientTrait;
 use Generator;
+use Keboola\StorageApi\Client;
+use Keboola\StorageApi\Components;
+use Keboola\StorageApi\Options\Components\ListConfigurationWorkspacesOptions;
+use Keboola\StorageApi\Workspaces;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 class RunDbtCommandTest extends TestCase
 {
-    use SnowflakeTestQueriesTrait;
+    use StorageApiClientTrait;
 
+    private const TARGET = 'kbc_dev_test';
     protected string $dataDir = __DIR__ . '/../../../data';
 
     private Command $command;
@@ -28,46 +36,51 @@ class RunDbtCommandTest extends TestCase
 
     /**
      * @throws \Keboola\Component\UserException
-     * @throws \Keboola\SnowflakeDbAdapter\Exception\SnowflakeDbAdapterException
      */
     public function setUp(): void
     {
-        $this->connection = OdbcTestConnection::createConnection();
-        $this->removeAllTablesAndViews();
-
         $application = new Application();
         $application->add(new RunDbtCommand());
         $this->command = $application->find('app:run-dbt-command');
         $this->commandTester = new CommandTester($this->command);
 
+        $this->client = new Client($this->getEnvVars());
         $this->cloneProjectFromGit();
+        $this->createWorkspaceWithConfiguration(GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST);
         $this->generateYamlFiles();
-        $this->createTestTableWithSampleData();
     }
 
+    public function tearDown(): void
+    {
+        $this->deleteWorkspacesAndConfigurations(GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST);
+
+        $fs = new Filesystem();
+        $finder = new Finder();
+        $fs->remove($finder->in($this->dataDir));
+    }
 
     /**
      * @dataProvider validInputsProvider
      * @param array<string, string> $expectedMessages
      */
-    public function testCreateWorkspaceCommand(string $models, array $expectedMessages): void
+    public function testRunDbtCommand(string $models, array $expectedMessages): void
     {
-        $this->commandTester->setInputs([$models]);
+        $this->commandTester->setInputs([$models, self::TARGET]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
         $this->assertEquals(Command::SUCCESS, $exitCode);
         foreach ($expectedMessages as $expectedMessage) {
-            $this->assertStringContainsString($expectedMessage, $output);
+            $this->assertStringMatchesFormat($expectedMessage, $output);
         }
     }
 
     /**
      * @dataProvider invalidInputsProvider
      */
-    public function testCreateWorkspaceCommandWithInvalidInputs(string $models, string $expectedError): void
+    public function testRunDbtWithInvalidInputs(string $models, string $target, string $expectedError): void
     {
-        $this->commandTester->setInputs([$models]);
+        $this->commandTester->setInputs([$models, $target]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
@@ -81,27 +94,26 @@ class RunDbtCommandTest extends TestCase
      */
     public function validInputsProvider(): Generator
     {
-        $schemaName = getenv('SNOWFLAKE_SCHEMA');
         yield 'all models' => [
             'models' => '',
             'expectedMessages' => [
-                sprintf('1 of 2 OK created view model %s.stg_model', $schemaName),
-                sprintf('2 of 2 OK created view model %s.fct_model', $schemaName),
+                '%a1 of 2 OK created view model %s.stg_model%a',
+                '%a2 of 2 OK created view model %s.fct_model%a',
             ],
         ];
 
         yield 'one model' => [
             'models' => 'stg_model',
             'expectedMessages' => [
-                sprintf('1 of 1 OK created view model %s.stg_model', $schemaName),
+                '%a1 of 1 OK created view model %s.stg_model%a',
             ],
         ];
 
         yield 'two models' => [
             'models' => 'stg_model fct_model',
             'expectedMessages' => [
-                sprintf('1 of 2 OK created view model %s.stg_model', $schemaName),
-                sprintf('2 of 2 OK created view model %s.fct_model', $schemaName),
+                '%a1 of 2 OK created view model %s.stg_model%a',
+                '%a2 of 2 OK created view model %s.fct_model%a',
             ],
         ];
     }
@@ -113,7 +125,14 @@ class RunDbtCommandTest extends TestCase
     {
         yield 'non existing model' => [
             'models' => 'non-exist',
+            'target' => self::TARGET,
             'expectedError' => 'The selection criterion \'non-exist\' does not match any nodes',
+        ];
+
+        yield 'non existing target' => [
+            'models' => '',
+            'target' => self::TARGET . 'invalid',
+            'expectedError' => 'The profile \'default\' does not have a target named \'' . self::TARGET . 'invalid\'',
         ];
     }
 
@@ -133,50 +152,55 @@ class RunDbtCommandTest extends TestCase
      */
     private function generateYamlFiles(): void
     {
-        $credentials = $this->getSnowflakeCredentials();
+        $components = new Components($this->client);
+        $configuration = $components->getConfiguration(
+            CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID,
+            GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST
+        );
+        $listConfigurationWorkspacesOptions = new ListConfigurationWorkspacesOptions();
+        $listConfigurationWorkspacesOptions
+            ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
+            ->setConfigurationId($configuration['id']);
+        [$workspace] = $components->listConfigurationWorkspaces($listConfigurationWorkspacesOptions);
+        ['password' => $password] = (new Workspaces($this->client))
+            ->resetWorkspacePassword($configuration['configuration']['parameters']['id']);
 
-        $workspace = [
-              'host' => $credentials['SNOWFLAKE_HOST'],
-              'warehouse' => $credentials['SNOWFLAKE_WAREHOUSE'],
-              'database' => $credentials['SNOWFLAKE_DATABASE'],
-              'schema' => $credentials['SNOWFLAKE_SCHEMA'],
-              'user' => $credentials['SNOWFLAKE_USER'],
-              'password' => $credentials['SNOWFLAKE_PASSWORD'],
-        ];
+        putenv(sprintf('DBT_KBC_DEV_TEST_DATABASE=%s', $workspace['connection']['database']));
+        putenv(sprintf('DBT_KBC_DEV_TEST_SCHEMA=%s', $workspace['connection']['schema']));
+        putenv(sprintf('DBT_KBC_DEV_TEST_WAREHOUSE=%s', $workspace['connection']['warehouse']));
+        $account = str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $workspace['connection']['host']);
+        putenv(sprintf('DBT_KBC_DEV_TEST_ACCOUNT=%s', $account));
+        putenv(sprintf('DBT_KBC_DEV_TEST_TYPE=%s', 'snowflake'));
+        putenv(sprintf('DBT_KBC_DEV_TEST_USER=%s', $workspace['connection']['user']));
+        putenv(sprintf('DBT_KBC_DEV_TEST_PASSWORD=%s', $password));
 
         $projectPath = sprintf('%s/dbt-project/', $this->dataDir);
         (new DbtProfilesYamlCreateService())->dumpYaml(
             $projectPath,
             sprintf('%s/dbt-project/dbt_project.yml', $this->dataDir),
-            $workspace
+            [GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST]
         );
 
         (new DbtSourceYamlCreateService())->dumpYaml(
             $projectPath,
             'my_source',
-            $workspace,
-            [['destination' => 'test']],
+            ['in.c-test' => [['id' => 'test', 'primaryKey' => []]]],
+            'DBT_KBC_DEV_TEST_DATABASE'
         );
     }
 
     /**
      * @return array<string, string>
      */
-    private function getSnowflakeCredentials(): array
+    private function getEnvVars(): array
     {
-        $credentials['SNOWFLAKE_HOST'] = getenv('SNOWFLAKE_HOST') ?: '';
-        $credentials['SNOWFLAKE_WAREHOUSE'] = getenv('SNOWFLAKE_WAREHOUSE') ?: '';
-        $credentials['SNOWFLAKE_DATABASE'] = getenv('SNOWFLAKE_DATABASE') ?: '';
-        $credentials['SNOWFLAKE_SCHEMA'] = getenv('SNOWFLAKE_SCHEMA') ?: '';
-        $credentials['SNOWFLAKE_USER'] = getenv('SNOWFLAKE_USER') ?: '';
-        $credentials['SNOWFLAKE_PASSWORD'] = getenv('SNOWFLAKE_PASSWORD') ?: '';
+        $kbcUrl = getenv('KBC_URL');
+        $kbcToken = getenv('KBC_TOKEN');
 
-        foreach ($credentials as $key => $value) {
-            if ($value === '') {
-                throw new RuntimeException(sprintf('Missing env variable "%s"', $key));
-            }
+        if ($kbcUrl === false || $kbcToken === false) {
+            throw new RuntimeException('Missing KBC env variables!');
         }
 
-        return $credentials;
+        return ['url' => $kbcUrl, 'token' => $kbcToken];
     }
 }

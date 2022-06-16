@@ -29,7 +29,7 @@ trait StorageApiClientTrait
         return $components->listConfigurationWorkspaces($listConfigurationWorkspacesOptions);
     }
 
-    public function deleteWorkspacesAndConfigurationsByConfigurationId(string $configurationId): void
+    public function deleteWorkspacesAndConfigurations(string $configurationId): void
     {
         $components = new Components($this->client);
         $workspaces = new Workspaces($this->client);
@@ -50,10 +50,13 @@ trait StorageApiClientTrait
         $configuration->setConfigurationId($configurationId);
         $components->addConfiguration($configuration);
 
-        $components->createConfigurationWorkspace(
+        $workspace = $components->createConfigurationWorkspace(
             CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID,
             $configurationId,
             ['backend' => 'snowflake']
         );
+
+        $configuration->setConfiguration(['parameters' => ['id' => $workspace['id']]]);
+        $components->updateConfiguration($configuration);
     }
 }

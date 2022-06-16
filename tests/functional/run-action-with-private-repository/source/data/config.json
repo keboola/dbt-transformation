@@ -19,14 +19,5 @@
       "generateSources": true,
       "sourceName": "my_source"
     }
-  },
-  "storage": {
-    "input": {
-      "tables": [
-        {
-          "destination": "test"
-        }
-      ]
-    }
   }
 }

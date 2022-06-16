@@ -18,14 +18,5 @@
       "sourceName": "my_source",
       "modelNames": ["non-existing-model"]
     }
-  },
-  "storage": {
-    "input": {
-      "tables": [
-        {
-          "destination": "test"
-        }
-      ]
-    }
   }
 }

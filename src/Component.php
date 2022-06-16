@@ -8,10 +8,13 @@ use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
+use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
 
 class Component extends BaseComponent
 {
+    public const STRING_TO_REMOVE_FROM_HOST = '.snowflakecomputing.com';
+
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
     private CloneRepositoryService $cloneRepositoryService;
@@ -33,11 +36,6 @@ class Component extends BaseComponent
         $dataDir = $this->getDataDir();
         $config = $this->getConfig();
         $gitRepositoryUrl = $config->getGitRepositoryUrl();
-
-        $inputTables = $config->getInputTables();
-        if (!count($inputTables)) {
-            throw new UserException('There are no tables on Input Mapping.');
-        }
 
         $this->cloneRepository($config, $gitRepositoryUrl);
 
@@ -76,21 +74,31 @@ class Component extends BaseComponent
         $this->projectPath = sprintf('%s/%s', $dataDir, 'dbt-project');
     }
 
+    /**
+     * @throws \Keboola\Component\UserException
+     */
     protected function createDbtYamlFiles(Config $config): void
     {
         $workspace = $config->getAuthorization()['workspace'];
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
             sprintf('%s/dbt_project.yml', $this->projectPath),
-            $workspace
         );
 
+        $this->setEnvVars($workspace);
+
         if ($config->shouldGenerateSources()) {
+            $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
+            $tables = $client->listTables();
+            $tablesData = [];
+            foreach ($tables as $table) {
+                $tablesData[$table['bucket']['id']][] = $table;
+            }
+
             $this->createSourceFileService->dumpYaml(
                 $this->projectPath,
                 $config->getDbtSourceName(),
-                $workspace,
-                $config->getInputTables()
+                $tablesData
             );
         }
     }
@@ -107,5 +115,20 @@ class Component extends BaseComponent
             $config->getGitRepositoryUsername(),
             $config->getGitRepositoryPassword()
         );
+    }
+
+    /**
+     * @param string[] $workspace
+     */
+    private function setEnvVars(array $workspace)
+    {
+        putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
+        putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
+        putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+        $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
+        putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
+        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', 'snowflake'));
+        putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
+        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password']));
     }
 }

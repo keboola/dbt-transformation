@@ -36,12 +36,20 @@ class GenerateProfilesAndSourcesCommand extends Command
 
     private DbtProfilesYamlCreateService $createProfilesFileService;
     private DbtSourceYamlCreateService $createSourceFileService;
+    private Client $client;
+    private Components $components;
 
     public function __construct(?string $name = null)
     {
         parent::__construct($name);
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
+    }
+
+    public function initClient(string $url, string $token): void
+    {
+        $this->client = new Client(['url' => $url, 'token' => $token]);
+        $this->components = new Components($this->client);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -63,41 +71,28 @@ class GenerateProfilesAndSourcesCommand extends Command
             . 'with DB name (e.g.: DBT_KBC_DEV_DATABASE): ');
         $dbEnvVarName = $helper->ask($input, $output, $questionDbEnvVarName);
 
-        $client = new Client(['url' => $url, 'token' => $token]);
+        $this->initClient($url, $token);
 
         try {
-            $components = new Components($client);
-            $listComponentConfigurationsOptions = new ListComponentConfigurationsOptions();
-            $listComponentConfigurationsOptions
-                ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
-                ->setIsDeleted(false);
-            $configurations = $components->listComponentConfigurations($listComponentConfigurationsOptions);
+            $configurations = $this->getConfigurations();
             $configurationNames = [];
             foreach ($configurations as $configuration) {
                 if (str_contains($configuration['name'], 'KBC_DEV_')) {
                     $configurationNames[] = $configuration['name'];
 
-                    $listConfigurationWorkspacesOptions = new ListConfigurationWorkspacesOptions();
-                    $listConfigurationWorkspacesOptions
-                        ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
-                        ->setConfigurationId($configuration['id']);
-                    [$workspace] = $components->listConfigurationWorkspaces($listConfigurationWorkspacesOptions);
+                    $workspace = $this->getWorkspace($configuration['id']);
 
                     if ($workspace['connection']['backend'] !== 'snowflake') {
                         $output->writeln('Only Snowflake backend is supported at the moment');
                         return Command::FAILURE;
                     }
 
-                    $password = $this->getPassword($client, $configuration['configuration']['parameters']['id']);
+                    $password = $this->getPassword($configuration['configuration']['parameters']['id']);
                     $output->writeln($this->getEnvVars($configuration['name'], $workspace, $password));
                 }
             }
 
-            $tables = $client->listTables();
-            $tablesData = [];
-            foreach ($tables as $table) {
-                $tablesData[(string) $table['bucket']['id']][] = $table;
-            }
+            $tablesData = $this->getTablesData();
         } catch (ClientException $e) {
             if ($e->getCode() === 401) {
                 $output->writeln('Authorization failed: wrong credentials');
@@ -149,10 +144,51 @@ class GenerateProfilesAndSourcesCommand extends Command
         yield sprintf('export DBT_%s_PASSWORD=%s', $name, $password);
     }
 
-    protected function getPassword(Client $client, int $id): string
+    protected function getPassword(int $id): string
     {
-        ['password' => $password] = (new Workspaces($client))->resetWorkspacePassword($id);
+        ['password' => $password] = (new Workspaces($this->client))->resetWorkspacePassword($id);
 
         return $password;
+    }
+
+    /**
+     * @return array<string, array<string, string>>
+     */
+    protected function getWorkspace(string $id): array
+    {
+        $listConfigurationWorkspacesOptions = new ListConfigurationWorkspacesOptions();
+        $listConfigurationWorkspacesOptions
+            ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
+            ->setConfigurationId($id);
+        [$workspace] = $this->components->listConfigurationWorkspaces($listConfigurationWorkspacesOptions);
+
+        return $workspace;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getConfigurations(): array
+    {
+        $listComponentConfigurationsOptions = new ListComponentConfigurationsOptions();
+        $listComponentConfigurationsOptions
+            ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
+            ->setIsDeleted(false);
+
+        return $this->components->listComponentConfigurations($listComponentConfigurationsOptions);
+    }
+
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    protected function getTablesData(): array
+    {
+        $tables = $this->client->listTables();
+        $tablesData = [];
+        foreach ($tables as $table) {
+            $tablesData[(string) $table['bucket']['id']][] = $table;
+        }
+
+        return $tablesData;
     }
 }

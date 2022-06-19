@@ -67,9 +67,8 @@ class GenerateProfilesAndSourcesCommand extends Command
         $questionDbtSourceName = new Question('Enter your DBT source name: ');
         $dbtSourceName = $helper->ask($input, $output, $questionDbtSourceName);
 
-        $questionDbEnvVarName = new Question('Enter name of environment variable '
-            . 'with DB name (e.g.: DBT_KBC_DEV_DATABASE): ');
-        $dbEnvVarName = $helper->ask($input, $output, $questionDbEnvVarName);
+        $questionWorkspaceName = new Question('Enter name of workspace you want to use: ');
+        $workspaceName = $helper->ask($input, $output, $questionWorkspaceName);
 
         $this->initClient($url, $token);
 
@@ -112,7 +111,7 @@ class GenerateProfilesAndSourcesCommand extends Command
                 sprintf('%s/dbt-project/', CloneGitRepositoryCommand::DATA_DIR),
                 $dbtSourceName,
                 $tablesData,
-                $dbEnvVarName
+                sprintf('DBT_KBC_DEV_%s_DATABASE', strtoupper($workspaceName))
             );
         } catch (UserException $e) {
             $output->writeln($e->getMessage());

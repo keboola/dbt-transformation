@@ -62,9 +62,9 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         string $url,
         string $token,
         string $sourceName,
-        string $databaseEnvVarName
+        string $workspaceName
     ): void {
-        $this->commandTester->setInputs([$url, $token, $sourceName, $databaseEnvVarName]);
+        $this->commandTester->setInputs([$url, $token, $sourceName, $workspaceName]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
@@ -126,7 +126,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
             $this->getEnvVars() +
             [
                 'sourceName' => 'my_source',
-                'databaseEnvVarName' => self::KBC_DEV_TEST . '_DATABASE',
+                'workspaceName' => 'test',
             ];
     }
 
@@ -141,7 +141,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
             'url' => $envVars['url'],
             'token' => $envVars['token'] . 'invalid',
             'sourceName' => 'my_source',
-            'databaseEnvVarName' => self::KBC_DEV_TEST . '_DATABASE',
+            'workspaceName' => 'test',
             'expectedError' => 'Authorization failed: wrong credentials',
         ];
     }

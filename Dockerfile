@@ -1,6 +1,6 @@
 FROM php:7.4-cli
 
-ARG COMPOSER_FLAGS="--prefer-dist --no-interaction --no-dev"
+ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV COMPOSER_ALLOW_SUPERUSER 1

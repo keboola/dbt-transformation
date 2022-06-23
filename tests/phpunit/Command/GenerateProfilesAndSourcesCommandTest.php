@@ -22,6 +22,10 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
     use StorageApiClientTrait;
 
     public const KBC_DEV_TEST = 'KBC_DEV_TEST';
+    private const TESTS_WITH_SETUP = [
+        'testGenerateProfilesAndSourcesCommand',
+        'testGenerateProfilesAndSourcesCommandWithEnvFlag',
+    ];
     protected string $dataDir = __DIR__ . '/../../../data';
 
     private Command $command;
@@ -38,7 +42,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $this->command = $application->find('app:generate-profiles-and-sources');
         $this->commandTester = new CommandTester($this->command);
 
-        if ($this->getName(false) === 'testGenerateProfilesAndSourcesCommand') {
+        if (in_array($this->getName(false), self::TESTS_WITH_SETUP)) {
             $this->cloneProjectFromGit();
             $this->createWorkspaceWithConfiguration(self::KBC_DEV_TEST);
         }
@@ -46,7 +50,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
 
     public function tearDown(): void
     {
-        if ($this->getName(false) === 'testGenerateProfilesAndSourcesCommand') {
+        if (in_array($this->getName(false), self::TESTS_WITH_SETUP)) {
             $this->deleteWorkspacesAndConfigurations(self::KBC_DEV_TEST);
         }
 
@@ -66,6 +70,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $this->commandTester->setInputs([$url, $token, $workspaceName]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
+        var_dump($output);
 
         $this->assertEquals(Command::SUCCESS, $exitCode);
         $this->assertStringContainsString('Sources and profiles.yml files generated.', $output);
@@ -79,23 +84,33 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
             sprintf('export DBT_%s_USER=%s', self::KBC_DEV_TEST, $workspace['connection']['user']),
             $output
         );
+    }
 
-        $profilesPath = sprintf('%s/dbt-project/profiles.yml', $this->dataDir);
-        $this->assertFileExists($profilesPath);
-        $this->assertStringMatchesFormat(
-            $this->getExpectedProfilesContent(),
-            file_get_contents($profilesPath) ?: ''
+    /**
+     * @dataProvider validInputsProvider
+     */
+    public function testGenerateProfilesAndSourcesCommandWithEnvFlag(
+        string $url,
+        string $token
+    ): void {
+        $this->commandTester->setInputs([$url, $token]);
+        $exitCode = $this->commandTester->execute(['command' => $this->command->getName(), '--env' => null]);
+        $output = $this->commandTester->getDisplay();
+        var_dump($output);
+
+        $this->assertEquals(Command::SUCCESS, $exitCode);
+        $this->assertStringContainsString('Command executed with --env flag. Only environment variables will ' .
+            'be printed without generating profiles and sources', $output);
+
+        [$workspace] = $this->getConfigurationWorkspaces(self::KBC_DEV_TEST);
+        $this->assertStringContainsString(
+            sprintf('export DBT_%s_SCHEMA=%s', self::KBC_DEV_TEST, $workspace['connection']['schema']),
+            $output
         );
-
-        $sourceFiles = (new Finder())->files()->in(sprintf('%s/dbt-project/models/_sources/', $this->dataDir));
-        $this->assertNotEmpty($sourceFiles);
-        foreach ($sourceFiles as $sourceFile) {
-            $this->assertFileExists($sourceFile->getPathname());
-            $this->assertStringMatchesFormat(
-                $this->getExpectedSourcesContent($sourceFile->getFilenameWithoutExtension()),
-                file_get_contents($sourceFile->getPathname()) ?: ''
-            );
-        }
+        $this->assertStringContainsString(
+            sprintf('export DBT_%s_USER=%s', self::KBC_DEV_TEST, $workspace['connection']['user']),
+            $output
+        );
     }
 
     /**

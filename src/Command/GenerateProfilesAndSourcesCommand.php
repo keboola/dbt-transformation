@@ -7,6 +7,7 @@ namespace DbtTransformation\Command;
 use DbtTransformation\Component;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
+use Dotenv\Dotenv;
 use Generator;
 use Keboola\Component\UserException;
 use Keboola\StorageApi\Client;
@@ -17,6 +18,7 @@ use Keboola\StorageApi\Options\Components\ListConfigurationWorkspacesOptions;
 use Keboola\StorageApi\Workspaces;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
@@ -38,12 +40,24 @@ class GenerateProfilesAndSourcesCommand extends Command
     private DbtSourceYamlCreateService $createSourceFileService;
     private Client $client;
     private Components $components;
+    private ?string $apiUrl;
+    private ?string $apiToken;
 
     public function __construct(?string $name = null)
     {
         parent::__construct($name);
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
+        $dotenv = Dotenv::createUnsafeMutable(__DIR__ . '/../../');
+        $dotenv->safeLoad();
+        $this->apiUrl = getenv('SAPI_URL') ?: null;
+        $this->apiToken = getenv('SAPI_TOKEN') ?: null;
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption('env', null, InputOption::VALUE_NONE, 'Only print environment '
+            . ' variables without generating profiles and sources');
     }
 
     public function initClient(string $url, string $token): void
@@ -54,20 +68,33 @@ class GenerateProfilesAndSourcesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('This command generates profiles.yml with credentials to Keboola Workspaces
-        and sources.yml');
+        $onlyPrintEnv = $input->getOption('env');
+        if ($onlyPrintEnv) {
+            $output->writeln('Command executed with --env flag. Only environment variables will be printed ' .
+                'without generating profiles and sources');
+        } else {
+            $output->writeln('This command generates profiles.yml with credentials to Keboola Workspaces ' .
+                'and sources.yml');
+        }
 
         $helper = $this->getHelper('question');
-        $questionUrl = new Question('Enter your Keboola Connection URL: ');
-        $url = $helper->ask($input, $output, $questionUrl);
+        if (!$this->apiUrl) {
+            $questionUrl = new Question('Enter your Keboola Connection URL '
+                . '(e.g. https://connection.keboola.com): ');
+            $this->apiUrl = $helper->ask($input, $output, $questionUrl);
+        }
 
-        $questionToken = new Question('Enter your Keboola Storage API token: ');
-        $token = $helper->ask($input, $output, $questionToken);
+        if (!$this->apiToken) {
+            $questionToken = new Question('Enter your Keboola Storage API token: ');
+            $this->apiToken = $helper->ask($input, $output, $questionToken);
+        }
 
-        $questionWorkspaceName = new Question('Enter name of workspace you want to use: ');
-        $workspaceName = $helper->ask($input, $output, $questionWorkspaceName);
+        if (!$onlyPrintEnv) {
+            $questionWorkspaceName = new Question('Enter name of workspace you want to use: ');
+            $workspaceName = $helper->ask($input, $output, $questionWorkspaceName);
+        }
 
-        $this->initClient($url, $token);
+        $this->initClient($this->apiUrl, $this->apiToken);
 
         try {
             $configurations = $this->getConfigurations();
@@ -86,6 +113,10 @@ class GenerateProfilesAndSourcesCommand extends Command
                     $password = $this->getPassword($configuration['configuration']['parameters']['id']);
                     $output->writeln($this->getEnvVars($configuration['name'], $workspace, $password));
                 }
+            }
+
+            if ($onlyPrintEnv) {
+                return Command::SUCCESS;
             }
 
             $tablesData = $this->getTablesData();

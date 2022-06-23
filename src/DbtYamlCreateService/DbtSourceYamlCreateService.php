@@ -14,7 +14,6 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
      */
     public function dumpYaml(
         string $projectPath,
-        string $sourceName,
         array $tablesData,
         string $dbEnvVarName = 'DBT_KBC_PROD_DATABASE'
     ): void {
@@ -28,7 +27,7 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                     'version' => 2,
                     'sources' => [
                         [
-                            'name' => $sourceName,
+                            'name' => $bucket,
                             'database' => sprintf('{{ env_var("%s") }}', $dbEnvVarName),
                             'schema' => $bucket,
                             'loaded_at_field' => '_timestamp',

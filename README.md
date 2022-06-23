@@ -13,7 +13,6 @@ The configuration `config.json` contains following properties in `parameters` ke
     - `generateSources` - boolean (required): 
       - If `true` sources YAML file is generated. You should probably use it if running DBT project for first time in Keboola.
       - If `false` generating of sources file is skipped. Use it if you have already correctly setup sources file in your DBT project.
-    - `sourceName` - string (required if `generateSources` set to `true`): Set source name which should be used in sources YAML file. It has to be same name as you use in DBT [`{{ source() }}` function](https://docs.getdbt.com/reference/dbt-jinja-functions/source).
     - `modelNames` - array of strings (optional): If you want to run DBT only with certain models, you can specify their names here. Otherwise, all models will be run.
 - `showExecutedSqls` - boolean (optional): Default `false`, if set to `true` SQL queries executed by DBT transformation are printed to output.
 
@@ -25,7 +24,6 @@ Example:
   },
   "dbt": {
     "generateSources": true,
-    "sourceName": "padak_data",
     "modelNames": [
       "+final_visit_hour"
     ]
@@ -62,7 +60,7 @@ Clones GIT repository with your DBT project. You input path to your repository w
 Creates workspace Snowflake workspace for running your DBT transformations. You need to enter your Keboola Connection URL (e.g. https://connection.keboola.com), storage API token and name for that workspace.
 
 ### app:generate-profiles-and-sources
-Generated profiles.yml and source file for every bucket in your project with all tables. You need to input URL and token like in previous command. You need to also provide source name which you are using in you DBT project and name of workspace, you created in previous step. All credentials are filled using environment variables, so command also print them for you. You have to export them to environment where your dbt will run.
+Generated profiles.yml and source file for every bucket in your project with all tables. You need to input URL and token like in previous command. You need to also provide name of workspace, you created in previous step. All credentials are filled using environment variables, so command also print them for you. You have to export them to environment where your dbt will run.
 
 ### app:run-dbt-command
 Runs `dbt run` with DBT CLI (don't forget to pass environment variables to docker). You can specify which models you want to run or leave blank if you want to run them all. You can also use your own local installation of DBT CLI if you want, probably somehow like `dbt run --profiles-dir ./profiles.yml` in path `/data/dbt-project/` (in that case you need to have exported environment variables to your local environment).

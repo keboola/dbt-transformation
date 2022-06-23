@@ -75,7 +75,6 @@ class DbtYamlCreateTest extends TestCase
 
         $service->dumpYaml(
             $this->dataDir,
-            $this->getConfig()['parameters']['dbt']['sourceName'],
             $tablesData
         );
 

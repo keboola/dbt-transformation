@@ -15,7 +15,6 @@
     },
     "dbt": {
       "generateSources": true,
-      "sourceName": "my_source",
       "modelNames": ["stg_model"]
     }
   }

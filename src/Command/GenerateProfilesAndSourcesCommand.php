@@ -64,9 +64,6 @@ class GenerateProfilesAndSourcesCommand extends Command
         $questionToken = new Question('Enter your Keboola Storage API token: ');
         $token = $helper->ask($input, $output, $questionToken);
 
-        $questionDbtSourceName = new Question('Enter your DBT source name: ');
-        $dbtSourceName = $helper->ask($input, $output, $questionDbtSourceName);
-
         $questionWorkspaceName = new Question('Enter name of workspace you want to use: ');
         $workspaceName = $helper->ask($input, $output, $questionWorkspaceName);
 
@@ -109,7 +106,6 @@ class GenerateProfilesAndSourcesCommand extends Command
             );
             $this->createSourceFileService->dumpYaml(
                 sprintf('%s/dbt-project/', CloneGitRepositoryCommand::DATA_DIR),
-                $dbtSourceName,
                 $tablesData,
                 sprintf('DBT_KBC_DEV_%s_DATABASE', strtoupper($workspaceName))
             );

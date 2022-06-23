@@ -96,7 +96,6 @@ class Component extends BaseComponent
 
             $this->createSourceFileService->dumpYaml(
                 $this->projectPath,
-                $config->getDbtSourceName(),
                 $tablesData
             );
         }

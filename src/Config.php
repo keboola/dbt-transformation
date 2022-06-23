@@ -47,11 +47,6 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'dbt', 'generateSources']);
     }
 
-    public function getDbtSourceName(): string
-    {
-        return $this->getValue(['parameters', 'dbt', 'sourceName']);
-    }
-
     public function showSqls(): bool
     {
         return $this->getValue(['parameters', 'showExecutedSqls']);

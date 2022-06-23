@@ -64,7 +64,6 @@ class ConfigTest extends TestCase
                     ],
                     'dbt' => [
                         'generateSources' => true,
-                        'sourceName' => 'my_source',
                     ],
                 ],
             ],
@@ -80,7 +79,6 @@ class ConfigTest extends TestCase
                     ],
                     'dbt' => [
                         'generateSources' => true,
-                        'sourceName' => 'my_source',
                     ],
                 ],
             ],
@@ -97,7 +95,6 @@ class ConfigTest extends TestCase
                     ],
                     'dbt' => [
                         'generateSources' => true,
-                        'sourceName' => 'my_source',
                     ],
                 ],
             ],
@@ -111,7 +108,6 @@ class ConfigTest extends TestCase
                     ],
                     'dbt' => [
                         'generateSources' => true,
-                        'sourceName' => 'my_source',
                     ],
                     'showExecutedSqls' => true,
                 ],
@@ -129,7 +125,6 @@ class ConfigTest extends TestCase
                     ],
                     'dbt' => [
                         'generateSources' => true,
-                        'sourceName' => 'my_source',
                         'modelNames' => ['stg_model'],
                     ],
                 ],
@@ -208,21 +203,6 @@ class ConfigTest extends TestCase
                 ],
             ],
             'expectedError' => 'The child config "generateSources" under "root.parameters.dbt" must be configured.',
-        ];
-
-        yield 'empty sourceName' => [
-            'configData' => [
-                'parameters' => [
-                    'git' => [
-                        'repo' => 'https://github.com/my-repo',
-                    ],
-                    'dbt' => [
-                        'generateSources' => true,
-                        'sourceName' => '',
-                    ],
-                ],
-            ],
-            'expectedError' => '"sourceName" must be specified if "generateSources" is true',
         ];
     }
 

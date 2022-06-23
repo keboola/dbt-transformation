@@ -61,10 +61,9 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
     public function testGenerateProfilesAndSourcesCommand(
         string $url,
         string $token,
-        string $sourceName,
         string $workspaceName
     ): void {
-        $this->commandTester->setInputs([$url, $token, $sourceName, $workspaceName]);
+        $this->commandTester->setInputs([$url, $token, $workspaceName]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
@@ -93,7 +92,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         foreach ($sourceFiles as $sourceFile) {
             $this->assertFileExists($sourceFile->getPathname());
             $this->assertStringMatchesFormat(
-                $this->getExpectedSourcesContent($sourceName),
+                $this->getExpectedSourcesContent($sourceFile->getFilenameWithoutExtension()),
                 file_get_contents($sourceFile->getPathname()) ?: ''
             );
         }
@@ -105,11 +104,10 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
     public function testGenerateProfilesAndSourcesCommandWithInvalidInputs(
         string $url,
         string $token,
-        string $sourceName,
         string $databaseEnvVarName,
         string $expectedError
     ): void {
-        $this->commandTester->setInputs([$url, $token, $sourceName, $databaseEnvVarName]);
+        $this->commandTester->setInputs([$url, $token, $databaseEnvVarName]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
@@ -125,7 +123,6 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         yield 'valid credentials' =>
             $this->getEnvVars() +
             [
-                'sourceName' => 'my_source',
                 'workspaceName' => 'test',
             ];
     }
@@ -140,7 +137,6 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         yield 'invalid token' => [
             'url' => $envVars['url'],
             'token' => $envVars['token'] . 'invalid',
-            'sourceName' => 'my_source',
             'workspaceName' => 'test',
             'expectedError' => 'Authorization failed: wrong credentials',
         ];

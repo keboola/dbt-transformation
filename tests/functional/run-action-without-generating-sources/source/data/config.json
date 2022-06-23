@@ -15,8 +15,7 @@
       "branch": "branch-with-sources"
     },
     "dbt": {
-      "generateSources": false,
-      "sourceName": "my_source"
+      "generateSources": false
     }
   }
 }

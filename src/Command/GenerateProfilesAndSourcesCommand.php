@@ -131,7 +131,7 @@ class GenerateProfilesAndSourcesCommand extends Command
         yield sprintf('export DBT_%s_WAREHOUSE=%s', $name, $workspace['connection']['warehouse']);
         yield sprintf('export DBT_%s_DATABASE=%s', $name, $workspace['connection']['database']);
         yield sprintf(
-            'export DBT_%s_HOST=%s',
+            'export DBT_%s_ACCOUNT=%s',
             $name,
             str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $workspace['connection']['host'])
         );

@@ -48,10 +48,10 @@ When preparing the repository, you can use following interactive CLI commands:
 ```
 docker-compose run --rm app bin/console app:clone-repository
 docker-compose run --rm app bin/console app:create-workspace
-docker-compose run --rm app bin/console app:generate-profiles-and-sources # add --env flag if you just want to print environment variables for DBT withou genrating yaml files
+docker-compose run --rm app bin/console app:generate-profiles-and-sources # add --env flag if you just want to print environment variables for DBT without generating yaml files
 docker-compose run --rm app bin/console app:run-dbt-command # pass environment variables printed by previous command to docker-compose with -e flag
 ```
-For first time you have to run `docker-compose build cli` before. 
+For first time you have to run `docker-compose build app` before. 
 
 If you don't want to enter Connection URL and storage API token every time, you can create file `.env` with these credentials like this:
 ```

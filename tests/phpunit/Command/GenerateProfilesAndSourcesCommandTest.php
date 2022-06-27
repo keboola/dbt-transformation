@@ -70,7 +70,6 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $this->commandTester->setInputs([$url, $token, $workspaceName]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
-        var_dump($output);
 
         $this->assertEquals(Command::SUCCESS, $exitCode);
         $this->assertStringContainsString('Sources and profiles.yml files generated.', $output);
@@ -96,7 +95,6 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $this->commandTester->setInputs([$url, $token]);
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName(), '--env' => null]);
         $output = $this->commandTester->getDisplay();
-        var_dump($output);
 
         $this->assertEquals(Command::SUCCESS, $exitCode);
         $this->assertStringContainsString('Command executed with --env flag. Only environment variables will ' .

@@ -16,7 +16,7 @@
     },
     "dbt": {
       "generateSources": true,
-      "sourceName": "my_source"
+      "sourceName": "in.c-test-bucket"
     }
   }
 }

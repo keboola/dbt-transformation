@@ -184,7 +184,7 @@ class RunDbtCommandTest extends TestCase
         (new DbtSourceYamlCreateService())->dumpYaml(
             $projectPath,
             'my_source',
-            ['in.c-test' => [['name' => 'test', 'primaryKey' => []]]],
+            ['in.c-test-bucket' => [['name' => 'test', 'primaryKey' => []]]],
             'DBT_KBC_DEV_TEST_DATABASE'
         );
     }

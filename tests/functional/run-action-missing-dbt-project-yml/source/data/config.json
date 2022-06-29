@@ -15,8 +15,7 @@
       "branch": "missing-dbt-project-yml"
     },
     "dbt": {
-      "generateSources": true,
-      "sourceName": "in.c-test-bucket"
+      "generateSources": true
     }
   }
 }

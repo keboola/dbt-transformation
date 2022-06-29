@@ -15,8 +15,7 @@
       "branch": "branch-with-sources"
     },
     "dbt": {
-      "generateSources": false,
-      "sourceName": "in.c-test-bucket"
+      "generateSources": false
     }
   }
 }

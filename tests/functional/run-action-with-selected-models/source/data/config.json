@@ -15,7 +15,6 @@
     },
     "dbt": {
       "generateSources": true,
-      "sourceName": "in.c-test-bucket",
       "modelNames": ["stg_model"]
     }
   }

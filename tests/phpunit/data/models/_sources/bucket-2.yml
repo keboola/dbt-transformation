@@ -1,0 +1,26 @@
+version: 2
+sources:
+    -
+        name: bucket-2
+        database: '{{ env_var("DBT_KBC_PROD_DATABASE") }}'
+        schema: bucket-2
+        loaded_at_field: _timestamp
+        tables:
+            -
+                name: table2
+                quoting:
+                    database: true
+                    schema: true
+                    identifier: true
+                columns:
+                    -
+                        name: vatId
+                        tests:
+                            - unique
+                            - not_null
+            -
+                name: table3
+                quoting:
+                    database: true
+                    schema: true
+                    identifier: true

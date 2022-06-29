@@ -15,17 +15,7 @@
       "branch": "missing-dbt-project-yml"
     },
     "dbt": {
-      "generateSources": true,
-      "sourceName": "my_source"
-    }
-  },
-  "storage": {
-    "input": {
-      "tables": [
-        {
-          "destination": "test"
-        }
-      ]
+      "generateSources": true
     }
   }
 }

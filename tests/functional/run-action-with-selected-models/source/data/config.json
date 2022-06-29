@@ -15,17 +15,7 @@
     },
     "dbt": {
       "generateSources": true,
-      "sourceName": "my_source",
       "modelNames": ["stg_model"]
-    }
-  },
-  "storage": {
-    "input": {
-      "tables": [
-        {
-          "destination": "test"
-        }
-      ]
     }
   }
 }

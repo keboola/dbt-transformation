@@ -61,23 +61,10 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->end()
                     ->end()
                     ->children()
-                        ->scalarNode('sourceName')
-                        ->end()
-                    ->end()
-                    ->children()
                         ->arrayNode('modelNames')
                             ->scalarPrototype()->end()
                         ->end()
                     ->end()
-                    ->validate()
-                    ->always(function ($item) {
-                        if (($item['generateSources'] === true && empty($item['sourceName']))) {
-                            throw new InvalidConfigurationException(
-                                '"sourceName" must be specified if "generateSources" is true'
-                            );
-                        }
-                        return $item;
-                    })
             ->end();
 
         /** @noinspection NullPointerExceptionInspection */

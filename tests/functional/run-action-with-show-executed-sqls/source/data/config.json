@@ -14,18 +14,8 @@
       "repo": "https://github.com/keboola/dbt-test-project-public.git"
     },
     "dbt": {
-      "generateSources": true,
-      "sourceName": "my_source"
+      "generateSources": true
     },
     "showExecutedSqls": true
-  },
-  "storage": {
-    "input": {
-      "tables": [
-        {
-          "destination": "test"
-        }
-      ]
-    }
   }
 }

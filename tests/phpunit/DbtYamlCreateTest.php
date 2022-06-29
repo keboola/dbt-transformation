@@ -6,41 +6,46 @@ namespace DbtTransformation\Tests;
 
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
-use Generator;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 class DbtYamlCreateTest extends TestCase
 {
     protected string $dataDir = __DIR__ . '/../../data';
     protected string $providerDataDir = __DIR__ . '/data';
 
+    public function tearDown(): void
+    {
+        $fs = new Filesystem();
+        $finder = new Finder();
+        $fs->remove($finder->in($this->dataDir));
+    }
+
     /**
-     * @dataProvider profileYamlDataProvider
-     * @param array<string, mixed> $config
      * @throws \Keboola\Component\UserException
      */
-    public function testCreateProfileYamlFromConfigData(
-        array $config,
-        string $generatedFilePath,
-        string $expectedSourceFilePath
-    ): void {
+    public function testCreateProfileYaml(): void
+    {
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
             sprintf('%s/dbt_project.yml', $this->providerDataDir),
-            $config['authorization']['workspace']
+            ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK']
         );
-        self::assertFileEquals($expectedSourceFilePath, $generatedFilePath);
+
+        self::assertFileEquals(
+            sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir)
+        );
     }
 
     /**
-     * @dataProvider profileYamlDataProvider
-     * @param array<string, mixed> $config
      * @throws \Keboola\Component\UserException
      */
-    public function testCreateProfileYamlMissingDbtProjectFile(array $config): void
+    public function testCreateProfileYamlMissingDbtProjectFile(): void
     {
         $this->expectException(UserException::class);
         $this->expectErrorMessage('Missing file "dbt_project.yml" in your project root');
@@ -49,60 +54,36 @@ class DbtYamlCreateTest extends TestCase
         $service->dumpYaml(
             $this->dataDir,
             sprintf('%s/non-exist.yml', $this->providerDataDir),
-            $config['authorization']['workspace']
+            ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK']
         );
     }
 
     /**
-     * @dataProvider sourceYamlDataProvider
-     * @param array<string, mixed> $config
+     * @throws \JsonException
      */
-    public function testCreateSourceYamlFromConfigData(
-        array $config,
-        string $generatedFilePath,
-        string $expectedSourceFilePath
-    ): void {
+    public function testCreateSourceYaml(): void
+    {
         $service = new DbtSourceYamlCreateService();
+
+        $tablesData = [
+            'bucket-1' => [['name' => 'table1', 'primaryKey' => ['id']]],
+            'bucket-2' => [
+                ['name' => 'table2', 'primaryKey' => ['vatId']],
+                ['name' => 'table3', 'primaryKey' => []],
+            ],
+        ];
+
         $service->dumpYaml(
             $this->dataDir,
-            $config['parameters']['dbt']['sourceName'],
-            $config['authorization']['workspace'],
-            $config['storage']['input']['tables']
+            $tablesData
         );
 
-        self::assertFileEquals($expectedSourceFilePath, $generatedFilePath);
-    }
-
-    /**
-     * @return Generator<int, mixed>
-     * @throws \JsonException
-     */
-    public function profileYamlDataProvider(): Generator
-    {
-        yield [
-            'config' => $this->getConfig(),
-            'generatedFilePath' => sprintf('%s/../.dbt/profiles.yml', $this->dataDir),
-            'expectedSourceFilePath' => sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
-        ];
-    }
-
-    /**
-     * @return Generator<int, mixed>
-     * @throws \JsonException
-     */
-    public function sourceYamlDataProvider(): Generator
-    {
-        $config = $this->getConfig();
-
-        yield [
-            'config' => $config,
-            'generatedFilePath' => sprintf(
-                '%s/models/src_%s.yml',
-                $this->dataDir,
-                $config['parameters']['dbt']['sourceName']
-            ),
-            'expectedSourceFilePath' => sprintf('%s/expectedSource.yml', $this->providerDataDir),
-        ];
+        foreach ($tablesData as $bucket => $tables) {
+            self::assertFileEquals(
+                sprintf('%s/models/_sources/%s.yml', $this->providerDataDir, $bucket),
+                sprintf('%s/models/_sources/%s.yml', $this->dataDir, $bucket)
+            );
+        }
     }
 
     /**

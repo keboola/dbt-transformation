@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Command;
 
+use Dotenv\Dotenv;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\ClientException;
 use Keboola\StorageApi\Components;
 use Keboola\StorageApi\Options\Components\Configuration;
-use Keboola\StorageApi\Workspaces;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,23 +28,39 @@ class CreateWorkspaceCommand extends Command
      * @var string
      */
     protected static $defaultDescription = 'Guide to creating Keboola workspace for DBT project';
+    private ?string $apiUrl;
+    private ?string $apiToken;
+
+    public function __construct(?string $name = null)
+    {
+        parent::__construct($name);
+        $dotenv = Dotenv::createUnsafeMutable(__DIR__ . '/../../');
+        $dotenv->safeLoad();
+        $this->apiUrl = getenv('SAPI_URL') ?: null;
+        $this->apiToken = getenv('SAPI_TOKEN') ?: null;
+    }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('This command creates Keboola workspace for DBT project');
 
         $helper = $this->getHelper('question');
-        $questionUrl = new Question('Enter your Keboola Connection URL: ');
-        $url = $helper->ask($input, $output, $questionUrl);
+        if (!$this->apiUrl) {
+            $questionUrl = new Question('Enter your Keboola Connection URL '
+                . '(e.g. https://connection.keboola.com): ');
+            $this->apiUrl = $helper->ask($input, $output, $questionUrl);
+        }
 
-        $questionToken = new Question('Enter your Keboola Storage API token: ');
-        $token = $helper->ask($input, $output, $questionToken);
+        if (!$this->apiToken) {
+            $questionToken = new Question('Enter your Keboola Storage API token: ');
+            $this->apiToken = $helper->ask($input, $output, $questionToken);
+        }
 
         $questionWsName = new Question('Enter workspace name (prefix "KBC_DEV_" will be added automatically): ');
         $wsName = $helper->ask($input, $output, $questionWsName);
         $wsName = sprintf('KBC_DEV_%s', strtoupper($wsName));
 
-        $client = new Client(['url' => $url, 'token' => $token]);
+        $client = new Client(['url' => $this->apiUrl, 'token' => $this->apiToken]);
 
         try {
             if (!in_array('input-mapping-read-only-storage', $client->verifyToken()['owner']['features'])) {
@@ -70,17 +86,19 @@ class CreateWorkspaceCommand extends Command
     protected function createWorkspace(Client $client, string $wsName): void
     {
         $components = new Components($client);
-
         $configuration = new Configuration();
-        $configuration->setComponentId(self::SANDBOXES_COMPONENT_ID);
+        $configuration->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID);
         $configuration->setName($wsName);
         $configuration->setConfigurationId($wsName);
         $components->addConfiguration($configuration);
 
-        $components->createConfigurationWorkspace(
-            self::SANDBOXES_COMPONENT_ID,
+        $workspace = $components->createConfigurationWorkspace(
+            CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID,
             $wsName,
             ['backend' => 'snowflake']
         );
+
+        $configuration->setConfiguration(['parameters' => ['id' => $workspace['id']]]);
+        $components->updateConfiguration($configuration);
     }
 }

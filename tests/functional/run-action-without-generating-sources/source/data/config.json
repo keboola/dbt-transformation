@@ -15,29 +15,7 @@
       "branch": "branch-with-sources"
     },
     "dbt": {
-      "generateSources": false,
-      "sourceName": "my_source"
-    }
-  },
-  "storage": {
-    "input": {
-      "tables": [
-        {
-          "destination": "test"
-        }
-      ]
-    },
-    "output": {
-      "tables": [
-        {
-          "destination": "out.c-test.stg_model",
-          "source": "stg_model"
-        },
-        {
-          "destination": "out.c-test.fct_model",
-          "source": "fct_model"
-        }
-      ]
+      "generateSources": false
     }
   }
 }

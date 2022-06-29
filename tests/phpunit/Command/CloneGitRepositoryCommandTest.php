@@ -11,6 +11,8 @@ use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 class CloneGitRepositoryCommandTest extends TestCase
 {
@@ -26,6 +28,14 @@ class CloneGitRepositoryCommandTest extends TestCase
         $this->command = $application->find('app:clone-repository');
         $this->commandTester = new CommandTester($this->command);
     }
+
+    public function tearDown(): void
+    {
+        $fs = new Filesystem();
+        $finder = new Finder();
+        $fs->remove($finder->in($this->dataDir));
+    }
+
     /**
      * @dataProvider validInputsProvider
      */

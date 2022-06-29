@@ -1,0 +1,20 @@
+version: 2
+sources:
+    -
+        name: bucket-1
+        database: '{{ env_var("DBT_KBC_PROD_DATABASE") }}'
+        schema: bucket-1
+        loaded_at_field: _timestamp
+        tables:
+            -
+                name: table1
+                quoting:
+                    database: true
+                    schema: true
+                    identifier: true
+                columns:
+                    -
+                        name: id
+                        tests:
+                            - unique
+                            - not_null

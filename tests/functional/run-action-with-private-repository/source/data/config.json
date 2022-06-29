@@ -16,17 +16,7 @@
       "password": "%env(string:GITHUB_PASSWORD)%"
     },
     "dbt": {
-      "generateSources": true,
-      "sourceName": "my_source"
-    }
-  },
-  "storage": {
-    "input": {
-      "tables": [
-        {
-          "destination": "test"
-        }
-      ]
+      "generateSources": true
     }
   }
 }

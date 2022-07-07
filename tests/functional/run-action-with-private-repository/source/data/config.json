@@ -15,8 +15,6 @@
       "username": "%env(string:GITHUB_USERNAME)%",
       "password": "%env(string:GITHUB_PASSWORD)%"
     },
-    "dbt": {
-      "generateSources": true
-    }
+    "dbt": {}
   }
 }

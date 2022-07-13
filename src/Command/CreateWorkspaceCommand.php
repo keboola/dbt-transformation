@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Command;
 
+use DbtTransformation\WorkspacesManagementService;
 use Dotenv\Dotenv;
-use Keboola\StorageApi\Client;
 use Keboola\StorageApi\ClientException;
-use Keboola\StorageApi\Components;
-use Keboola\StorageApi\Options\Components\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,8 +14,6 @@ use Symfony\Component\Console\Question\Question;
 
 class CreateWorkspaceCommand extends Command
 {
-    public const SANDBOXES_COMPONENT_ID = 'keboola.sandboxes';
-
     /**
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint
      * @var string
@@ -60,15 +56,16 @@ class CreateWorkspaceCommand extends Command
         $wsName = $helper->ask($input, $output, $questionWsName);
         $wsName = sprintf('KBC_DEV_%s', strtoupper($wsName));
 
-        $client = new Client(['url' => $this->apiUrl, 'token' => $this->apiToken]);
+        $workspaceManagementService = new WorkspacesManagementService($this->apiUrl, $this->apiToken);
 
         try {
-            if (!in_array('input-mapping-read-only-storage', $client->verifyToken()['owner']['features'])) {
+            $tokenInfo = $workspaceManagementService->getTokenInfo();
+            if (!in_array('input-mapping-read-only-storage', $tokenInfo['owner']['features'])) {
                 $output->writeln('Your project does not have read only storage enabled. Please ask our '
                 . 'support for turning this feature on.');
                 return Command::FAILURE;
             }
-            $this->createWorkspace($client, $wsName);
+            $workspaceManagementService->createWorkspaceWithConfiguration($wsName);
         } catch (ClientException $e) {
             if ($e->getCode() === 401) {
                 $output->writeln('Authorization failed: wrong credentials');
@@ -81,24 +78,5 @@ class CreateWorkspaceCommand extends Command
         $output->writeln(sprintf('Workspace "%s" successfully created.', $wsName));
 
         return Command::SUCCESS;
-    }
-
-    protected function createWorkspace(Client $client, string $wsName): void
-    {
-        $components = new Components($client);
-        $configuration = new Configuration();
-        $configuration->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID);
-        $configuration->setName($wsName);
-        $configuration->setConfigurationId($wsName);
-        $components->addConfiguration($configuration);
-
-        $workspace = $components->createConfigurationWorkspace(
-            CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID,
-            $wsName,
-            ['backend' => 'snowflake']
-        );
-
-        $configuration->setConfiguration(['parameters' => ['id' => $workspace['id']]]);
-        $components->updateConfiguration($configuration);
     }
 }

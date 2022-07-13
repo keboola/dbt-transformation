@@ -6,9 +6,8 @@ namespace DbtTransformation\Tests\Command;
 
 use DbtTransformation\CloneRepositoryService;
 use DbtTransformation\Command\GenerateProfilesAndSourcesCommand;
-use DbtTransformation\Traits\StorageApiClientTrait;
+use DbtTransformation\WorkspacesManagementService;
 use Generator;
-use Keboola\StorageApi\Client;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Application;
@@ -19,8 +18,6 @@ use Symfony\Component\Finder\Finder;
 
 class GenerateProfilesAndSourcesCommandTest extends TestCase
 {
-    use StorageApiClientTrait;
-
     public const KBC_DEV_TEST = 'KBC_DEV_TEST';
     private const TESTS_WITH_SETUP = [
         'testGenerateProfilesAndSourcesCommand',
@@ -30,28 +27,29 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
 
     private Command $command;
     private CommandTester $commandTester;
+    private WorkspacesManagementService $workspaceManagementService;
 
     /**
      * @throws \Keboola\Component\UserException
      */
     public function setUp(): void
     {
-        $this->client = new Client($this->getEnvVars());
         $application = new Application();
         $application->add(new GenerateProfilesAndSourcesCommand());
         $this->command = $application->find('app:generate-profiles-and-sources');
         $this->commandTester = new CommandTester($this->command);
-
+        $credentials = $this->getEnvVars();
+        $this->workspaceManagementService = new WorkspacesManagementService($credentials['url'], $credentials['token']);
         if (in_array($this->getName(false), self::TESTS_WITH_SETUP)) {
             $this->cloneProjectFromGit();
-            $this->createWorkspaceWithConfiguration(self::KBC_DEV_TEST);
+            $this->workspaceManagementService->createWorkspaceWithConfiguration(self::KBC_DEV_TEST);
         }
     }
 
     public function tearDown(): void
     {
         if (in_array($this->getName(false), self::TESTS_WITH_SETUP)) {
-            $this->deleteWorkspacesAndConfigurations(self::KBC_DEV_TEST);
+            $this->workspaceManagementService->deleteWorkspacesAndConfigurations(self::KBC_DEV_TEST);
         }
 
         $fs = new Filesystem();
@@ -71,10 +69,10 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
-        $this->assertEquals(Command::SUCCESS, $exitCode);
+        $this->assertEquals(Command::SUCCESS, $exitCode, $output);
         $this->assertStringContainsString('Sources and profiles.yml files generated.', $output);
 
-        [$workspace] = $this->getConfigurationWorkspaces(self::KBC_DEV_TEST);
+        [$workspace] = $this->workspaceManagementService->getConfigurationWorkspaces(self::KBC_DEV_TEST);
         $this->assertStringContainsString(
             sprintf('export DBT_%s_SCHEMA=%s', self::KBC_DEV_TEST, $workspace['connection']['schema']),
             $output
@@ -96,11 +94,11 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName(), '--env' => null]);
         $output = $this->commandTester->getDisplay();
 
-        $this->assertEquals(Command::SUCCESS, $exitCode);
+        $this->assertEquals(Command::SUCCESS, $exitCode, $output);
         $this->assertStringContainsString('Command executed with --env flag. Only environment variables will ' .
             'be printed without generating profiles and sources', $output);
 
-        [$workspace] = $this->getConfigurationWorkspaces(self::KBC_DEV_TEST);
+        [$workspace] = $this->workspaceManagementService->getConfigurationWorkspaces(self::KBC_DEV_TEST);
         $this->assertStringContainsString(
             sprintf('export DBT_%s_SCHEMA=%s', self::KBC_DEV_TEST, $workspace['connection']['schema']),
             $output

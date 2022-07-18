@@ -31,8 +31,8 @@ class DbtYamlCreateTest extends TestCase
     {
         $fs = new Filesystem();
         $fs->copy(
-            sprintf("%s/dbt_project.yml", $this->providerDataDir),
-            sprintf("%s/dbt_project.yml", $this->dataDir)
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir)
         );
 
         $service = new DbtProfilesYamlCreateService();

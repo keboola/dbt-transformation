@@ -29,10 +29,15 @@ class DbtYamlCreateTest extends TestCase
      */
     public function testCreateProfileYaml(): void
     {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf("%s/dbt_project.yml", $this->providerDataDir),
+            sprintf("%s/dbt_project.yml", $this->dataDir)
+        );
+
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
-            sprintf('%s/dbt_project.yml', $this->providerDataDir),
             ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK']
         );
 
@@ -53,7 +58,6 @@ class DbtYamlCreateTest extends TestCase
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
-            sprintf('%s/non-exist.yml', $this->providerDataDir),
             ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK']
         );
     }
@@ -84,24 +88,5 @@ class DbtYamlCreateTest extends TestCase
                 sprintf('%s/models/_sources/%s.yml', $this->dataDir, $bucket)
             );
         }
-    }
-
-    /**
-     * @return array<string, mixed>
-     * @throws \JsonException
-     */
-    protected function getConfig(): array
-    {
-        $configJson = file_get_contents(sprintf('%s/config.json', $this->providerDataDir));
-        if ($configJson === false) {
-            throw new RuntimeException('Failed to get contents of config.json');
-        }
-
-        return json_decode(
-            $configJson,
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
     }
 }

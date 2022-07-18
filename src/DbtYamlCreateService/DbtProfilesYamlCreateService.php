@@ -13,8 +13,9 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
      * @param array<int, string> $configurationNames
      * @throws \Keboola\Component\UserException
      */
-    public function dumpYaml(string $projectPath, string $dbtProjectYamlPath, array $configurationNames = []): void
+    public function dumpYaml(string $projectPath, array $configurationNames = []): void
     {
+        $dbtProjectYamlPath = sprintf('%s/dbt_project.yml', $projectPath);
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
             throw new UserException('Missing file "dbt_project.yml" in your project root');
         }

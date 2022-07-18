@@ -43,14 +43,6 @@ cd dbt-transformation
 docker-compose run --rm app composer install --prefer-dist --no-interaction --no-dev
 ```
 
-
-When preparing the repository, you can use following interactive CLI commands:
-```
-docker-compose run --rm app bin/console app:clone-repository
-docker-compose run --rm app bin/console app:create-workspace
-docker-compose run --rm app bin/console app:generate-profiles-and-sources # add --env flag if you just want to print environment variables for DBT without generating yaml files
-docker-compose run --rm app bin/console app:run-dbt-command # pass environment variables printed by previous command to docker-compose with -e flag
-```
 For first time you have to run `docker-compose build app` before. 
 
 If you don't want to enter Connection URL and storage API token every time, you can create file `.env` with these credentials like this:
@@ -60,17 +52,41 @@ SAPI_TOKEN=xxxx
 ```
 
 ### app:clone-repository
-Clones GIT repository with your DBT project. You input path to your repository when you are asked, branch what you want to use (leave blank if you want clone from master branch) and optionally GitHub credentials if repository is private. If you are using another GIT service than GitHub or you just want to clone your project manually, just skip this command and clone your project to folder `/data` and rename it `dbt-project`, so your project root will be in path `/data/dbt-project/`.
+```
+docker-compose run --rm app bin/console app:clone-repository
+```
+Clones GIT repository with your DBT project. You input path to your repository when you are asked, branch what you want to use (leave blank if you want clone from master branch) and optionally GitHub credentials if repository is private. If you are using another GIT service than GitHub or you just want to clone your project manually, just skip this command and clone your project to folder `/data` and rename it `dbt-project`, so your project root will be in path `/data/dbt-project/` or mount it to docker (see instructions in *app:generate-profiles-and-sources*)
 
 ### app:create-workspace
+```
+docker-compose run --rm app bin/console app:create-workspace
+```
 Creates workspace Snowflake workspace for running your DBT transformations. You need to enter your Keboola Connection URL (e.g. https://connection.keboola.com), storage API token and name for that workspace.
 
 ### app:generate-profiles-and-sources
+```
+docker-compose run --rm app bin/console app:generate-profiles-and-sources
+```
 Generated profiles.yml and source file for every bucket in your project with all tables. You need to input URL and token like in previous command. You need to also provide name of workspace, you created in previous step. All credentials are filled using environment variables, so command also print them for you. You have to export them to environment where your dbt will run. If executed with `--env` flag only environment variables for DBT will be printed, without generating yaml files.
+#### Only print envirovment variables
+```
+docker-compose run --rm app bin/console app:generate-profiles-and-sources --env
+```
+#### Mount path with dbt project (if you skip first command for cloning repository)
+```
+docker-compose run -v /local/path/to/your-dbt-project/:/code/data/dbt-project --rm app bin/console app:generate-profiles-and-sources
+```
 
 ### app:run-dbt-command
-Runs `dbt run` with DBT CLI (don't forget to pass environment variables to docker). You can specify which models you want to run or leave blank if you want to run them all. You can also use your own local installation of DBT CLI if you want, probably somehow like `dbt run --profiles-dir ./profiles.yml` in path `/data/dbt-project/` (in that case you need to have exported environment variables to your local environment).
+```
+docker-compose run --env-file .my-env --rm app bin/console app:run-dbt-command
+```
+Runs `dbt run` with DBT CLI (don't forget to pass environment variables to docker, in example above create file `.my-env` and paste them there). You can specify which models you want to run or leave blank if you want to run them all. You can also use your own local installation of DBT CLI if you want, probably somehow like `dbt run --profiles-dir ./profiles.yml` in path `/data/dbt-project/` (in that case you need to have exported environment variables to your local environment).
 
+#### Mount path with dbt project (if you skip first command for cloning repository)
+```
+docker-compose run --env-file .my-env -v /local/path/to/your-dbt-project/:/code/data/dbt-project --rm app bin/console app:run-dbt-command
+```
 
 ## Development
  

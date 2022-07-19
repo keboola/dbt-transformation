@@ -83,19 +83,17 @@ class Component extends BaseComponent
 
         $this->setEnvVars($workspace);
 
-        if ($config->shouldGenerateSources()) {
-            $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
-            $tables = $client->listTables();
-            $tablesData = [];
-            foreach ($tables as $table) {
-                $tablesData[(string) $table['bucket']['id']][] = $table;
-            }
-
-            $this->createSourceFileService->dumpYaml(
-                $this->projectPath,
-                $tablesData
-            );
+        $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
+        $tables = $client->listTables();
+        $tablesData = [];
+        foreach ($tables as $table) {
+            $tablesData[(string) $table['bucket']['id']][] = $table;
         }
+
+        $this->createSourceFileService->dumpYaml(
+            $this->projectPath,
+            $tablesData
+        );
     }
 
     /**

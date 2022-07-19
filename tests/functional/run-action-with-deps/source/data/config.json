@@ -15,7 +15,6 @@
       "branch": "branch-with-deps"
     },
     "dbt": {
-      "generateSources": true
     }
   }
 }

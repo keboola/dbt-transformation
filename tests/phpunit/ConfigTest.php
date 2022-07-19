@@ -48,9 +48,7 @@ class ConfigTest extends TestCase
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
                     ],
-                    'dbt' => [
-                        'generateSources' => false,
-                    ],
+                    'dbt' => [],
                 ],
             ],
         ];
@@ -62,9 +60,7 @@ class ConfigTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                         'branch' => 'master',
                     ],
-                    'dbt' => [
-                        'generateSources' => true,
-                    ],
+                    'dbt' => [],
                 ],
             ],
         ];
@@ -77,9 +73,7 @@ class ConfigTest extends TestCase
                         'username' => 'test',
                         'password' => 'test',
                     ],
-                    'dbt' => [
-                        'generateSources' => true,
-                    ],
+                    'dbt' => [],
                 ],
             ],
         ];
@@ -93,9 +87,7 @@ class ConfigTest extends TestCase
                         'username' => 'test',
                         'password' => 'test',
                     ],
-                    'dbt' => [
-                        'generateSources' => true,
-                    ],
+                    'dbt' => [],
                 ],
             ],
         ];
@@ -106,9 +98,7 @@ class ConfigTest extends TestCase
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
                     ],
-                    'dbt' => [
-                        'generateSources' => true,
-                    ],
+                    'dbt' => [],
                     'showExecutedSqls' => true,
                 ],
             ],
@@ -124,7 +114,6 @@ class ConfigTest extends TestCase
                         'password' => 'test',
                     ],
                     'dbt' => [
-                        'generateSources' => true,
                         'modelNames' => ['stg_model'],
                     ],
                 ],
@@ -191,18 +180,6 @@ class ConfigTest extends TestCase
                 ],
             ],
             'expectedError' => 'Both username and password has to be set.',
-        ];
-
-        yield 'empty dbt' => [
-            'configData' => [
-                'parameters' => [
-                    'git' => [
-                        'repo' => 'https://github.com/my-repo',
-                    ],
-                    'dbt' => [],
-                ],
-            ],
-            'expectedError' => 'The child config "generateSources" under "root.parameters.dbt" must be configured.',
         ];
     }
 

@@ -7,15 +7,14 @@ namespace DbtTransformation\Command;
 use DbtTransformation\Component;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\WorkspacesManagementService;
 use Dotenv\Dotenv;
 use Generator;
 use Keboola\Component\UserException;
+use Keboola\Sandboxes\Api\Sandbox;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\ClientException;
-use Keboola\StorageApi\Components;
-use Keboola\StorageApi\Options\Components\ListComponentConfigurationsOptions;
-use Keboola\StorageApi\Options\Components\ListConfigurationWorkspacesOptions;
-use Keboola\StorageApi\Workspaces;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -38,8 +37,6 @@ class GenerateProfilesAndSourcesCommand extends Command
 
     private DbtProfilesYamlCreateService $createProfilesFileService;
     private DbtSourceYamlCreateService $createSourceFileService;
-    private Client $client;
-    private Components $components;
     private ?string $apiUrl;
     private ?string $apiToken;
 
@@ -58,12 +55,6 @@ class GenerateProfilesAndSourcesCommand extends Command
     {
         $this->addOption('env', null, InputOption::VALUE_NONE, 'Only print environment '
             . ' variables without generating profiles and sources');
-    }
-
-    public function initClient(string $url, string $token): void
-    {
-        $this->client = new Client(['url' => $url, 'token' => $token]);
-        $this->components = new Components($this->client);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -90,28 +81,29 @@ class GenerateProfilesAndSourcesCommand extends Command
         }
 
         if (!$onlyPrintEnv) {
-            $questionWorkspaceName = new Question('Enter name of workspace you want to use: ');
+            $questionWorkspaceName = new Question('Enter name of workspace you want to use ' .
+                '(prefix "KBC_DEV_" will be added automatically): ');
             $workspaceName = $helper->ask($input, $output, $questionWorkspaceName);
         }
 
-        $this->initClient($this->apiUrl, $this->apiToken);
+        $workspaceManagementService = new WorkspacesManagementService($this->apiUrl, $this->apiToken);
 
         try {
-            $configurations = $this->getConfigurations();
+            $configurations = $workspaceManagementService->getConfigurations();
             $configurationNames = [];
             foreach ($configurations as $configuration) {
                 if (str_contains($configuration['name'], 'KBC_DEV_')) {
                     $configurationNames[] = $configuration['name'];
 
-                    $workspace = $this->getWorkspace($configuration['id']);
+                    $workspaceId = (string) $configuration['configuration']['parameters']['id'];
+                    $workspace = $workspaceManagementService->getWorkspace($workspaceId);
 
-                    if ($workspace['connection']['backend'] !== 'snowflake') {
+                    if ($workspace->getType() !== 'snowflake') {
                         $output->writeln('Only Snowflake backend is supported at the moment');
                         return Command::FAILURE;
                     }
 
-                    $password = $this->getPassword($configuration['configuration']['parameters']['id']);
-                    $output->writeln($this->getEnvVars($configuration['name'], $workspace, $password));
+                    $output->writeln($this->getEnvVars($configuration['name'], $workspace));
                 }
             }
 
@@ -151,56 +143,30 @@ class GenerateProfilesAndSourcesCommand extends Command
     }
 
     /**
-     * @param array<string, array<string, string>> $workspace
      * @return Generator<string>
      */
-    private function getEnvVars(string $name, array $workspace, string $password): Generator
+    private function getEnvVars(string $name, Sandbox $workspace): Generator
     {
-        yield sprintf('export DBT_%s_TYPE=%s', $name, $workspace['connection']['backend']);
-        yield sprintf('export DBT_%s_SCHEMA=%s', $name, $workspace['connection']['schema']);
-        yield sprintf('export DBT_%s_WAREHOUSE=%s', $name, $workspace['connection']['warehouse']);
-        yield sprintf('export DBT_%s_DATABASE=%s', $name, $workspace['connection']['database']);
+        $workspaceDetails = $workspace->getWorkspaceDetails();
+        $host = $workspace->getHost();
+        if ($workspaceDetails === null || $host === null) {
+            throw new RuntimeException(sprintf(
+                'Missing workspace data in sandbox with id "%s"',
+                $workspace->getId()
+            ));
+        }
+
+        yield sprintf('export DBT_%s_TYPE=%s', $name, $workspace->getType());
+        yield sprintf('export DBT_%s_SCHEMA=%s', $name, $workspaceDetails['connection']['schema']);
+        yield sprintf('export DBT_%s_WAREHOUSE=%s', $name, $workspaceDetails['connection']['warehouse']);
+        yield sprintf('export DBT_%s_DATABASE=%s', $name, $workspaceDetails['connection']['database']);
         yield sprintf(
             'export DBT_%s_ACCOUNT=%s',
             $name,
-            str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $workspace['connection']['host'])
+            str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $host)
         );
-        yield sprintf('export DBT_%s_USER=%s', $name, $workspace['connection']['user']);
-        yield sprintf('export DBT_%s_PASSWORD=%s', $name, $password);
-    }
-
-    protected function getPassword(int $id): string
-    {
-        ['password' => $password] = (new Workspaces($this->client))->resetWorkspacePassword($id);
-
-        return $password;
-    }
-
-    /**
-     * @return array<string, array<string, string>>
-     */
-    protected function getWorkspace(string $id): array
-    {
-        $listConfigurationWorkspacesOptions = new ListConfigurationWorkspacesOptions();
-        $listConfigurationWorkspacesOptions
-            ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
-            ->setConfigurationId($id);
-        [$workspace] = $this->components->listConfigurationWorkspaces($listConfigurationWorkspacesOptions);
-
-        return $workspace;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getConfigurations(): array
-    {
-        $listComponentConfigurationsOptions = new ListComponentConfigurationsOptions();
-        $listComponentConfigurationsOptions
-            ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
-            ->setIsDeleted(false);
-
-        return $this->components->listComponentConfigurations($listComponentConfigurationsOptions);
+        yield sprintf('export DBT_%s_USER=%s', $name, $workspace->getUser());
+        yield sprintf('export DBT_%s_PASSWORD=%s', $name, $workspace->getPassword());
     }
 
     /**
@@ -208,7 +174,9 @@ class GenerateProfilesAndSourcesCommand extends Command
      */
     protected function getTablesData(): array
     {
-        $tables = $this->client->listTables();
+        $client = new Client(['url' => $this->apiUrl, 'token' => $this->apiToken]);
+        $tables = $client->listTables();
+
         $tablesData = [];
         foreach ($tables as $table) {
             $tablesData[(string) $table['bucket']['id']][] = $table;

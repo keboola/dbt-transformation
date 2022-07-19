@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Command;
 
 use DbtTransformation\Command\CreateWorkspaceCommand;
-use DbtTransformation\Traits\StorageApiClientTrait;
+use DbtTransformation\WorkspacesManagementService;
 use Generator;
-use Keboola\StorageApi\Client;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Application;
@@ -16,27 +15,27 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class CreateWorkspaceCommandTest extends TestCase
 {
-    use StorageApiClientTrait;
-
     protected string $dataDir = __DIR__ . '/../../../data';
 
     private Command $command;
     private CommandTester $commandTester;
+    private WorkspacesManagementService $workspaceManagementService;
 
     public function setUp(): void
     {
-        $this->client = new Client($this->getEnvVars());
         $application = new Application();
         $application->add(new CreateWorkspaceCommand());
         $this->command = $application->find('app:create-workspace');
         $this->commandTester = new CommandTester($this->command);
+        $credentials = $this->getEnvVars();
+        $this->workspaceManagementService = new WorkspacesManagementService($credentials['url'], $credentials['token']);
     }
 
     public function tearDown(): void
     {
         if ($this->getName(false) === 'testCreateWorkspaceCommand') {
             foreach ($this->validInputsProvider() as $inputProvider) {
-                $this->deleteWorkspacesAndConfigurations(
+                $this->workspaceManagementService->deleteWorkspacesAndConfigurations(
                     sprintf('KBC_DEV_%s', $inputProvider['wsName'])
                 );
             }
@@ -52,14 +51,14 @@ class CreateWorkspaceCommandTest extends TestCase
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
-        $this->assertEquals(Command::SUCCESS, $exitCode);
+        $this->assertEquals(Command::SUCCESS, $exitCode, $output);
         $wsName = sprintf('KBC_DEV_%s', $wsName);
         $this->assertStringContainsString(
             sprintf('Workspace "%s" successfully created.', $wsName),
             $output
         );
 
-        $configurationWorkspaces = $this->getConfigurationWorkspaces($wsName);
+        $configurationWorkspaces = $this->workspaceManagementService->getConfigurationWorkspaces($wsName);
         $this->assertNotEmpty($configurationWorkspaces);
     }
 

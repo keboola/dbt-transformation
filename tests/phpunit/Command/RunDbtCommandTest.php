@@ -5,17 +5,12 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Command;
 
 use DbtTransformation\CloneRepositoryService;
-use DbtTransformation\Command\CreateWorkspaceCommand;
 use DbtTransformation\Command\RunDbtCommand;
 use DbtTransformation\Component;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
-use DbtTransformation\Traits\StorageApiClientTrait;
+use DbtTransformation\WorkspacesManagementService;
 use Generator;
-use Keboola\StorageApi\Client;
-use Keboola\StorageApi\Components;
-use Keboola\StorageApi\Options\Components\ListConfigurationWorkspacesOptions;
-use Keboola\StorageApi\Workspaces;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Application;
@@ -26,13 +21,12 @@ use Symfony\Component\Finder\Finder;
 
 class RunDbtCommandTest extends TestCase
 {
-    use StorageApiClientTrait;
-
     private const TARGET = 'kbc_dev_test';
     protected string $dataDir = __DIR__ . '/../../../data';
 
     private Command $command;
     private CommandTester $commandTester;
+    private WorkspacesManagementService $workspaceManagementService;
 
     /**
      * @throws \Keboola\Component\UserException
@@ -44,15 +38,20 @@ class RunDbtCommandTest extends TestCase
         $this->command = $application->find('app:run-dbt-command');
         $this->commandTester = new CommandTester($this->command);
 
-        $this->client = new Client($this->getEnvVars());
+        $credentials = $this->getEnvVars();
+        $this->workspaceManagementService = new WorkspacesManagementService($credentials['url'], $credentials['token']);
         $this->cloneProjectFromGit();
-        $this->createWorkspaceWithConfiguration(GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST);
-        $this->generateYamlFiles();
+        $workspaceId = $this->workspaceManagementService->createWorkspaceWithConfiguration(
+            GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST
+        );
+        $this->generateYamlFiles($workspaceId);
     }
 
     public function tearDown(): void
     {
-        $this->deleteWorkspacesAndConfigurations(GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST);
+        $this->workspaceManagementService->deleteWorkspacesAndConfigurations(
+            GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST
+        );
 
         $fs = new Filesystem();
         $finder = new Finder();
@@ -69,7 +68,7 @@ class RunDbtCommandTest extends TestCase
         $exitCode = $this->commandTester->execute(['command' => $this->command->getName()]);
         $output = $this->commandTester->getDisplay();
 
-        $this->assertEquals(Command::SUCCESS, $exitCode);
+        $this->assertEquals(Command::SUCCESS, $exitCode, $output);
         foreach ($expectedMessages as $expectedMessage) {
             $this->assertStringMatchesFormat($expectedMessage, $output);
         }
@@ -150,29 +149,26 @@ class RunDbtCommandTest extends TestCase
     /**
      * @throws \Keboola\Component\UserException
      */
-    private function generateYamlFiles(): void
+    private function generateYamlFiles(string $workspaceId): void
     {
-        $components = new Components($this->client);
-        $configuration = $components->getConfiguration(
-            CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID,
-            GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST
-        );
-        $listConfigurationWorkspacesOptions = new ListConfigurationWorkspacesOptions();
-        $listConfigurationWorkspacesOptions
-            ->setComponentId(CreateWorkspaceCommand::SANDBOXES_COMPONENT_ID)
-            ->setConfigurationId($configuration['id']);
-        [$workspace] = $components->listConfigurationWorkspaces($listConfigurationWorkspacesOptions);
-        ['password' => $password] = (new Workspaces($this->client))
-            ->resetWorkspacePassword($configuration['configuration']['parameters']['id']);
+        $workspace = $this->workspaceManagementService->getWorkspace($workspaceId);
+        $workspaceDetails = $workspace->getWorkspaceDetails();
+        $host = $workspace->getHost();
+        if ($workspaceDetails === null || $host === null) {
+            throw new RuntimeException(sprintf(
+                'Missing workspace data in sandbox with id "%s"',
+                $workspace->getId()
+            ));
+        }
 
-        putenv(sprintf('DBT_KBC_DEV_TEST_DATABASE=%s', $workspace['connection']['database']));
-        putenv(sprintf('DBT_KBC_DEV_TEST_SCHEMA=%s', $workspace['connection']['schema']));
-        putenv(sprintf('DBT_KBC_DEV_TEST_WAREHOUSE=%s', $workspace['connection']['warehouse']));
-        $account = str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $workspace['connection']['host']);
+        putenv(sprintf('DBT_KBC_DEV_TEST_DATABASE=%s', $workspaceDetails['connection']['database']));
+        putenv(sprintf('DBT_KBC_DEV_TEST_SCHEMA=%s', $workspaceDetails['connection']['schema']));
+        putenv(sprintf('DBT_KBC_DEV_TEST_WAREHOUSE=%s', $workspaceDetails['connection']['warehouse']));
+        $account = str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $host);
         putenv(sprintf('DBT_KBC_DEV_TEST_ACCOUNT=%s', $account));
-        putenv(sprintf('DBT_KBC_DEV_TEST_TYPE=%s', 'snowflake'));
-        putenv(sprintf('DBT_KBC_DEV_TEST_USER=%s', $workspace['connection']['user']));
-        putenv(sprintf('DBT_KBC_DEV_TEST_PASSWORD=%s', $password));
+        putenv(sprintf('DBT_KBC_DEV_TEST_TYPE=%s', $workspace->getType()));
+        putenv(sprintf('DBT_KBC_DEV_TEST_USER=%s', $workspace->getUser()));
+        putenv(sprintf('DBT_KBC_DEV_TEST_PASSWORD=%s', $workspace->getPassword()));
 
         $projectPath = sprintf('%s/dbt-project/', $this->dataDir);
         (new DbtProfilesYamlCreateService())->dumpYaml(

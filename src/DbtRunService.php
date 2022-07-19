@@ -25,6 +25,7 @@ class DbtRunService
     public function run(array $modelNames = [], string $target = 'kbc_prod'): string
     {
         try {
+            (new Process(['dbt', 'deps'], $this->projectPath))->mustRun();
             $command = $this->prepareCommand($this->getSelectParameter($modelNames), $target);
             $process = new Process($command, $this->projectPath, getenv());
             $process->mustRun();

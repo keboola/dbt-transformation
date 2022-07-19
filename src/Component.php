@@ -79,26 +79,21 @@ class Component extends BaseComponent
     protected function createDbtYamlFiles(Config $config): void
     {
         $workspace = $config->getAuthorization()['workspace'];
-        $this->createProfilesFileService->dumpYaml(
-            $this->projectPath,
-            sprintf('%s/dbt_project.yml', $this->projectPath),
-        );
+        $this->createProfilesFileService->dumpYaml($this->projectPath);
 
         $this->setEnvVars($workspace);
 
-        if ($config->shouldGenerateSources()) {
-            $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
-            $tables = $client->listTables();
-            $tablesData = [];
-            foreach ($tables as $table) {
-                $tablesData[(string) $table['bucket']['id']][] = $table;
-            }
-
-            $this->createSourceFileService->dumpYaml(
-                $this->projectPath,
-                $tablesData
-            );
+        $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
+        $tables = $client->listTables();
+        $tablesData = [];
+        foreach ($tables as $table) {
+            $tablesData[(string) $table['bucket']['id']][] = $table;
         }
+
+        $this->createSourceFileService->dumpYaml(
+            $this->projectPath,
+            $tablesData
+        );
     }
 
     /**

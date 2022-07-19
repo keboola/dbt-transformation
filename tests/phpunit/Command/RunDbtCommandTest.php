@@ -173,7 +173,6 @@ class RunDbtCommandTest extends TestCase
         $projectPath = sprintf('%s/dbt-project/', $this->dataDir);
         (new DbtProfilesYamlCreateService())->dumpYaml(
             $projectPath,
-            sprintf('%s/dbt-project/dbt_project.yml', $this->dataDir),
             [GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST]
         );
 

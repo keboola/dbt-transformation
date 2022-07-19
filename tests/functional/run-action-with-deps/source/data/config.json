@@ -11,10 +11,10 @@
   },
   "parameters": {
     "git": {
-      "repo": "https://github.com/keboola/dbt-test-project-public.git"
+      "repo": "https://github.com/keboola/dbt-test-project-public.git",
+      "branch": "branch-with-deps"
     },
     "dbt": {
-      "generateSources": false
     }
   }
 }

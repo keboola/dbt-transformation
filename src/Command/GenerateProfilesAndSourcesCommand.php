@@ -123,8 +123,7 @@ class GenerateProfilesAndSourcesCommand extends Command
 
         try {
             $this->createProfilesFileService->dumpYaml(
-                sprintf('%s/dbt-project/../', CloneGitRepositoryCommand::DATA_DIR),
-                sprintf('%s/dbt-project/dbt_project.yml', CloneGitRepositoryCommand::DATA_DIR),
+                sprintf('%s/dbt-project/', CloneGitRepositoryCommand::DATA_DIR),
                 $configurationNames
             );
             $this->createSourceFileService->dumpYaml(

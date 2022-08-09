@@ -1,3 +1,4 @@
+Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch main (1eb5a3acfd31a878eea30cc06079de94f68dafb0)
 show terse schemas in database "%s"     limit 10000
 show terse objects in "%s"."%s"
 create or replace  view "%s"."%s"."stg_model"        as (     with source as (                  select * from "%s"."%s"."test"              ),          renamed as (                  select             "id",             "col2",             "col3",             "col4"         from source          )          select * from renamed   );

@@ -31,7 +31,7 @@ class DbtRunService
             $process->mustRun();
             return $process->getOutput();
         } catch (ProcessFailedException $e) {
-            throw new UserException($e->getMessage());
+            throw new UserException($this->getErrorMessagesFromOutput($e->getProcess()->getOutput()));
         }
     }
 
@@ -67,5 +67,20 @@ class DbtRunService
             '--profiles-dir',
             $this->projectPath,
         ];
+    }
+
+    protected function getErrorMessagesFromOutput(string $output): string
+    {
+        preg_match_all('~\{(?:[^{}]|(?R))*}~', $output, $messages);
+
+        $errors = [];
+        foreach (reset($messages) as $messageJson) {
+            $message = json_decode($messageJson, true);
+            if ($message['level'] === 'error') {
+                $errors[] = $message['msg'];
+            }
+        }
+
+        return implode("\r\n", $errors);
     }
 }

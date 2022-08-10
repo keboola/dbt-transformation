@@ -4,9 +4,9 @@ name: 'GitHub Actions'
 concurrency: 'ci-${{ github.ref }}'
 env:
     APP_IMAGE: keboola/dbt-transformation
-    KBC_DEVELOPERPORTAL_VENDOR: keboola-test
-    KBC_DEVELOPERPORTAL_APP: keboola-test.dbt-transformation
-    KBC_DEVELOPERPORTAL_USERNAME: keboola-test+dbt_transformation
+    KBC_DEVELOPERPORTAL_VENDOR: keboola
+    KBC_DEVELOPERPORTAL_APP: keboola.dbt-transformation
+    KBC_DEVELOPERPORTAL_USERNAME: keboola+dbt_transformation_gha
     KBC_DEVELOPERPORTAL_PASSWORD: '${{ secrets.KBC_DEVELOPERPORTAL_PASSWORD }}'
 
     # Snowflake Credentials

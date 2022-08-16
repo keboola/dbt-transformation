@@ -24,7 +24,7 @@ class Component extends BaseComponent
         parent::__construct($logger);
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
-        $this->cloneRepositoryService = new CloneRepositoryService;
+        $this->cloneRepositoryService = new CloneRepositoryService($this->getLogger());
     }
 
     /**

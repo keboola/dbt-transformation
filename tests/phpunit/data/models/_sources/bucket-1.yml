@@ -2,9 +2,13 @@ version: 2
 sources:
     -
         name: bucket-1
+        freshness:
+            warn_after:
+                count: 1
+                period: day
         database: '{{ env_var("DBT_KBC_PROD_DATABASE") }}'
         schema: bucket-1
-        loaded_at_field: _timestamp
+        loaded_at_field: '"_timestamp"'
         tables:
             -
                 name: table1
@@ -14,7 +18,7 @@ sources:
                     identifier: true
                 columns:
                     -
-                        name: id
+                        name: '"id"'
                         tests:
                             - unique
                             - not_null

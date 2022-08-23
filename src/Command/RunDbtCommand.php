@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Command;
 
-use DbtTransformation\DbtRunService;
+use DbtTransformation\DbtService;
 use Keboola\Component\UserException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,8 +34,9 @@ class RunDbtCommand extends Command
         $questionTarget = new Question('Enter output target name: ');
         $target = $helper->ask($input, $output, $questionTarget);
 
-        $dbtRunService = new DbtRunService(sprintf('%s/dbt-project', CloneGitRepositoryCommand::DATA_DIR));
+        $dbtRunService = new DbtService(sprintf('%s/dbt-project', CloneGitRepositoryCommand::DATA_DIR));
         try {
+            $output->writeln($dbtRunService->deps());
             $output->writeln($dbtRunService->run(
                 $modelNames ? explode(' ', $modelNames) : [],
                 $target

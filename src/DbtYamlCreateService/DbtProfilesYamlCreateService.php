@@ -33,6 +33,7 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
         $this->filesystem->dumpFile(
             sprintf('%s/profiles.yml', $projectPath),
             Yaml::dump([
+                'config' => ['send_anonymous_usage_stats' => false],
                 $dbtProjectYaml['profile'] => [
                     'target' => 'dev',
                     'outputs' => $outputs,

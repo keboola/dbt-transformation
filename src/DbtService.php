@@ -8,7 +8,7 @@ use Keboola\Component\UserException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
-class DbtRunService
+class DbtService
 {
 
     private string $projectPath;
@@ -25,13 +25,30 @@ class DbtRunService
     public function run(array $modelNames = [], string $target = 'kbc_prod'): string
     {
         try {
-            (new Process(['dbt', 'deps'], $this->projectPath))->mustRun();
             $command = $this->prepareCommand($this->getSelectParameter($modelNames), $target);
             $process = new Process($command, $this->projectPath, getenv());
             $process->mustRun();
             return $process->getOutput();
         } catch (ProcessFailedException $e) {
-            throw new UserException($this->getErrorMessagesFromOutput($e->getProcess()->getOutput()));
+            $output = $e->getProcess()->getOutput();
+            $logs = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output, 'error'));
+            throw new UserException(implode(PHP_EOL, $logs));
+        }
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function deps(): string
+    {
+        try {
+            $process = new Process(['dbt', 'deps'], $this->projectPath);
+            $process->mustRun();
+            return $process->getOutput();
+        } catch (ProcessFailedException $e) {
+            $output = $e->getProcess()->getOutput();
+            $logs = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output, 'error'));
+            throw new UserException(implode(PHP_EOL, $logs));
         }
     }
 
@@ -67,20 +84,5 @@ class DbtRunService
             '--profiles-dir',
             $this->projectPath,
         ];
-    }
-
-    protected function getErrorMessagesFromOutput(string $output): string
-    {
-        preg_match_all('~\{(?:[^{}]|(?R))*}~', $output, $messages);
-
-        $errors = [];
-        foreach (reset($messages) as $messageJson) {
-            $message = json_decode($messageJson, true);
-            if ($message['level'] === 'error') {
-                $errors[] = $message['msg'];
-            }
-        }
-
-        return implode("\r\n", $errors);
     }
 }

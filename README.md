@@ -10,7 +10,7 @@ The configuration `config.json` contains following properties in `parameters` ke
     - `password` - string (optional): GitHub Private Access Token if repository is private. Both or none of couple `username` and `password` must be specified.
     - `branch` - string (optional): Specify git branch if you want to clone project from specific branch.
 - `dbt` - object (required): Configuration of DBT
-    - `executeSteps` - array of strings (required): Enum values of dbt steps you want to run. Available values are `dbt run`, `dbt docs`, `dbt test` and `dbt source freshness`. At least one value required.
+    - `executeSteps` - array of strings (required): Enum values of dbt steps you want to run. Available values are `dbt run`, `dbt docs generate`, `dbt test` and `dbt source freshness`. At least one value required.
     - `modelNames` - array of strings (optional): If you want to run DBT only with certain models, you can specify their names here. Otherwise, all models will be run.
 - `showExecutedSqls` - boolean (optional): Default `false`, if set to `true` SQL queries executed by DBT transformation are printed to output.
 

@@ -9,6 +9,7 @@ use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\Component\BaseComponent;
 use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class Component extends BaseComponent
 {
@@ -51,6 +52,9 @@ class Component extends BaseComponent
             $output = $dbtService->runCommand($step);
             foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
                 $this->getLogger()->info($log);
+            }
+            if ($step !== 'dbt deps') {
+                $this->storeResultToArtifacts($step);
             }
         }
 
@@ -135,5 +139,13 @@ class Component extends BaseComponent
         putenv(sprintf('DBT_KBC_PROD_TYPE=%s', 'snowflake'));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
         putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password']));
+    }
+
+    private function storeResultToArtifacts(string $step): void
+    {
+        $fs = new Filesystem();
+        $artifactsPath = sprintf('%s/artifacts/out/current/%s', $this->getDataDir(), $step);
+        $fs->mkdir($artifactsPath);
+        $fs->mirror(sprintf('%s/target/', $this->projectPath), $artifactsPath);
     }
 }

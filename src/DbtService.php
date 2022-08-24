@@ -13,40 +13,29 @@ class DbtService
 
     private string $projectPath;
 
+    /** @var array<string> */
+    private array $modelNames = [];
+
     public function __construct(string $projectPath)
     {
         $this->projectPath = $projectPath;
     }
 
     /**
-     * @param array<string> $modelNames
      * @throws \Keboola\Component\UserException
      */
-    public function run(array $modelNames = [], string $target = 'kbc_prod'): string
+    public function runCommand(string $command, string $target = 'kbc_prod'): string
     {
         try {
-            $command = $this->prepareCommand($this->getSelectParameter($modelNames), $target);
-            $process = new Process($command, $this->projectPath, getenv());
+            $command = $this->prepareCommand($command, $target);
+            $process = new Process($command, $this->projectPath, getenv(), null, null);
             $process->mustRun();
             return $process->getOutput();
         } catch (ProcessFailedException $e) {
             $output = $e->getProcess()->getOutput();
-            $logs = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output, 'error'));
-            throw new UserException(implode(PHP_EOL, $logs));
-        }
-    }
-
-    /**
-     * @throws \Keboola\Component\UserException
-     */
-    public function deps(): string
-    {
-        try {
-            $process = new Process(['dbt', '--log-format', 'json', '--warn-error', 'deps'], $this->projectPath);
-            $process->mustRun();
-            return $process->getOutput();
-        } catch (ProcessFailedException $e) {
-            $output = $e->getProcess()->getOutput();
+            if ($output === '') {
+                throw new UserException($e->getProcess()->getErrorOutput());
+            }
             $logs = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output, 'error'));
             throw new UserException(implode(PHP_EOL, $logs));
         }
@@ -67,22 +56,40 @@ class DbtService
     }
 
     /**
-     * @param array<int, string> $selectParameter
      * @return array<int, string>
      */
-    protected function prepareCommand(array $selectParameter, string $target): array
+    protected function prepareCommand(string $command, string $target): array
     {
         return [
             'dbt',
             '--log-format',
             'json',
             '--warn-error',
-            'run',
+            ...$this->getCommandWithoutDbt($command),
             '-t',
             $target,
-            ...$selectParameter,
+            ...$command !== 'dbt deps' ? $this->getSelectParameter($this->modelNames) : [],
             '--profiles-dir',
             $this->projectPath,
         ];
+    }
+
+    /**
+     * @param array<string> $modelNames
+     */
+    public function setModelNames(array $modelNames): void
+    {
+        $this->modelNames = $modelNames;
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function getCommandWithoutDbt(string $command): array
+    {
+        $command = explode(' ', $command);
+        unset($command[0]);
+
+        return $command;
     }
 }

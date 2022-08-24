@@ -13,7 +13,9 @@
     "git": {
       "repo": "https://github.com/keboola/dbt-test-project-public.git"
     },
-    "dbt": {},
+    "dbt": {
+      "executeSteps": ["dbt run"]
+    },
     "showExecutedSqls": true
   }
 }

@@ -34,13 +34,11 @@ class RunDbtCommand extends Command
         $questionTarget = new Question('Enter output target name: ');
         $target = $helper->ask($input, $output, $questionTarget);
 
-        $dbtRunService = new DbtService(sprintf('%s/dbt-project', CloneGitRepositoryCommand::DATA_DIR));
+        $dbtService = new DbtService(sprintf('%s/dbt-project', CloneGitRepositoryCommand::DATA_DIR));
+        $dbtService->setModelNames($modelNames ? explode(' ', $modelNames) : []);
         try {
-            $output->writeln($dbtRunService->deps());
-            $output->writeln($dbtRunService->run(
-                $modelNames ? explode(' ', $modelNames) : [],
-                $target
-            ));
+            $output->writeln($dbtService->runCommand('dbt deps'));
+            $output->writeln($dbtService->runCommand('dbt run', $target));
         } catch (UserException $e) {
             $output->writeln($e->getMessage());
             return Command::FAILURE;

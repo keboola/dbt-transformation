@@ -48,7 +48,9 @@ class ConfigTest extends TestCase
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
                     ],
-                    'dbt' => [],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
                 ],
             ],
         ];
@@ -60,7 +62,9 @@ class ConfigTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                         'branch' => 'master',
                     ],
-                    'dbt' => [],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
                 ],
             ],
         ];
@@ -73,7 +77,9 @@ class ConfigTest extends TestCase
                         'username' => 'test',
                         'password' => 'test',
                     ],
-                    'dbt' => [],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
                 ],
             ],
         ];
@@ -87,7 +93,9 @@ class ConfigTest extends TestCase
                         'username' => 'test',
                         'password' => 'test',
                     ],
-                    'dbt' => [],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
                 ],
             ],
         ];
@@ -98,7 +106,9 @@ class ConfigTest extends TestCase
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
                     ],
-                    'dbt' => [],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
                     'showExecutedSqls' => true,
                 ],
             ],
@@ -115,6 +125,20 @@ class ConfigTest extends TestCase
                     ],
                     'dbt' => [
                         'modelNames' => ['stg_model'],
+                        'executeSteps' => ['dbt run'],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with multiple execute steps' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run', 'dbt docs generate'],
                     ],
                 ],
             ],
@@ -180,6 +204,60 @@ class ConfigTest extends TestCase
                 ],
             ],
             'expectedError' => 'Both username and password has to be set.',
+        ];
+
+        yield 'missing dbt node' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                ],
+            ],
+            'expectedError' => 'The child config "dbt" under "root.parameters" must be configured.',
+        ];
+
+        yield 'missing execute steps' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                    ],
+                ],
+            ],
+            'expectedError' => 'The child config "executeSteps" under "root.parameters.dbt" must be configured.',
+        ];
+
+        yield 'no execute steps' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [],
+                    ],
+                ],
+            ],
+            'expectedError' => 'The path "root.parameters.dbt.executeSteps" should have at least 1 element(s) defined.',
+        ];
+
+        yield 'invalid execute steps' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt do nothing'],
+                    ],
+                ],
+            ],
+            'expectedError' => 'The value "dbt do nothing" is not allowed for path ' .
+                '"root.parameters.dbt.executeSteps.0". Permissible values: "dbt run", "dbt docs generate", ' .
+                '"dbt test", "dbt source freshness"',
         ];
     }
 

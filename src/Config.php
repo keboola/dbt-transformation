@@ -55,6 +55,14 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'dbt', 'modelNames']);
     }
 
+    /**
+     * @return array<string>
+     */
+    public function getExecuteSteps(): array
+    {
+        return $this->getValue(['parameters', 'dbt', 'executeSteps']);
+    }
+
     public function getStorageApiToken(): string
     {
         $token = getenv('KBC_TOKEN');

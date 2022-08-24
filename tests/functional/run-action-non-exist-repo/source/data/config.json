@@ -13,6 +13,8 @@
     "git": {
       "repo": "https://github.com/non-exist-repo.git"
     },
-    "dbt": {}
+    "dbt": {
+      "executeSteps": ["dbt run"]
+    }
   }
 }

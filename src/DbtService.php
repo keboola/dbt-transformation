@@ -42,7 +42,7 @@ class DbtService
     public function deps(): string
     {
         try {
-            $process = new Process(['dbt', 'deps'], $this->projectPath);
+            $process = new Process(['dbt', '--log-format', 'json', '--warn-error' 'deps'], $this->projectPath);
             $process->mustRun();
             return $process->getOutput();
         } catch (ProcessFailedException $e) {

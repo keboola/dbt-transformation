@@ -41,10 +41,21 @@ class Component extends BaseComponent
         $this->setProjectPath($dataDir);
         $this->createDbtYamlFiles($config);
 
-        (new DbtRunService($this->projectPath))->run($config->getModelNames());
+        $dbtRunService = new DbtService($this->projectPath);
+
+        $output = $dbtRunService->deps();
+        foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
+            $this->getLogger()->info($log);
+        }
+
+        $output = $dbtRunService->run($config->getModelNames());
+        foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
+            $this->getLogger()->info($log);
+        }
 
         if ($config->showSqls()) {
             $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
+            $this->getLogger()->info('Executed SQLs:');
             foreach ($sqls as $sql) {
                 $this->getLogger()->info($sql);
             }

@@ -28,9 +28,10 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                     'sources' => [
                         [
                             'name' => $bucket,
+                            'freshness' => ['warn_after' => ['count' => 1, 'period' => 'day']],
                             'database' => sprintf('{{ env_var("%s") }}', $dbEnvVarName),
                             'schema' => $bucket,
-                            'loaded_at_field' => '_timestamp',
+                            'loaded_at_field' => '"_timestamp"',
                             'tables' => array_map($this->formatTableSources(), $tables),
                         ],
                     ],
@@ -55,7 +56,7 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                 $tables['columns'] = array_map(
                     static function ($primaryColumn) {
                         return [
-                            'name' => $primaryColumn,
+                            'name' => sprintf('"%s"', $primaryColumn),
                             'tests' => ['unique', 'not_null'],
                         ];
                     },

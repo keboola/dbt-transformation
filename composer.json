@@ -4,7 +4,8 @@
     "license": "MIT",
     "require": {
         "php": "^7.4",
-        "keboola/php-component": "^8.1",
+        "ext-json": "*",
+        "keboola/php-component": "^9.1",
         "keboola/sandboxes-api-php-client": "^6.21",
         "keboola/storage-api-client": "^12.10",
         "symfony/console": "^5.4",

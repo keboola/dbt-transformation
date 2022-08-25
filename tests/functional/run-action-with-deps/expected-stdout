@@ -1,2 +1,16 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-deps (2e52464b58d679cf561f2526ec80735b78aa7253)
-
+Running with dbt=%s
+Installing dbt-labs/dbt_utils
+  Installed from version 0.8.6
+  Up to date!
+Running with dbt=%s
+Partial parse save file not found. Starting full parse.
+Found 2 models, 2 tests, 0 snapshots, 0 analyses, 416 macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
+Concurrency: 1 threads (target='kbc_prod')
+1 of 2 START view model %s.stg_model........................... [RUN]
+1 of 2 OK created view model %s.stg_model...................... [SUCCESS 1 in %ss]
+2 of 2 START view model %s.fct_model........................... [RUN]
+2 of 2 OK created view model %s.fct_model...................... [SUCCESS 1 in %ss]
+Finished running 2 view models in %ss.
+Completed successfully
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2

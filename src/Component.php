@@ -48,22 +48,17 @@ class Component extends BaseComponent
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');
 
+        if ($config->hasRemoteDwh()) {
+            $dwhConfig = $config->getRemoteDwh();
+            $this->getLogger()->info(sprintf('Remote %s DWH: %s', $dwhConfig['type'], $dwhConfig['host']));
+        }
+
         foreach ($executeSteps as $step) {
-            $output = $dbtService->runCommand($step);
-            foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
-                $this->getLogger()->info($log);
-            }
-            if ($step !== 'dbt deps') {
-                $this->storeResultToArtifacts($step);
-            }
+            $this->executeStep($dbtService, $step);
         }
 
         if ($config->showSqls()) {
-            $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
-            $this->getLogger()->info('Executed SQLs:');
-            foreach ($sqls as $sql) {
-                $this->getLogger()->info($sql);
-            }
+            $this->logExecutedSqls();
         }
     }
 
@@ -94,10 +89,13 @@ class Component extends BaseComponent
      */
     protected function createDbtYamlFiles(Config $config): void
     {
-        $workspace = $config->getAuthorization()['workspace'];
-        $this->createProfilesFileService->dumpYaml($this->projectPath);
+        if ($config->hasRemoteDwh()) {
+            $this->createProfilesFileService->dumpYaml($this->projectPath, [], $config->getRemoteDwh()['type']);
+        } else {
+            $this->createProfilesFileService->dumpYaml($this->projectPath);
+        }
 
-        $this->setEnvVars($workspace);
+        $this->setEnvVars();
 
         $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
         $tables = $client->listTables();
@@ -126,19 +124,30 @@ class Component extends BaseComponent
         );
     }
 
-    /**
-     * @param array<string, string> $workspace
-     */
-    private function setEnvVars(array $workspace): void
+    private function setEnvVars(): void
     {
-        putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
+        $config = $this->getConfig();
+        if ($config->hasRemoteDwh()) {
+            $workspace = $config->getRemoteDwh();
+        } else {
+            $workspace = $config->getAuthorization()['workspace'];
+            $workspace['type'] = 'snowflake';
+        }
+
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
-        putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
-        $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
-        putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
-        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', 'snowflake'));
+        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
+        if ($workspace['type'] === 'snowflake') {
+            putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
+            putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+            $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
+            putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
+        } else {
+            putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['dbname']));
+            putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
+            putenv(sprintf('DBT_KBC_PROD_PORT=%s', $workspace['port']));
+        }
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password']));
+        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
     }
 
     private function storeResultToArtifacts(string $step): void
@@ -147,5 +156,28 @@ class Component extends BaseComponent
         $artifactsPath = sprintf('%s/artifacts/out/current/%s', $this->getDataDir(), $step);
         $fs->mkdir($artifactsPath);
         $fs->mirror(sprintf('%s/target/', $this->projectPath), $artifactsPath);
+    }
+
+    protected function logExecutedSqls(): void
+    {
+        $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
+        $this->getLogger()->info('Executed SQLs:');
+        foreach ($sqls as $sql) {
+            $this->getLogger()->info($sql);
+        }
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    protected function executeStep(DbtService $dbtService, string $step): void
+    {
+        $output = $dbtService->runCommand($step);
+        foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
+            $this->getLogger()->info($log);
+        }
+        if ($step !== 'dbt deps') {
+            $this->storeResultToArtifacts($step);
+        }
     }
 }

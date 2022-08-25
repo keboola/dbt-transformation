@@ -63,6 +63,24 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'dbt', 'executeSteps']);
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function getRemoteDwh(): array
+    {
+        return $this->getValue(['parameters', 'remoteDwh']);
+    }
+
+    public function hasRemoteDwh(): bool
+    {
+        try {
+            $this->getRemoteDwh();
+            return true;
+        } catch (InvalidArgumentException $e) {
+            return false;
+        }
+    }
+
     public function getStorageApiToken(): string
     {
         $token = getenv('KBC_TOKEN');

@@ -25,7 +25,14 @@ RUN apt-get update && apt-get install -y \
          markupsafe==2.0.1 \
          cryptography~=3.4  \
          dbt-snowflake~=1.0.1 \
-	&& rm -r /var/lib/apt/lists/* \
+         dbt-postgres \
+         dbt-redshift \
+         dbt-oracle \
+         dbt-bigquery \
+         dbt-teradata \
+         dbt-mysql \
+         dbt-sqlite \
+    && rm -r /var/lib/apt/lists/* \
 	&& sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
 	&& locale-gen \
 	&& chmod +x /tmp/composer-install.sh \

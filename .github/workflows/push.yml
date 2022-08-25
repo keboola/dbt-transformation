@@ -91,7 +91,8 @@ jobs:
             -
                 name: 'Run tests'
                 run: |
-                    docker run \
+                    docker-compose run dev composer install && \
+                    docker-compose run \
                     -e SNOWFLAKE_HOST \
                     -e SNOWFLAKE_PORT \
                     -e SNOWFLAKE_WAREHOUSE \
@@ -104,7 +105,7 @@ jobs:
                     -e KBC_URL \
                     -e KBC_TOKEN \
                     -e KBC_TOKEN_NO_RO_MAPPING \
-                    ${{env.APP_IMAGE}} composer ci
+                    dev composer ci
     tests-in-kbc:
         needs: build
         runs-on: ubuntu-latest

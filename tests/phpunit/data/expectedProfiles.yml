@@ -1,3 +1,5 @@
+config:
+    send_anonymous_usage_stats: false
 default:
     target: dev
     outputs:

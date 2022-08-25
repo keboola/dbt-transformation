@@ -10,6 +10,17 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
+    private const REMOTE_DWH_ALLOWED_TYPES = [
+        'snowflake',
+        'postgres',
+        'redshift',
+        'oracle',
+        'bigquery',
+        'teradata',
+        'mysql',
+        'sqlite',
+    ];
+
     private const ACCEPTED_DBT_COMMANDS = ['dbt run', 'dbt docs generate', 'dbt test', 'dbt source freshness'];
 
     protected function getParametersDefinition(): ArrayNodeDefinition
@@ -50,6 +61,61 @@ class ConfigDefinition extends BaseConfigDefinition
                     return $item;
                 })
             ->end()
+            ->end();
+
+        /** @noinspection NullPointerExceptionInspection */
+        $parametersNode
+            ->children()
+            ->arrayNode('remoteDwh')
+                ->children()
+                    ->enumNode('type')
+                        ->isRequired()
+                        ->values(self::REMOTE_DWH_ALLOWED_TYPES)
+                    ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('host')
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('user')
+                        ->isRequired()
+                        ->cannotBeEmpty()
+            ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('#password')
+                        ->isRequired()
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('port')
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('dbname')
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('schema')
+                        ->isRequired()
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('warehouse')
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
+                ->children()
+                    ->scalarNode('database')
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
             ->end();
 
         /** @noinspection NullPointerExceptionInspection */

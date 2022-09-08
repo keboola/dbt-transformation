@@ -141,6 +141,16 @@ class Component extends BaseComponent
             putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
             $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
             putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
+        } elseif ($workspace['type'] === 'bigquery') {
+            putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
+            putenv(sprintf('DBT_KBC_PROD_METHOD=%s', $workspace['method']));
+            putenv(sprintf('DBT_KBC_PROD_PROJECT=%s', $workspace['project']));
+            putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['dataset']));
+            putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
+            // create temp file with key
+            $tmpKeyFile = tempnam(__DIR__ . '/../', 'key-');
+            file_put_contents($tmpKeyFile, $workspace['#key_content']);
+            putenv(sprintf('DBT_KBC_PROD_KEYFILE=%s', $tmpKeyFile));
         } else {
             putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['dbname']));
             putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));

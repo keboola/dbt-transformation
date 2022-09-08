@@ -57,6 +57,15 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
                 'database' => sprintf('{{ env_var("DBT_%s_DATABASE") }}', $configurationName),
                 'account' => sprintf('{{ env_var("DBT_%s_ACCOUNT") }}', $configurationName),
             ];
+        } elseif ($type === 'bigquery') {
+            return [
+                'type' => sprintf('{{ env_var("DBT_%s_TYPE") }}', $configurationName),
+                'method' => sprintf('{{ env_var("DBT_%s_METHOD") }}', $configurationName),
+                'project' => sprintf('{{ env_var("DBT_%s_PROJECT") }}', $configurationName),
+                'dataset' => sprintf('{{ env_var("DBT_%s_DATASET") }}', $configurationName),
+                'threads' => sprintf('{{ env_var("DBT_%s_THREADS") }}', $configurationName),
+                'keyfile' => sprintf('{{ env_var("DBT_%s_KEYFILE") }}', $configurationName),
+            ];
         } else {
             return [
                 'type' => sprintf('{{ env_var("DBT_%s_TYPE") }}', $configurationName),

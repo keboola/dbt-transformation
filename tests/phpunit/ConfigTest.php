@@ -144,7 +144,7 @@ class ConfigTest extends TestCase
             ],
         ];
 
-        yield 'config with remote DWH' => [
+        yield 'config with remote DWH postgres' => [
             'configData' => [
                 'parameters' => [
                     'git' => [
@@ -161,6 +161,27 @@ class ConfigTest extends TestCase
                         'port' => '5432',
                         'dbname' => 'db',
                         'schema' => 'schema',
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with remote DWH bigquery' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'bigquery',
+                        'method' => 'service-account',
+                        'project' => 'gcp-project',
+                        'dataset' => 'dbt',
+                        'threads' => '1',
+                        '#key_content' => '{"type":"service_account","project_id":"gcp-project","private_key_id":"1234567"}',
                     ],
                 ],
             ],

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DbtYamlCreateService;
 
+use DbtTransformation\RemoteDWH\RemoteDWHFactory;
 use Keboola\Component\UserException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -26,6 +27,9 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
         if (empty($configurationNames)) {
             $outputs['kbc_prod'] = $this->getOutputDefinition($type, 'KBC_PROD');
         }
+
+        var_dump(getenv('DBT_KBC_PROD_PROJECT'));
+
         foreach ($configurationNames as $configurationName) {
             $outputs[strtolower($configurationName)] = $this->getOutputDefinition($type, $configurationName);
         }
@@ -47,35 +51,16 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
      */
     protected function getOutputDefinition(string $type, string $configurationName): array
     {
-        if ($type === 'snowflake') {
-            return [
-                'type' => sprintf('{{ env_var("DBT_%s_TYPE") }}', $configurationName),
-                'user' => sprintf('{{ env_var("DBT_%s_USER") }}', $configurationName),
-                'password' => sprintf('{{ env_var("DBT_%s_PASSWORD") }}', $configurationName),
-                'schema' => sprintf('{{ env_var("DBT_%s_SCHEMA") }}', $configurationName),
-                'warehouse' => sprintf('{{ env_var("DBT_%s_WAREHOUSE") }}', $configurationName),
-                'database' => sprintf('{{ env_var("DBT_%s_DATABASE") }}', $configurationName),
-                'account' => sprintf('{{ env_var("DBT_%s_ACCOUNT") }}', $configurationName),
-            ];
-        } elseif ($type === 'bigquery') {
-            return [
-                'type' => sprintf('{{ env_var("DBT_%s_TYPE") }}', $configurationName),
-                'method' => sprintf('{{ env_var("DBT_%s_METHOD") }}', $configurationName),
-                'project' => sprintf('{{ env_var("DBT_%s_PROJECT") }}', $configurationName),
-                'dataset' => sprintf('{{ env_var("DBT_%s_DATASET") }}', $configurationName),
-                'threads' => sprintf('{{ env_var("DBT_%s_THREADS") }}', $configurationName),
-                'keyfile' => sprintf('{{ env_var("DBT_%s_KEYFILE") }}', $configurationName),
-            ];
-        } else {
-            return [
-                'type' => sprintf('{{ env_var("DBT_%s_TYPE") }}', $configurationName),
-                'user' => sprintf('{{ env_var("DBT_%s_USER") }}', $configurationName),
-                'password' => sprintf('{{ env_var("DBT_%s_PASSWORD") }}', $configurationName),
-                'schema' => sprintf('{{ env_var("DBT_%s_SCHEMA") }}', $configurationName),
-                'dbname' => sprintf('{{ env_var("DBT_%s_DATABASE") }}', $configurationName),
-                'host' => sprintf('{{ env_var("DBT_%s_HOST") }}', $configurationName),
-                'port' => sprintf('{{ env_var("DBT_%s_PORT")|as_number }}', $configurationName),
-            ];
-        }
+        $keys = RemoteDWHFactory::getDbtParams($type);
+
+        $values = array_map(function ($item) use ($configurationName) {
+            $asNumber = '';
+            if ($item === 'threads' || $item === 'port') {
+                $asNumber = '| as_number';
+            }
+            return sprintf('{{ env_var("DBT_%s_%s")%s }}', $configurationName, strtoupper($item), $asNumber);
+        }, $keys);
+
+        return array_combine($keys, $values);
     }
 }

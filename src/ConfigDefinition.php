@@ -10,6 +10,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
+    private const ACCEPTED_DBT_COMMANDS = ['dbt run', 'dbt docs generate', 'dbt test', 'dbt source freshness'];
+
     protected function getParametersDefinition(): ArrayNodeDefinition
     {
         $parametersNode = parent::getParametersDefinition();
@@ -58,6 +60,13 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->children()
                         ->arrayNode('modelNames')
                             ->scalarPrototype()->end()
+                        ->end()
+                        ->arrayNode('executeSteps')
+                            ->isRequired()
+                            ->requiresAtLeastOneElement()
+                            ->enumPrototype()
+                                ->values(self::ACCEPTED_DBT_COMMANDS)
+                            ->end()
                         ->end()
                     ->end()
             ->end();

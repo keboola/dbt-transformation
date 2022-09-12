@@ -14,7 +14,12 @@
       "repo": "https://github.com/keboola/dbt-test-project-public.git"
     },
     "dbt": {
-      "modelNames": ["stg_model"]
+      "modelNames": [
+        "stg_model"
+      ],
+      "executeSteps": [
+        "dbt run"
+      ]
     }
   }
 }

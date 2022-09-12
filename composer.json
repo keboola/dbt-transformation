@@ -37,11 +37,11 @@
     "scripts": {
         "tests-phpunit": "phpunit",
         "tests-datadir": "phpunit tests/functional",
-        "tests-datadir-2": "phpunit tests/functional2",
+        "tests-datadir-remote-dwh": "phpunit tests/functionalRemoteDWH",
         "tests": [
             "@tests-phpunit",
             "@tests-datadir",
-            "@tests-datadir-2"
+            "@tests-datadir-remote-dwh"
         ],
 
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",

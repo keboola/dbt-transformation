@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\FunctionalTests;
+namespace DbtTransformation\FunctionalRemoteDwhTests;
 
 use Keboola\DatadirTests\DatadirTestCase;
 use Symfony\Component\Filesystem\Filesystem;

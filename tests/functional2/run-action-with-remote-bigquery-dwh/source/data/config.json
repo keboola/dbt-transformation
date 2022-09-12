@@ -12,7 +12,7 @@
   "parameters": {
     "git": {
       "repo": "https://github.com/keboola/dbt-test-project-public.git",
-      "branch": "branch-with-sources"
+      "branch": "branch-with-bigquery-sources"
     },
     "dbt": {
       "executeSteps": ["dbt run"]

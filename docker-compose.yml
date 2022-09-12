@@ -21,6 +21,7 @@ services:
 
   pgsql:
     image: postgres
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: some password

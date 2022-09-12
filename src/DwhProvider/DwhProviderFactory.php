@@ -8,13 +8,14 @@ use DbtTransformation\Config;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 class DwhProviderFactory
 {
     public const REMOTE_DWH_ALLOWED_TYPES = [
         RemoteSnowflakeProvider::DWH_PROVIDER_TYPE,
         RemotePostgresProvider::DWH_PROVIDER_TYPE,
-        RemoteBigQueryProvider::DWH_PROVIDER_TYPE
+        RemoteBigQueryProvider::DWH_PROVIDER_TYPE,
     ];
 
     private DbtSourceYamlCreateService $createSourceFileService;
@@ -37,6 +38,7 @@ class DwhProviderFactory
             return new LocalSnowflakeProvider(
                 $this->createSourceFileService,
                 $this->createProfilesFileService,
+                $this->logger,
                 $config,
                 $projectPath
             );
@@ -49,6 +51,7 @@ class DwhProviderFactory
                 return new RemoteSnowflakeProvider(
                     $this->createSourceFileService,
                     $this->createProfilesFileService,
+                    $this->logger,
                     $config,
                     $projectPath
                 );
@@ -57,6 +60,7 @@ class DwhProviderFactory
                 return new RemotePostgresProvider(
                     $this->createSourceFileService,
                     $this->createProfilesFileService,
+                    $this->logger,
                     $config,
                     $projectPath
                 );
@@ -65,6 +69,7 @@ class DwhProviderFactory
                 return new RemoteBigQueryProvider(
                     $this->createSourceFileService,
                     $this->createProfilesFileService,
+                    $this->logger,
                     $config,
                     $projectPath
                 );

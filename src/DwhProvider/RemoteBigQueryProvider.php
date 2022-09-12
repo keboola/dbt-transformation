@@ -47,7 +47,7 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
     /**
      * @return array<int, string>
      */
-    protected function getDbtParams(): array
+    protected static function getDbtParams(): array
     {
         return [
             'type',

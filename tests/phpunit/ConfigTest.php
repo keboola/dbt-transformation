@@ -321,7 +321,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'expectedError' => 'The value "elasticsearch" is not allowed for path "root.parameters.remoteDwh.type". ' .
-                'Permissible values: "snowflake", "postgres", "bigquery", "redshift"',
+                'Permissible values: "snowflake", "postgres", "bigquery"',
         ];
 
         yield 'config with remote DWH missing credentials' => [

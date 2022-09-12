@@ -7,6 +7,7 @@ namespace DbtTransformation\Command;
 use DbtTransformation\Component;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
 use DbtTransformation\WorkspacesManagementService;
 use Dotenv\Dotenv;
 use Generator;
@@ -14,10 +15,12 @@ use Keboola\Component\UserException;
 use Keboola\Sandboxes\Api\Sandbox;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\ClientException;
+use Psr\Log\NullLogger;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
@@ -124,7 +127,7 @@ class GenerateProfilesAndSourcesCommand extends Command
         try {
             $this->createProfilesFileService->dumpYaml(
                 sprintf('%s/dbt-project/', CloneGitRepositoryCommand::DATA_DIR),
-                $configurationNames
+                $this->getOutputs($configurationNames)
             );
             $this->createSourceFileService->dumpYaml(
                 sprintf('%s/dbt-project/', CloneGitRepositoryCommand::DATA_DIR),
@@ -163,7 +166,7 @@ class GenerateProfilesAndSourcesCommand extends Command
         yield sprintf(
             'export DBT_%s_ACCOUNT=%s',
             $name,
-            str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $host)
+            str_replace(LocalSnowflakeProvider::STRING_TO_REMOVE_FROM_HOST, '', $host)
         );
         yield sprintf('export DBT_%s_USER=%s', $name, $workspace->getUser());
         yield sprintf('export DBT_%s_PASSWORD=%s', $name, $workspace->getPassword());
@@ -183,5 +186,37 @@ class GenerateProfilesAndSourcesCommand extends Command
         }
 
         return $tablesData;
+    }
+
+    protected function getOutputs(array $configurationNames): array
+    {
+        $outputs = [];
+        foreach ($configurationNames as $configurationName) {
+            $outputs[strtolower($configurationName)] = $this->getOutputDefinition($configurationName);
+        }
+
+        return $outputs;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function getOutputDefinition(string $configurationName): array
+    {
+        $keys = [
+            'type',
+            'user',
+            'password',
+            'schema',
+            'warehouse',
+            'database',
+            'account',
+        ];
+
+        $values = array_map(function ($item) use ($configurationName) {
+            return sprintf('{{ env_var("DBT_%s_%s") }}', $configurationName, strtoupper($item));
+        }, $keys);
+
+        return array_combine($keys, $values);
     }
 }

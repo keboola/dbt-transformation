@@ -8,6 +8,7 @@ use DbtTransformation\Config;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\StorageApi\Client;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 class LocalSnowflakeProvider implements DwhProviderInterface
@@ -19,31 +20,20 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     protected DbtProfilesYamlCreateService $createProfilesFileService;
     protected Config $config;
     protected string $projectPath;
+    protected LoggerInterface $logger;
 
     public function __construct(
         DbtSourceYamlCreateService $createSourceFileService,
         DbtProfilesYamlCreateService $createProfilesFileService,
+        LoggerInterface $logger,
         Config $config,
         string $projectPath
     ) {
         $this->createProfilesFileService = $createProfilesFileService;
         $this->createSourceFileService = $createSourceFileService;
+        $this->logger = $logger;
         $this->config = $config;
         $this->projectPath = $projectPath;
-    }
-
-    public function setEnvVars(): void
-    {
-        $workspace = $this->config->getAuthorization()['workspace'];
-        $workspace['type'] = 'snowflake';
-
-        putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
-        putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
-        putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
-        $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
-        putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
-        putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
     }
 
     public function createDbtYamlFiles(array $configurationNames = []): void
@@ -53,7 +43,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
 
         $client = new Client([
             'url' => $this->config->getStorageApiUrl(),
-            'token' => $this->config->getStorageApiToken()
+            'token' => $this->config->getStorageApiToken(),
         ]);
         $tables = $client->listTables();
         $tablesData = [];
@@ -65,6 +55,20 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             $this->projectPath,
             $tablesData
         );
+    }
+
+    protected function setEnvVars(): void
+    {
+        $workspace = $this->config->getAuthorization()['workspace'];
+        $workspace['type'] = 'snowflake';
+
+        putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
+        putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
+        putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+        $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
+        putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
+        putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
+        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
     }
 
     /**
@@ -85,7 +89,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     /**
      * @return array<int, string>
      */
-    protected function getDbtParams(): array
+    protected static function getDbtParams(): array
     {
         return [
             'type',
@@ -98,15 +102,15 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         ];
     }
 
-    protected function getOutputs(array $configurationNames): array
+    public static function getOutputs(array $configurationNames): array
     {
         $outputs = [];
         if (empty($configurationNames)) {
-            $outputs['kbc_prod'] = $this->getOutputDefinition('KBC_PROD');
+            $outputs['kbc_prod'] = self::getOutputDefinition('KBC_PROD');
         }
 
         foreach ($configurationNames as $configurationName) {
-            $outputs[strtolower($configurationName)] = $this->getOutputDefinition($configurationName);
+            $outputs[strtolower($configurationName)] = self::getOutputDefinition($configurationName);
         }
 
         return $outputs;
@@ -115,9 +119,10 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     /**
      * @return array<string, string>
      */
-    protected function getOutputDefinition(string $configurationName): array
+    protected static function getOutputDefinition(string $configurationName): array
     {
-        $keys = RemoteDWHFactory::getDbtParams(self::DWH_PROVIDER_TYPE,);
+        // @todo: tahle metoda se muze zjednodusit a byt pro kazdeho providera specificka
+        $keys = self::getDbtParams();
 
         $values = array_map(function ($item) use ($configurationName) {
             $asNumber = '';

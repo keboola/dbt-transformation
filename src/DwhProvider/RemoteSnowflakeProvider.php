@@ -27,5 +27,4 @@ class RemoteSnowflakeProvider extends LocalSnowflakeProvider implements DwhProvi
         $this->createProfilesFileService->dumpYaml($this->projectPath, $configurationNames);
         $this->setEnvVars();
     }
-
 }

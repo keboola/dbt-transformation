@@ -6,5 +6,5 @@ namespace DbtTransformation\DwhProvider;
 
 interface DwhProviderInterface
 {
-
+    public function createDbtYamlFiles(): void;
 }

@@ -4,23 +4,14 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
+use DbtTransformation\RemoteDWH\RemoteDWHFactory;
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
-    private const REMOTE_DWH_ALLOWED_TYPES = [
-        'snowflake',
-        'postgres',
-        'redshift',
-        'oracle',
-        'bigquery',
-        'teradata',
-        'mysql',
-        'sqlite',
-    ];
-
     private const ACCEPTED_DBT_COMMANDS = ['dbt run', 'dbt docs generate', 'dbt test', 'dbt source freshness'];
 
     protected function getParametersDefinition(): ArrayNodeDefinition
@@ -67,52 +58,63 @@ class ConfigDefinition extends BaseConfigDefinition
         $parametersNode
             ->children()
             ->arrayNode('remoteDwh')
+                ->validate()
+                    ->ifTrue(function ($v) {
+                        if (!is_array($v)) {
+                            return true;
+                        }
+                        $requiredSettings = RemoteDWHFactory::getConnectionParams($v['type']);
+                        foreach ($requiredSettings as $setting) {
+                            if (!array_key_exists($setting, $v)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    })
+                    ->thenInvalid('Missing required options for "%s"')
+                ->end()
                 ->children()
                     ->enumNode('type')
                         ->isRequired()
-                        ->values(self::REMOTE_DWH_ALLOWED_TYPES)
+                        ->values(RemoteDWHFactory::REMOTE_DWH_ALLOWED_TYPES)
                     ->end()
-                ->end()
-                ->children()
                     ->scalarNode('host')
                         ->cannotBeEmpty()
                     ->end()
-                ->end()
-                ->children()
                     ->scalarNode('user')
-                        ->isRequired()
-                        ->cannotBeEmpty()
-            ->end()
-                ->end()
-                ->children()
-                    ->scalarNode('#password')
-                        ->isRequired()
                         ->cannotBeEmpty()
                     ->end()
-                ->end()
-                ->children()
+                    ->scalarNode('#password')
+                        ->cannotBeEmpty()
+                    ->end()
                     ->scalarNode('port')
                         ->cannotBeEmpty()
                     ->end()
-                ->end()
-                ->children()
                     ->scalarNode('dbname')
                         ->cannotBeEmpty()
                     ->end()
-                ->end()
-                ->children()
                     ->scalarNode('schema')
-                        ->isRequired()
                         ->cannotBeEmpty()
                     ->end()
-                ->end()
-                ->children()
                     ->scalarNode('warehouse')
                         ->cannotBeEmpty()
                     ->end()
-                ->end()
-                ->children()
                     ->scalarNode('database')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('method')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('project')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('dataset')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('threads')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('#key_content')
                         ->cannotBeEmpty()
                     ->end()
                 ->end()

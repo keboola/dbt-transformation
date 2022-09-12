@@ -18,6 +18,12 @@ env:
     SNOWFLAKE_USER: "SAPI_WORKSPACE_875822722"
     SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
 
+    # BigQuery
+    BIGQUERY_PROJECT_ID: devel-249608
+    BIGQUERY_DATASET: dbt
+    BIGQUERY_THREADS: 1
+    BIGQUERY_KEY_CONTENT: ${{ secrets.BIGQUERY_KEY_CONTENT }}
+
     GITHUB_USERNAME: "dbt-test-project-user"
     GITHUB_PASSWORD: ${{ secrets.GH_PAT }}
 
@@ -91,7 +97,8 @@ jobs:
             -
                 name: 'Run tests'
                 run: |
-                    docker-compose run dev composer install && \
+                    docker-compose run dev composer install
+                    docker-compose run wait
                     docker-compose run \
                     -e SNOWFLAKE_HOST \
                     -e SNOWFLAKE_PORT \
@@ -100,6 +107,10 @@ jobs:
                     -e SNOWFLAKE_SCHEMA \
                     -e SNOWFLAKE_USER \
                     -e SNOWFLAKE_PASSWORD \
+                    -e BIGQUERY_PROJECT_ID \
+                    -e BIGQUERY_DATASET \
+                    -e BIGQUERY_THREADS \
+                    -e BIGQUERY_KEY_CONTENT \
                     -e GITHUB_USERNAME \
                     -e GITHUB_PASSWORD \
                     -e KBC_URL \

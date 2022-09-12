@@ -3,10 +3,10 @@ Running with dbt=%s
 Warning: No packages were found in packages.yml
 Running with dbt=%s
 Partial parse save file not found. Starting full parse.
-Found 2 models, 2 tests, 0 snapshots, 0 analyses, 179 macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
+Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')
-1 of 1 START view model %s.stg_model........................... [RUN]
-1 of 1 OK created view model %s.stg_model...................... [SUCCESS 1 in %ss]
-Finished running 1 view model in %ss.
+1 of 1 START view model %s.stg_model %s [RUN]
+1 of 1 OK created view model %s.stg_model %s [SUCCESS 1 in %ss]
+Finished running 1 view model in %s hours %s minutes and %s seconds (%ss).
 Completed successfully
 Done. PASS=1 WARN=0 ERROR=0 SKIP=0 TOTAL=1

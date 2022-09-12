@@ -107,6 +107,10 @@ jobs:
                     -e SNOWFLAKE_SCHEMA \
                     -e SNOWFLAKE_USER \
                     -e SNOWFLAKE_PASSWORD \
+                    -e BIGQUERY_PROJECT_ID \
+                    -e BIGQUERY_DATASET \
+                    -e BIGQUERY_THREADS \
+                    -e BIGQUERY_KEY_CONTENT \
                     -e GITHUB_USERNAME \
                     -e GITHUB_PASSWORD \
                     -e KBC_URL \

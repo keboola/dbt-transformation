@@ -37,9 +37,11 @@
     "scripts": {
         "tests-phpunit": "phpunit",
         "tests-datadir": "phpunit tests/functional",
+        "tests-datadir-2": "phpunit tests/functional2",
         "tests": [
             "@tests-phpunit",
-            "@tests-datadir"
+            "@tests-datadir",
+            "@tests-datadir-2"
         ],
 
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",

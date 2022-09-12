@@ -1,15 +1,15 @@
-Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-sources (fe39bd0645d0578f63faeb750d74dd520a5ecadc)
-Remote snowflake DWH: keboola.snowflakecomputing.com
+Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-bigquery-sources (%s)
+Remote bigquery DWH: devel-249608
 Running with dbt=%s
 Warning: No packages were found in packages.yml
 Running with dbt=%s
 Partial parse save file not found. Starting full parse.
-Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 3 sources, 0 exposures, 0 metrics
+Found 2 models, 0 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 1 source, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')
-1 of 2 START view model WORKSPACE_875822722.stg_model %s [RUN]
-1 of 2 OK created view model WORKSPACE_875822722.stg_model %s [SUCCESS 1 in %ss]
-2 of 2 START view model WORKSPACE_875822722.fct_model %s [RUN]
-2 of 2 OK created view model WORKSPACE_875822722.fct_model %s [SUCCESS 1 in %ss]
-Finished running 2 view models in %s hours %s minutes and %s seconds (%ss).
+1 of 2 START table model %s.stg_model %s [RUN]
+1 of 2 OK created table model %s.stg_model %s [CREATE TABLE (4.0 rows, %s Bytes processed) in %ss]
+2 of 2 START table model %s.fct_model %s [RUN]
+2 of 2 OK created table model %s.fct_model %s [CREATE TABLE (1.0 rows, %s Bytes processed) in %ss]
+Finished running 2 table models in %s hours %s minutes and %s seconds (%ss).
 Completed successfully
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2

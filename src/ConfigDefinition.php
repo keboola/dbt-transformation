@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
+use DbtTransformation\RemoteDWH\RemoteDWHFactory;
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
@@ -50,6 +52,72 @@ class ConfigDefinition extends BaseConfigDefinition
                     return $item;
                 })
             ->end()
+            ->end();
+
+        /** @noinspection NullPointerExceptionInspection */
+        $parametersNode
+            ->children()
+            ->arrayNode('remoteDwh')
+                ->validate()
+                    ->ifTrue(function ($v) {
+                        if (!is_array($v)) {
+                            return true;
+                        }
+                        $requiredSettings = RemoteDWHFactory::getConnectionParams($v['type']);
+                        foreach ($requiredSettings as $setting) {
+                            if (!array_key_exists($setting, $v)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    })
+                    ->thenInvalid('Missing required options for "%s"')
+                ->end()
+                ->children()
+                    ->enumNode('type')
+                        ->isRequired()
+                        ->values(RemoteDWHFactory::REMOTE_DWH_ALLOWED_TYPES)
+                    ->end()
+                    ->scalarNode('host')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('user')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('#password')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('port')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('dbname')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('schema')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('warehouse')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('database')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('method')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('project')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('dataset')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('threads')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('#key_content')
+                        ->cannotBeEmpty()
+                    ->end()
+                ->end()
             ->end();
 
         /** @noinspection NullPointerExceptionInspection */

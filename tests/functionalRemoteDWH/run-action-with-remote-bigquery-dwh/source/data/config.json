@@ -1,0 +1,29 @@
+{
+  "authorization": {
+    "workspace": {
+      "host": "%env(string:SNOWFLAKE_HOST)%",
+      "warehouse": "%env(string:SNOWFLAKE_WAREHOUSE)%",
+      "database": "%env(string:SNOWFLAKE_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_SCHEMA)%",
+      "user": "%env(string:SNOWFLAKE_USER)%",
+      "password": "%env(string:SNOWFLAKE_PASSWORD)%"
+    }
+  },
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project-public.git",
+      "branch": "branch-with-bigquery-sources"
+    },
+    "dbt": {
+      "executeSteps": ["dbt run"]
+    },
+    "remoteDwh": {
+      "type": "bigquery",
+      "method": "service-account",
+      "project": "%env(string:BIGQUERY_PROJECT_ID)%",
+      "dataset": "%env(string:BIGQUERY_DATASET)%",
+      "threads": "%env(string:BIGQUERY_THREADS)%",
+      "#key_content": "%env(string:BIGQUERY_KEY_CONTENT)%"
+    }
+  }
+}

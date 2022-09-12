@@ -1,8 +1,39 @@
 version: '3'
 services:
-  app:
+  app: &main
     build: .
     image: keboola/dbt-transformation
     volumes:
       - ./:/code
       - ./data:/data
+
+  dev:
+    <<: *main
+    environment:
+      PGSQL_DB_HOST: pgsql
+      PGSQL_DB_PORT: 5432
+      PGSQL_DB_USER: postgres
+      PGSQL_DB_PASSWORD: some password
+      PGSQL_DB_DATABASE: postgres
+      PGSQL_DB_SCHEMA: public
+    links:
+      - pgsql
+
+  pgsql:
+    image: postgres
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: some password
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  wait:
+    image: waisbrot/wait
+    depends_on:
+      - pgsql
+    environment:
+      - TARGETS=pgsql:5432
+      - TIMEOUT=200

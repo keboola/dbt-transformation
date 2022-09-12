@@ -143,6 +143,50 @@ class ConfigTest extends TestCase
                 ],
             ],
         ];
+
+        yield 'config with remote DWH postgres' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'postgres',
+                        'host' => 'postgres',
+                        'user' => 'user',
+                        '#password' => 'pass',
+                        'port' => '5432',
+                        'dbname' => 'db',
+                        'schema' => 'schema',
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with remote DWH bigquery' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'bigquery',
+                        'method' => 'service-account',
+                        'project' => 'gcp-project',
+                        'dataset' => 'dbt',
+                        'threads' => '1',
+                        '#key_content' => '{"type":"service_account","project_id":"gcp-project",' .
+                            '"private_key_id":"1234567"}',
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -258,6 +302,47 @@ class ConfigTest extends TestCase
             'expectedError' => 'The value "dbt do nothing" is not allowed for path ' .
                 '"root.parameters.dbt.executeSteps.0". Permissible values: "dbt run", "dbt docs generate", ' .
                 '"dbt test", "dbt source freshness"',
+        ];
+
+        yield 'config with remote DWH non-supported type' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [],
+                    'remoteDwh' => [
+                        'type' => 'elasticsearch',
+                        'host' => 'elasticsearch',
+                        'user' => 'user',
+                        '#password' => 'pass',
+                        'port' => '9200',
+                    ],
+                ],
+            ],
+            'expectedError' => 'The value "elasticsearch" is not allowed for path "root.parameters.remoteDwh.type". ' .
+                'Permissible values: "snowflake", "postgres", "bigquery", "redshift"',
+        ];
+
+        yield 'config with remote DWH missing credentials' => [
+            'configData' => [
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [],
+                    'remoteDwh' => [
+                        'type' => 'postgres',
+                        'host' => 'postgres',
+                        'user' => '',
+                        '#password' => '',
+                        'port' => '5432',
+                        'dbname' => 'db',
+                        'schema' => 'schema',
+                    ],
+                ],
+            ],
+            'expectedError' => 'The path "root.parameters.remoteDwh.user" cannot contain an empty value, but got "".',
         ];
     }
 

@@ -102,7 +102,7 @@ docker-compose run --rm app composer install --no-scripts
 Run the test suite using this command:
 
 ```shell
-docker-compose run --rm app composer ci
+docker-compose run --rm dev composer ci
 ```
  
 # Integration

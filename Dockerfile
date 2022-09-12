@@ -20,12 +20,11 @@ RUN apt-get update && apt-get install -y \
         python3-pip \
     && pip3 install --upgrade pip cffi \
     && pip3 install \
-         # See https://github.com/pallets/markupsafe/issues/282
-         # breaking change introduced in markupsafe causes jinja to break
-         markupsafe==2.0.1 \
-         cryptography~=3.4  \
-         dbt-snowflake~=1.0.1 \
-	&& rm -r /var/lib/apt/lists/* \
+         dbt-snowflake \
+         dbt-postgres \
+         dbt-redshift \
+         dbt-bigquery \
+    && rm -r /var/lib/apt/lists/* \
 	&& sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
 	&& locale-gen \
 	&& chmod +x /tmp/composer-install.sh \

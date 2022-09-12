@@ -1,0 +1,30 @@
+{
+  "authorization": {
+    "workspace": {
+      "host": "%env(string:SNOWFLAKE_HOST)%",
+      "warehouse": "%env(string:SNOWFLAKE_WAREHOUSE)%",
+      "database": "%env(string:SNOWFLAKE_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_SCHEMA)%",
+      "user": "%env(string:SNOWFLAKE_USER)%",
+      "password": "%env(string:SNOWFLAKE_PASSWORD)%"
+    }
+  },
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project-public.git",
+      "branch": "branch-with-postgres-sources"
+    },
+    "dbt": {
+      "executeSteps": ["dbt run"]
+    },
+    "remoteDwh": {
+      "type": "postgres",
+      "host": "%env(string:PGSQL_DB_HOST)%",
+      "port": "%env(string:PGSQL_DB_PORT)%",
+      "user": "%env(string:PGSQL_DB_USER)%",
+      "#password": "%env(string:PGSQL_DB_PASSWORD)%",
+      "dbname": "%env(string:PGSQL_DB_DATABASE)%",
+      "schema": "%env(string:PGSQL_DB_SCHEMA)%"
+    }
+  }
+}

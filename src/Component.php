@@ -10,6 +10,7 @@ use DbtTransformation\RemoteDWH\RemoteDWHFactory;
 use Keboola\Component\BaseComponent;
 use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Component extends BaseComponent
@@ -99,21 +100,14 @@ class Component extends BaseComponent
 
         $this->setEnvVars();
 
-        $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
-        $tables = $client->listTables();
-        $tablesData = [];
-        foreach ($tables as $table) {
-            $tablesData[(string) $table['bucket']['id']][] = $table;
-        }
+        if (!$config->hasRemoteDwh()) {
+            $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
+            $tables = $client->listTables();
+            $tablesData = [];
+            foreach ($tables as $table) {
+                $tablesData[(string) $table['bucket']['id']][] = $table;
+            }
 
-        if ($config->getRemoteDwh()['type'] === RemoteDWHFactory::REMOTE_DWH_TYPE_BIGQUERY) {
-            $this->createSourceFileService->dumpYaml(
-                $this->projectPath,
-                $tablesData,
-                'DBT_KBC_PROD_PROJECT',
-                'DBT_KBC_PROD_DATASET',
-            );
-        } else {
             $this->createSourceFileService->dumpYaml(
                 $this->projectPath,
                 $tablesData
@@ -163,6 +157,9 @@ class Component extends BaseComponent
             putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
             // create temp file with key
             $tmpKeyFile = tempnam(__DIR__ . '/../', 'key-');
+            if ($tmpKeyFile === false) {
+                throw new RuntimeException('Creating temp file with key for BigQuery failed');
+            }
             file_put_contents($tmpKeyFile, $workspace['#key_content']);
             putenv(sprintf('DBT_KBC_PROD_KEYFILE=%s', $tmpKeyFile));
         } else {

@@ -6,6 +6,7 @@ namespace DbtTransformation\DbtYamlCreateService;
 
 use DbtTransformation\RemoteDWH\RemoteDWHFactory;
 use Keboola\Component\UserException;
+use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 
 class DbtProfilesYamlCreateService extends DbtYamlCreateService
@@ -27,8 +28,6 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
         if (empty($configurationNames)) {
             $outputs['kbc_prod'] = $this->getOutputDefinition($type, 'KBC_PROD');
         }
-
-        var_dump(getenv('DBT_KBC_PROD_PROJECT'));
 
         foreach ($configurationNames as $configurationName) {
             $outputs[strtolower($configurationName)] = $this->getOutputDefinition($type, $configurationName);
@@ -61,6 +60,11 @@ class DbtProfilesYamlCreateService extends DbtYamlCreateService
             return sprintf('{{ env_var("DBT_%s_%s")%s }}', $configurationName, strtoupper($item), $asNumber);
         }, $keys);
 
-        return array_combine($keys, $values);
+        $outputDefinition = array_combine($keys, $values);
+        if ($outputDefinition === false) {
+            throw new RuntimeException('Failed to get output definition');
+        }
+
+        return $outputDefinition;
     }
 }

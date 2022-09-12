@@ -21,7 +21,6 @@ services:
 
   pgsql:
     image: postgres
-    platform: linux/arm64/v8
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: some password

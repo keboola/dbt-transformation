@@ -181,7 +181,8 @@ class ConfigTest extends TestCase
                         'project' => 'gcp-project',
                         'dataset' => 'dbt',
                         'threads' => '1',
-                        '#key_content' => '{"type":"service_account","project_id":"gcp-project","private_key_id":"1234567"}',
+                        '#key_content' => '{"type":"service_account","project_id":"gcp-project",' .
+                            '"private_key_id":"1234567"}',
                     ],
                 ],
             ],
@@ -320,8 +321,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'expectedError' => 'The value "elasticsearch" is not allowed for path "root.parameters.remoteDwh.type". ' .
-                'Permissible values: "snowflake", "postgres", "redshift", "oracle", "bigquery", "teradata", "mysql", ' .
-                '"sqlite"',
+                'Permissible values: "snowflake", "postgres", "bigquery", "redshift"',
         ];
 
         yield 'config with remote DWH missing credentials' => [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DbtTransformation\RemoteDWH;
 
 use Exception;
@@ -14,7 +16,7 @@ class RemoteDWHFactory
         self::REMOTE_DWH_TYPE_SNOWFLAKE,
         self::REMOTE_DWH_TYPE_POSTGRES,
         self::REMOTE_DWH_TYPE_BIGQUERY,
-        self::REMOTE_DWH_TYPE_REDSHIFT
+        self::REMOTE_DWH_TYPE_REDSHIFT,
 //        'oracle',
 //        'teradata',
 //        'mysql',
@@ -32,6 +34,10 @@ class RemoteDWHFactory
         }
     }
 
+
+    /**
+     * @return array<int, string>
+     */
     public static function getConnectionParams(string $type): array
     {
         self::checkType($type);
@@ -68,6 +74,9 @@ class RemoteDWHFactory
         }
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function getDbtParams(string $type): array
     {
         self::checkType($type);

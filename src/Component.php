@@ -51,12 +51,6 @@ class Component extends BaseComponent
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');
 
-        if ($config->hasRemoteDwh()) {
-            $dwhConfig = $config->getRemoteDwh();
-            $host = $dwhConfig['type'] === 'bigquery' ? $dwhConfig['project'] : $dwhConfig['host'];
-            $this->getLogger()->info(sprintf('Remote %s DWH: %s', $dwhConfig['type'], $host));
-        }
-
         foreach ($executeSteps as $step) {
             $this->executeStep($dbtService, $step);
         }
@@ -110,6 +104,12 @@ class Component extends BaseComponent
         $fs->mirror(sprintf('%s/target/', $this->projectPath), $artifactsPath);
     }
 
+    private function readResultFromArtifacts(string $step, string $filePath): string
+    {
+        $artifactsPath = sprintf('%s/artifacts/in/runs/%s/%s', $this->getDataDir(), $step, $filePath);
+        return file_get_contents($artifactsPath);
+    }
+
     protected function logExecutedSqls(): void
     {
         $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
@@ -131,5 +131,25 @@ class Component extends BaseComponent
         if ($step !== 'dbt deps') {
             $this->storeResultToArtifacts($step);
         }
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function getSyncActions(): array
+    {
+        return [
+            'dbtDocs' => 'actionDbtDocs',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function actionDbtDocs(): array
+    {
+        return [
+            'html' => file_get_contents(__DIR__ . '/SyncAction/index.html'),
+        ];
     }
 }

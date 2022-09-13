@@ -107,7 +107,7 @@ class Component extends BaseComponent
     private function readResultFromArtifacts(string $step, string $filePath): string
     {
         $artifactsPath = sprintf('%s/artifacts/in/runs/%s/%s', $this->getDataDir(), $step, $filePath);
-        return file_get_contents($artifactsPath);
+        return (string) file_get_contents($artifactsPath);
     }
 
     protected function logExecutedSqls(): void
@@ -149,7 +149,7 @@ class Component extends BaseComponent
     protected function actionDbtDocs(): array
     {
         return [
-            'html' => file_get_contents(__DIR__ . '/SyncAction/index.html'),
+            'html' => (string) file_get_contents(__DIR__ . '/SyncAction/index.html'),
         ];
     }
 }

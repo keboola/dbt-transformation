@@ -7,11 +7,8 @@ namespace DbtTransformation;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
-use DbtTransformation\DwhProvider\RemoteDWHFactory;
 use Keboola\Component\BaseComponent;
-use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Component extends BaseComponent

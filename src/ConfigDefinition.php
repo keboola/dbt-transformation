@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
-use DbtTransformation\RemoteDWH\RemoteDWHFactory;
+use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
+use DbtTransformation\DwhProvider\RemotePostgresProvider;
+use DbtTransformation\DwhProvider\RemoteSnowflakeProvider;
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
@@ -63,7 +65,7 @@ class ConfigDefinition extends BaseConfigDefinition
                         if (!is_array($v)) {
                             return true;
                         }
-                        $requiredSettings = RemoteDWHFactory::getConnectionParams($v['type']);
+                        $requiredSettings = $this->getRemoteDwhConnectionParams($v['type']);
                         foreach ($requiredSettings as $setting) {
                             if (!array_key_exists($setting, $v)) {
                                 return true;
@@ -76,7 +78,7 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->children()
                     ->enumNode('type')
                         ->isRequired()
-                        ->values(RemoteDWHFactory::REMOTE_DWH_ALLOWED_TYPES)
+                        ->values(DwhProviderFactory::REMOTE_DWH_ALLOWED_TYPES)
                     ->end()
                     ->scalarNode('host')
                         ->cannotBeEmpty()
@@ -148,5 +150,24 @@ class ConfigDefinition extends BaseConfigDefinition
 
         // @formatter:on
         return $parametersNode;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getRemoteDwhConnectionParams(string $type): array
+    {
+        switch ($type) {
+            case RemoteSnowflakeProvider::DWH_PROVIDER_TYPE:
+                return RemoteSnowflakeProvider::getConnectionParams();
+
+            case RemotePostgresProvider::DWH_PROVIDER_TYPE:
+                return RemotePostgresProvider::getConnectionParams();
+
+            case RemoteBigQueryProvider::DWH_PROVIDER_TYPE:
+                return RemoteBigQueryProvider::getConnectionParams();
+        }
+
+        throw new InvalidConfigurationException(sprintf('Remote DWH type "%s" not supported', $type));
     }
 }

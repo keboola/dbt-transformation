@@ -6,6 +6,8 @@ namespace DbtTransformation\Tests;
 
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
+use DbtTransformation\Tests\Command\GenerateProfilesAndSourcesCommandTest;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -38,7 +40,10 @@ class DbtYamlCreateTest extends TestCase
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
-            ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK']
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                LocalSnowflakeProvider::getDbtParams()
+            )
         );
 
         self::assertFileEquals(
@@ -58,7 +63,10 @@ class DbtYamlCreateTest extends TestCase
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
-            ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK']
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                LocalSnowflakeProvider::getDbtParams()
+            )
         );
     }
 

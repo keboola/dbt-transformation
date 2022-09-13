@@ -9,6 +9,7 @@ use DbtTransformation\Command\RunDbtCommand;
 use DbtTransformation\Component;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
 use DbtTransformation\WorkspacesManagementService;
 use Generator;
 use PHPUnit\Framework\TestCase;
@@ -164,7 +165,7 @@ class RunDbtCommandTest extends TestCase
         putenv(sprintf('DBT_KBC_DEV_TEST_DATABASE=%s', $workspaceDetails['connection']['database']));
         putenv(sprintf('DBT_KBC_DEV_TEST_SCHEMA=%s', $workspaceDetails['connection']['schema']));
         putenv(sprintf('DBT_KBC_DEV_TEST_WAREHOUSE=%s', $workspaceDetails['connection']['warehouse']));
-        $account = str_replace(Component::STRING_TO_REMOVE_FROM_HOST, '', $host);
+        $account = str_replace(LocalSnowflakeProvider::STRING_TO_REMOVE_FROM_HOST, '', $host);
         putenv(sprintf('DBT_KBC_DEV_TEST_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_DEV_TEST_TYPE=%s', $workspace->getType()));
         putenv(sprintf('DBT_KBC_DEV_TEST_USER=%s', $workspace->getUser()));
@@ -173,7 +174,10 @@ class RunDbtCommandTest extends TestCase
         $projectPath = sprintf('%s/dbt-project/', $this->dataDir);
         (new DbtProfilesYamlCreateService())->dumpYaml(
             $projectPath,
-            [GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST]
+            LocalSnowflakeProvider::getOutputs(
+                [GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST],
+                LocalSnowflakeProvider::getDbtParams()
+            )
         );
 
         (new DbtSourceYamlCreateService())->dumpYaml(

@@ -6,17 +6,13 @@ namespace DbtTransformation;
 
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
-use DbtTransformation\RemoteDWH\RemoteDWHFactory;
+use DbtTransformation\DwhProvider\DwhProviderFactory;
 use Keboola\Component\BaseComponent;
-use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Component extends BaseComponent
 {
-    public const STRING_TO_REMOVE_FROM_HOST = '.snowflakecomputing.com';
-
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
     private CloneRepositoryService $cloneRepositoryService;
@@ -38,11 +34,16 @@ class Component extends BaseComponent
         $dataDir = $this->getDataDir();
         $config = $this->getConfig();
         $gitRepositoryUrl = $config->getGitRepositoryUrl();
-
         $this->cloneRepository($config, $gitRepositoryUrl);
-
         $this->setProjectPath($dataDir);
-        $this->createDbtYamlFiles($config);
+
+        $dwhProviderFactory = new DwhProviderFactory(
+            $this->createSourceFileService,
+            $this->createProfilesFileService,
+            $this->getLogger()
+        );
+        $provider = $dwhProviderFactory->getProvider($config, $this->projectPath);
+        $provider->createDbtYamlFiles();
 
         $dbtService = new DbtService($this->projectPath);
         $dbtService->setModelNames($config->getModelNames());
@@ -90,34 +91,6 @@ class Component extends BaseComponent
     /**
      * @throws \Keboola\Component\UserException
      */
-    protected function createDbtYamlFiles(Config $config): void
-    {
-        if ($config->hasRemoteDwh()) {
-            $this->createProfilesFileService->dumpYaml($this->projectPath, [], $config->getRemoteDwh()['type']);
-        } else {
-            $this->createProfilesFileService->dumpYaml($this->projectPath);
-        }
-
-        $this->setEnvVars();
-
-        if (!$config->hasRemoteDwh()) {
-            $client = new Client(['url' => $config->getStorageApiUrl(), 'token' => $config->getStorageApiToken()]);
-            $tables = $client->listTables();
-            $tablesData = [];
-            foreach ($tables as $table) {
-                $tablesData[(string) $table['bucket']['id']][] = $table;
-            }
-
-            $this->createSourceFileService->dumpYaml(
-                $this->projectPath,
-                $tablesData
-            );
-        }
-    }
-
-    /**
-     * @throws \Keboola\Component\UserException
-     */
     protected function cloneRepository(Config $config, string $gitRepositoryUrl): void
     {
         $this->cloneRepositoryService->clone(
@@ -127,49 +100,6 @@ class Component extends BaseComponent
             $config->getGitRepositoryUsername(),
             $config->getGitRepositoryPassword()
         );
-    }
-
-    private function setEnvVars(): void
-    {
-        $config = $this->getConfig();
-        if ($config->hasRemoteDwh()) {
-            $workspace = $config->getRemoteDwh();
-        } else {
-            $workspace = $config->getAuthorization()['workspace'];
-            $workspace['type'] = 'snowflake';
-        }
-
-        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
-        if ($workspace['type'] === 'snowflake') {
-            putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
-            putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
-            putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
-            $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
-            putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
-            putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-            putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
-        } elseif ($workspace['type'] === 'bigquery') {
-            putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
-            putenv(sprintf('DBT_KBC_PROD_METHOD=%s', $workspace['method']));
-            putenv(sprintf('DBT_KBC_PROD_PROJECT=%s', $workspace['project']));
-            putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['project']));
-            putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['dataset']));
-            putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
-            // create temp file with key
-            $tmpKeyFile = tempnam(__DIR__ . '/../', 'key-');
-            if ($tmpKeyFile === false) {
-                throw new RuntimeException('Creating temp file with key for BigQuery failed');
-            }
-            file_put_contents($tmpKeyFile, $workspace['#key_content']);
-            putenv(sprintf('DBT_KBC_PROD_KEYFILE=%s', $tmpKeyFile));
-        } else {
-            putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
-            putenv(sprintf('DBT_KBC_PROD_DBNAME=%s', $workspace['dbname']));
-            putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
-            putenv(sprintf('DBT_KBC_PROD_PORT=%s', $workspace['port']));
-            putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-            putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
-        }
     }
 
     private function storeResultToArtifacts(string $step): void

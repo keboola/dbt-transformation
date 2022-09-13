@@ -12,6 +12,7 @@ class RemotePostgresProvider extends RemoteSnowflakeProvider implements DwhProvi
     {
         $workspace = $this->config->getRemoteDwh();
 
+        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
         putenv(sprintf('DBT_KBC_PROD_DBNAME=%s', $workspace['dbname']));
         putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
@@ -42,11 +43,12 @@ class RemotePostgresProvider extends RemoteSnowflakeProvider implements DwhProvi
     {
         return [
             'type',
-            'method',
-            'project',
-            'dataset',
-            'threads',
-            'keyfile',
+            'user',
+            'password',
+            'schema',
+            'dbname',
+            'host',
+            'port',
         ];
     }
 }

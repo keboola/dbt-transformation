@@ -21,7 +21,7 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
         putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['dataset']));
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
         // create temp file with key
-        $tmpKeyFile = tempnam(__DIR__ . '/../', 'key-');
+        $tmpKeyFile = tempnam(__DIR__ . '/../../', 'key-');
         if ($tmpKeyFile === false) {
             throw new RuntimeException('Creating temp file with key for BigQuery failed');
         }
@@ -51,12 +51,11 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
     {
         return [
             'type',
-            'user',
-            'password',
-            'schema',
-            'dbname',
-            'host',
-            'port',
+            'method',
+            'project',
+            'dataset',
+            'threads',
+            'keyfile',
         ];
     }
 }

@@ -38,7 +38,10 @@ class LocalSnowflakeProvider implements DwhProviderInterface
 
     public function createDbtYamlFiles(array $configurationNames = []): void
     {
-        $this->createProfilesFileService->dumpYaml($this->projectPath, $this->getOutputs($configurationNames));
+        $this->createProfilesFileService->dumpYaml(
+            $this->projectPath,
+            $this->getOutputs($configurationNames, self::getDbtParams())
+        );
         $this->setEnvVars();
 
         $client = new Client([
@@ -62,6 +65,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         $workspace = $this->config->getAuthorization()['workspace'];
         $workspace['type'] = 'snowflake';
 
+        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
@@ -102,15 +106,20 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         ];
     }
 
-    public static function getOutputs(array $configurationNames): array
+    /**
+     * @param array<string, string> $configurationNames
+     * @param array<int, string> $dbtParams
+     * @return array<string, string>
+     */
+    public static function getOutputs(array $configurationNames, array $dbtParams): array
     {
         $outputs = [];
         if (empty($configurationNames)) {
-            $outputs['kbc_prod'] = self::getOutputDefinition('KBC_PROD');
+            $outputs['kbc_prod'] = self::getOutputDefinition('KBC_PROD', $dbtParams);
         }
 
         foreach ($configurationNames as $configurationName) {
-            $outputs[strtolower($configurationName)] = self::getOutputDefinition($configurationName);
+            $outputs[strtolower($configurationName)] = self::getOutputDefinition($configurationName, $dbtParams);
         }
 
         return $outputs;
@@ -119,20 +128,18 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     /**
      * @return array<string, string>
      */
-    protected static function getOutputDefinition(string $configurationName): array
+    protected static function getOutputDefinition(string $configurationName, array $dbtParams): array
     {
         // @todo: tahle metoda se muze zjednodusit a byt pro kazdeho providera specificka
-        $keys = self::getDbtParams();
-
         $values = array_map(function ($item) use ($configurationName) {
             $asNumber = '';
             if ($item === 'threads' || $item === 'port') {
                 $asNumber = '| as_number';
             }
             return sprintf('{{ env_var("DBT_%s_%s")%s }}', $configurationName, strtoupper($item), $asNumber);
-        }, $keys);
+        }, $dbtParams);
 
-        $outputDefinition = array_combine($keys, $values);
+        $outputDefinition = array_combine($dbtParams, $values);
         if ($outputDefinition === false) {
             throw new RuntimeException('Failed to get output definition');
         }

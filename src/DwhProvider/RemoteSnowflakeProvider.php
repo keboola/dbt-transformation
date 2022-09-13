@@ -22,6 +22,10 @@ class RemoteSnowflakeProvider extends LocalSnowflakeProvider implements DwhProvi
         putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
     }
 
+    /**
+     * @param array<int, string> $configurationNames
+     * @throws \Keboola\Component\UserException
+     */
     public function createDbtYamlFiles(array $configurationNames = []): void
     {
         $this->createProfilesFileService->dumpYaml(

@@ -96,7 +96,7 @@ class GenerateProfilesAndSourcesCommand extends Command
             $configurationNames = [];
             foreach ($configurations as $configuration) {
                 if (str_contains($configuration['name'], 'KBC_DEV_')) {
-                    $configurationNames[] = $configuration['name'];
+                    $configurationNames[] = (string) $configuration['name'];
 
                     $workspaceId = (string) $configuration['configuration']['parameters']['id'];
                     $workspace = $workspaceManagementService->getWorkspace($workspaceId);
@@ -188,6 +188,10 @@ class GenerateProfilesAndSourcesCommand extends Command
         return $tablesData;
     }
 
+    /**
+     * @param array<int, string> $configurationNames
+     * @return array<string, array<string, string>>
+     */
     protected function getOutputs(array $configurationNames): array
     {
         $outputs = [];

@@ -10,7 +10,7 @@ use Symfony\Component\Yaml\Yaml;
 class DbtProfilesYamlCreateService extends DbtYamlCreateService
 {
     /**
-     * @param array<string, array> $outputs
+     * @param array<string, array<string, string>> $outputs
      * @throws UserException
      */
     public function dumpYaml(string $projectPath, array $outputs): void

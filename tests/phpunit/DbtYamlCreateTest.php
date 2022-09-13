@@ -40,7 +40,10 @@ class DbtYamlCreateTest extends TestCase
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
-            LocalSnowflakeProvider::getOutputs(['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'])
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                LocalSnowflakeProvider::getDbtParams()
+            )
         );
 
         self::assertFileEquals(
@@ -60,7 +63,10 @@ class DbtYamlCreateTest extends TestCase
         $service = new DbtProfilesYamlCreateService();
         $service->dumpYaml(
             $this->dataDir,
-            LocalSnowflakeProvider::getOutputs(['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'])
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                LocalSnowflakeProvider::getDbtParams()
+            )
         );
     }
 

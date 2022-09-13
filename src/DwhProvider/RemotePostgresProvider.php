@@ -39,7 +39,7 @@ class RemotePostgresProvider extends RemoteSnowflakeProvider implements DwhProvi
     /**
      * @return array<int, string>
      */
-    protected static function getDbtParams(): array
+    public static function getDbtParams(): array
     {
         return [
             'type',

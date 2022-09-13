@@ -152,6 +152,9 @@ class ConfigDefinition extends BaseConfigDefinition
         return $parametersNode;
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function getRemoteDwhConnectionParams(string $type): array
     {
         switch ($type) {

@@ -36,6 +36,10 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         $this->projectPath = $projectPath;
     }
 
+    /**
+     * @param array<int, string> $configurationNames
+     * @throws \Keboola\Component\UserException
+     */
     public function createDbtYamlFiles(array $configurationNames = []): void
     {
         $this->createProfilesFileService->dumpYaml(
@@ -93,7 +97,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     /**
      * @return array<int, string>
      */
-    protected static function getDbtParams(): array
+    public static function getDbtParams(): array
     {
         return [
             'type',
@@ -107,9 +111,9 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     }
 
     /**
-     * @param array<string, string> $configurationNames
+     * @param array<int, string> $configurationNames
      * @param array<int, string> $dbtParams
-     * @return array<string, string>
+     * @return array<string, array<string, string>>
      */
     public static function getOutputs(array $configurationNames, array $dbtParams): array
     {
@@ -126,6 +130,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     }
 
     /**
+     * @param array<int, string> $dbtParams
      * @return array<string, string>
      */
     protected static function getOutputDefinition(string $configurationName, array $dbtParams): array

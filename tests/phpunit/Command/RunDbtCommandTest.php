@@ -174,7 +174,10 @@ class RunDbtCommandTest extends TestCase
         $projectPath = sprintf('%s/dbt-project/', $this->dataDir);
         (new DbtProfilesYamlCreateService())->dumpYaml(
             $projectPath,
-            LocalSnowflakeProvider::getOutputs([GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST])
+            LocalSnowflakeProvider::getOutputs(
+                [GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST],
+                LocalSnowflakeProvider::getDbtParams()
+            )
         );
 
         (new DbtSourceYamlCreateService())->dumpYaml(

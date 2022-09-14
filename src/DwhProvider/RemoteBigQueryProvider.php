@@ -58,4 +58,10 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
             'keyfile',
         ];
     }
+
+    protected function getConnectionLogMessage(): string
+    {
+        $dwhConfig = $this->config->getRemoteDwh();
+        return sprintf('Remote %s DWH: %s', self::DWH_PROVIDER_TYPE, $dwhConfig['project']);
+    }
 }

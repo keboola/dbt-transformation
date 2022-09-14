@@ -33,5 +33,13 @@ class RemoteSnowflakeProvider extends LocalSnowflakeProvider implements DwhProvi
             $this->getOutputs($configurationNames, static::getDbtParams())
         );
         $this->setEnvVars();
+
+        $this->logger->info($this->getConnectionLogMessage());
+    }
+
+    protected function getConnectionLogMessage(): string
+    {
+        $dwhConfig = $this->config->getRemoteDwh();
+        return sprintf('Remote %s DWH: %s', self::DWH_PROVIDER_TYPE, $dwhConfig['host']);
     }
 }

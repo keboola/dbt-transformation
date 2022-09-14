@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests;
 
 use DbtTransformation\Config;
-use DbtTransformation\ConfigDefinition;
+use DbtTransformation\ConfigDefinitionSyncActions;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -18,7 +18,7 @@ class ConfigTest extends TestCase
      */
     public function testValidConfig(array $configData): void
     {
-        $config = new Config($configData, new ConfigDefinition());
+        $config = new Config($configData, new ConfigDefinitionSyncActions());
         $configData = $this->addDefaultValues($configData);
         $this->assertEquals($configData, $config->getData());
     }
@@ -30,7 +30,7 @@ class ConfigTest extends TestCase
     public function testInvalidConfigs(array $configData, string $expectedError): void
     {
         try {
-            new Config($configData, new ConfigDefinition());
+            new Config($configData, new ConfigDefinitionSyncActions());
             $this->fail('Validation should produce error');
         } catch (InvalidConfigurationException $e) {
             $this->assertStringContainsString($expectedError, $e->getMessage());

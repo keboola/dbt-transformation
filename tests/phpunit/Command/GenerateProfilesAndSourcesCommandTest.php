@@ -15,6 +15,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 
 class GenerateProfilesAndSourcesCommandTest extends TestCase
 {
@@ -41,6 +42,10 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $credentials = $this->getEnvVars();
         $this->workspaceManagementService = new WorkspacesManagementService($credentials['url'], $credentials['token']);
         if (in_array($this->getName(false), self::TESTS_WITH_SETUP)) {
+            try {
+                $this->workspaceManagementService->deleteWorkspacesAndConfigurations(self::KBC_DEV_TEST);
+            } catch (Throwable $e) {
+            }
             $this->cloneProjectFromGit();
             $this->workspaceManagementService->createWorkspaceWithConfiguration(self::KBC_DEV_TEST);
         }
@@ -48,10 +53,6 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
 
     public function tearDown(): void
     {
-        if (in_array($this->getName(false), self::TESTS_WITH_SETUP)) {
-            $this->workspaceManagementService->deleteWorkspacesAndConfigurations(self::KBC_DEV_TEST);
-        }
-
         $fs = new Filesystem();
         $finder = new Finder();
         $fs->remove($finder->in($this->dataDir));

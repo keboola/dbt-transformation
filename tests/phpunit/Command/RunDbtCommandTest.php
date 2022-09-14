@@ -6,7 +6,6 @@ namespace DbtTransformation\Tests\Command;
 
 use DbtTransformation\CloneRepositoryService;
 use DbtTransformation\Command\RunDbtCommand;
-use DbtTransformation\Component;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
@@ -19,6 +18,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 
 class RunDbtCommandTest extends TestCase
 {
@@ -41,19 +41,21 @@ class RunDbtCommandTest extends TestCase
 
         $credentials = $this->getEnvVars();
         $this->workspaceManagementService = new WorkspacesManagementService($credentials['url'], $credentials['token']);
-        $this->cloneProjectFromGit();
+        try {
+            $this->workspaceManagementService->deleteWorkspacesAndConfigurations(
+                GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST
+            );
+        } catch (Throwable $e) {
+        }
         $workspaceId = $this->workspaceManagementService->createWorkspaceWithConfiguration(
             GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST
         );
+        $this->cloneProjectFromGit();
         $this->generateYamlFiles($workspaceId);
     }
 
     public function tearDown(): void
     {
-        $this->workspaceManagementService->deleteWorkspacesAndConfigurations(
-            GenerateProfilesAndSourcesCommandTest::KBC_DEV_TEST
-        );
-
         $fs = new Filesystem();
         $finder = new Finder();
         $fs->remove($finder->in($this->dataDir));

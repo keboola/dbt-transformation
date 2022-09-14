@@ -29,10 +29,7 @@ class CreateWorkspaceCommandTest extends TestCase
         $this->commandTester = new CommandTester($this->command);
         $credentials = $this->getEnvVars();
         $this->workspaceManagementService = new WorkspacesManagementService($credentials['url'], $credentials['token']);
-    }
 
-    public function tearDown(): void
-    {
         if ($this->getName(false) === 'testCreateWorkspaceCommand') {
             foreach ($this->validInputsProvider() as $inputProvider) {
                 $this->workspaceManagementService->deleteWorkspacesAndConfigurations(

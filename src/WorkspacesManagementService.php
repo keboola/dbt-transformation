@@ -67,13 +67,17 @@ class WorkspacesManagementService
     {
         $components = new Components($this->sapiClient);
         $workspaces = new Workspaces($this->sapiClient);
-        [$configurationWorkspace] = $this->getConfigurationWorkspaces($configurationId);
-        $workspaces->deleteWorkspace($configurationWorkspace['id']);
+        $configurationWorkspaces = $this->getConfigurationWorkspaces($configurationId);
+        if (!empty($configurationWorkspaces)) {
+            $workspaces->deleteWorkspace($configurationWorkspaces[0]['id']);
+        }
         $configuration = $components->getConfiguration(
             self::SANDBOXES_COMPONENT_ID,
             $configurationId
         );
-        $this->sandboxesClient->delete((string) $configuration['configuration']['parameters']['id']);
+        if (!empty($configuration['configuration']['parameters']['id'])) {
+            $this->sandboxesClient->delete((string) $configuration['configuration']['parameters']['id']);
+        }
         $components->deleteConfiguration(self::SANDBOXES_COMPONENT_ID, $configurationId);
     }
 

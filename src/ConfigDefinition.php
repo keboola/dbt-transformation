@@ -14,7 +14,12 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
-    private const ACCEPTED_DBT_COMMANDS = ['dbt run', 'dbt docs generate', 'dbt test', 'dbt source freshness'];
+    private const ACCEPTED_DBT_COMMANDS = [
+        Component::STEP_RUN,
+        Component::STEP_DOCS_GENERATE,
+        Component::STEP_TEST,
+        Component::STEP_SOURCE_FRESHNESS,
+    ];
 
     protected function getParametersDefinition(): ArrayNodeDefinition
     {

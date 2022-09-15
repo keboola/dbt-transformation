@@ -7,16 +7,26 @@ namespace DbtTransformation;
 use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\SyncAction\DocsHelper;
 use Keboola\Component\BaseComponent;
+use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 
 class Component extends BaseComponent
 {
+    public const COMPONENT_ID = 'keboola.dbt-transformation';
+
+    public const STEP_RUN = 'dbt run';
+    public const STEP_DOCS_GENERATE = 'dbt docs generate';
+    public const STEP_TEST = 'dbt test';
+    public const STEP_SOURCE_FRESHNESS = 'dbt source freshness';
+
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
     private CloneRepositoryService $cloneRepositoryService;
     private string $projectPath;
+    private StorageClient $storageClient;
+    private Artifacts $artifacts;
 
     public function __construct(LoggerInterface $logger)
     {
@@ -24,6 +34,12 @@ class Component extends BaseComponent
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
         $this->cloneRepositoryService = new CloneRepositoryService($this->getLogger());
+
+        $this->storageClient = new StorageClient([
+            'url' => $this->getConfig()->getStorageApiUrl(),
+            'token' => $this->getConfig()->getStorageApiToken(),
+        ]);
+        $this->artifacts = new Artifacts($this->storageClient, $this->getDataDir());
     }
 
     /**
@@ -100,20 +116,6 @@ class Component extends BaseComponent
         );
     }
 
-    private function storeResultToArtifacts(string $step): void
-    {
-        $fs = new Filesystem();
-        $artifactsPath = sprintf('%s/artifacts/out/current/%s', $this->getDataDir(), $step);
-        $fs->mkdir($artifactsPath);
-        $fs->mirror(sprintf('%s/target/', $this->projectPath), $artifactsPath);
-    }
-
-    private function readResultFromArtifacts(string $step, string $filePath): string
-    {
-        $artifactsPath = sprintf('%s/artifacts/in/runs/%s/%s', $this->getDataDir(), $step, $filePath);
-        return (string) file_get_contents($artifactsPath);
-    }
-
     protected function logExecutedSqls(): void
     {
         $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
@@ -133,7 +135,7 @@ class Component extends BaseComponent
             $this->getLogger()->info($log);
         }
         if ($step !== 'dbt deps') {
-            $this->storeResultToArtifacts($step);
+            $this->artifacts->uploadResults($this->projectPath, $step);
         }
     }
 
@@ -152,8 +154,18 @@ class Component extends BaseComponent
      */
     protected function actionDbtDocs(): array
     {
+        $componentId = (string) getenv('KBC_COMPONENTID');
+        $configId = (string) getenv('KBC_CONFIGID');
+        $branchId = (string) getenv('KBC_BRANCHID');
+
+        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+
+        $html = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'index.html');
+        $manifest = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'manifest.json');
+        $catalog = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'catalog.json');
+
         return [
-            'html' => (string) file_get_contents(__DIR__ . '/SyncAction/index.html'),
+            'html' => DocsHelper::mergeHtml($html, $manifest, $catalog),
         ];
     }
 }

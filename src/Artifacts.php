@@ -63,7 +63,9 @@ class Artifacts
         );
 
         if (empty($files)) {
-            return null;
+            throw new UserException(
+                'No artifact from previous run found. Run the component first.'
+            );
         }
 
         $file = array_shift($files);

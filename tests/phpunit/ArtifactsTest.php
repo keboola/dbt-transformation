@@ -6,6 +6,7 @@ namespace DbtTransformation\Tests;
 
 use DbtTransformation\Artifacts;
 use DbtTransformation\Component;
+use Keboola\Component\UserException;
 use Keboola\StorageApi\Client as StorageClient;
 use Keboola\StorageApi\Options\FileUploadOptions;
 use Keboola\Temp\Temp;
@@ -59,6 +60,16 @@ class ArtifactsTest extends TestCase
         foreach ($expectedPaths as $path) {
             self::assertFileExists($artifacts->getDownloadDir() . $path);
         }
+    }
+
+    public function testDownloadLastRunNotFound(): void
+    {
+        $temp = new Temp();
+        $artifacts = new Artifacts($this->storageClient, $temp->getTmpFolder());
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('No artifact from previous run found. Run the component first.');
+        $artifacts->downloadLastRun(Component::COMPONENT_ID, '456', 'default');
     }
 
     public function testUploadResults(): void

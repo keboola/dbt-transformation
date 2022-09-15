@@ -13,17 +13,28 @@ COPY docker/composer-install.sh /tmp/composer-install.sh
 
 RUN apt-get update && apt-get install -y \
         git \
+        gnupg2 \
         locales \
         unzip \
         libpq-dev \
+        unixodbc-dev \
         python3 \
         python3-pip \
+        wget \
     && pip3 install --upgrade pip cffi \
     && pip3 install \
          dbt-snowflake \
          dbt-postgres \
          dbt-redshift \
          dbt-bigquery \
+         dbt-sqlserver==v1.2.0b2 \
+    && wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1_amd64.deb\
+    && apt-get install ./multiarch-support_2.27-3ubuntu1_amd64.deb \
+    && apt-get update \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+        && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+        && apt-get update -q && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
+            msodbcsql17 \
     && rm -r /var/lib/apt/lists/* \
 	&& sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
 	&& locale-gen \

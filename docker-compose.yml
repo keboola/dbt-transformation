@@ -16,12 +16,18 @@ services:
       PGSQL_DB_PASSWORD: some password
       PGSQL_DB_DATABASE: postgres
       PGSQL_DB_SCHEMA: public
+      MSSQL_DB_HOST: mssql
+      MSSQL_DB_PORT: 1433
+      MSSQL_DB_USER: SA
+      MSSQL_DB_PASSWORD: Passw@rd
+      MSSQL_DB_SCHEMA: dbo
+      MSSQL_DB_DATABASE: test
     links:
       - pgsql
+      - mssql
 
   pgsql:
     image: postgres
-    platform: ${DOCKER_PLATFORM:-linux/amd64}
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: some password
@@ -30,10 +36,16 @@ services:
     volumes:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  mssql:
+    build: ./docker/mssql
+    ports:
+      - '1433:1433'
+
   wait:
     image: waisbrot/wait
     depends_on:
       - pgsql
+      - mssql
     environment:
-      - TARGETS=pgsql:5432
+      - TARGETS=pgsql:5432,mssql:1433
       - TIMEOUT=200

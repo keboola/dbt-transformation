@@ -6,6 +6,7 @@ namespace DbtTransformation;
 
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
+use DbtTransformation\DwhProvider\RemoteMssqlProvider;
 use DbtTransformation\DwhProvider\RemotePostgresProvider;
 use DbtTransformation\DwhProvider\RemoteSnowflakeProvider;
 use Keboola\Component\Config\BaseConfigDefinition;
@@ -81,6 +82,9 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->values(DwhProviderFactory::REMOTE_DWH_ALLOWED_TYPES)
                     ->end()
                     ->scalarNode('host')
+                        ->cannotBeEmpty()
+                    ->end()
+                    ->scalarNode('server')
                         ->cannotBeEmpty()
                     ->end()
                     ->scalarNode('user')
@@ -166,6 +170,9 @@ class ConfigDefinition extends BaseConfigDefinition
 
             case RemoteBigQueryProvider::DWH_PROVIDER_TYPE:
                 return RemoteBigQueryProvider::getConnectionParams();
+
+            case RemoteMssqlProvider::DWH_PROVIDER_TYPE:
+                return RemoteMssqlProvider::getConnectionParams();
         }
 
         throw new InvalidConfigurationException(sprintf('Remote DWH type "%s" not supported', $type));

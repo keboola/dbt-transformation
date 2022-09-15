@@ -16,6 +16,7 @@ class DwhProviderFactory
         RemoteSnowflakeProvider::DWH_PROVIDER_TYPE,
         RemotePostgresProvider::DWH_PROVIDER_TYPE,
         RemoteBigQueryProvider::DWH_PROVIDER_TYPE,
+        RemoteMssqlProvider::DWH_PROVIDER_TYPE,
     ];
 
     private DbtSourceYamlCreateService $createSourceFileService;
@@ -50,6 +51,10 @@ class DwhProviderFactory
 
                 case RemoteBigQueryProvider::DWH_PROVIDER_TYPE:
                     $provider = RemoteBigQueryProvider::class;
+                    break;
+
+                case RemoteMssqlProvider::DWH_PROVIDER_TYPE:
+                    $provider = RemoteMssqlProvider::class;
                     break;
 
                 default:

@@ -35,46 +35,34 @@ class DwhProviderFactory
     public function getProvider(Config $config, string $projectPath): DwhProviderInterface
     {
         if (!$config->hasRemoteDwh()) {
-            return new LocalSnowflakeProvider(
-                $this->createSourceFileService,
-                $this->createProfilesFileService,
-                $this->logger,
-                $config,
-                $projectPath
-            );
+            $provider = LocalSnowflakeProvider::class;
+        } else {
+            $type = $config->getRemoteDwh()['type'];
+
+            switch ($type) {
+                case RemoteSnowflakeProvider::DWH_PROVIDER_TYPE:
+                    $provider = RemoteSnowflakeProvider::class;
+                    break;
+
+                case RemotePostgresProvider::DWH_PROVIDER_TYPE:
+                    $provider = RemotePostgresProvider::class;
+                    break;
+
+                case RemoteBigQueryProvider::DWH_PROVIDER_TYPE:
+                    $provider = RemoteBigQueryProvider::class;
+                    break;
+
+                default:
+                    throw new RuntimeException(sprintf('Remote DWH type "%s" not supported', $type));
+            }
         }
 
-        $type = $config->getRemoteDwh()['type'];
-
-        switch ($type) {
-            case RemoteSnowflakeProvider::DWH_PROVIDER_TYPE:
-                return new RemoteSnowflakeProvider(
-                    $this->createSourceFileService,
-                    $this->createProfilesFileService,
-                    $this->logger,
-                    $config,
-                    $projectPath
-                );
-
-            case RemotePostgresProvider::DWH_PROVIDER_TYPE:
-                return new RemotePostgresProvider(
-                    $this->createSourceFileService,
-                    $this->createProfilesFileService,
-                    $this->logger,
-                    $config,
-                    $projectPath
-                );
-
-            case RemoteBigQueryProvider::DWH_PROVIDER_TYPE:
-                return new RemoteBigQueryProvider(
-                    $this->createSourceFileService,
-                    $this->createProfilesFileService,
-                    $this->logger,
-                    $config,
-                    $projectPath
-                );
-        }
-
-        throw new RuntimeException(sprintf('Remote DWH type "%s" not supported', $type));
+        return new $provider(
+            $this->createSourceFileService,
+            $this->createProfilesFileService,
+            $this->logger,
+            $config,
+            $projectPath
+        );
     }
 }

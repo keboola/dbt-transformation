@@ -91,7 +91,7 @@ class Component extends BaseComponent
     protected function getConfigDefinitionClass(): string
     {
         $configRaw = $this->getRawConfig();
-        if ($configRaw['action'] !== 'run') {
+        if (($configRaw['action'] ?? 'run') !== 'run') {
             return ConfigDefinitionSyncActions::class;
         }
         return ConfigDefinition::class;

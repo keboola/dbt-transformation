@@ -13,6 +13,7 @@ use Keboola\StorageApi\Options\Components\Configuration;
 use Keboola\StorageApi\Options\Components\ListComponentConfigurationsOptions;
 use Keboola\StorageApi\Options\Components\ListConfigurationWorkspacesOptions;
 use Keboola\StorageApi\Workspaces;
+use Throwable;
 
 class WorkspacesManagementService
 {
@@ -78,7 +79,10 @@ class WorkspacesManagementService
             $configurationId
         );
         if (!empty($configuration['configuration']['parameters']['id'])) {
-            $this->sandboxesClient->delete((string) $configuration['configuration']['parameters']['id']);
+            try {
+                $this->sandboxesClient->delete((string) $configuration['configuration']['parameters']['id']);
+            } catch (Throwable $e) {
+            }
         }
         $components->deleteConfiguration(self::SANDBOXES_COMPONENT_ID, $configurationId);
     }

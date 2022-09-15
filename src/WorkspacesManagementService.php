@@ -69,7 +69,9 @@ class WorkspacesManagementService
         $workspaces = new Workspaces($this->sapiClient);
         $configurationWorkspaces = $this->getConfigurationWorkspaces($configurationId);
         if (!empty($configurationWorkspaces)) {
-            $workspaces->deleteWorkspace($configurationWorkspaces[0]['id']);
+            foreach ($configurationWorkspaces as $configurationWorkspace) {
+                $workspaces->deleteWorkspace($configurationWorkspace['id']);
+            }
         }
         $configuration = $components->getConfiguration(
             self::SANDBOXES_COMPONENT_ID,

@@ -35,31 +35,26 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->scalarNode('repo')
                             ->isRequired()
                             ->cannotBeEmpty()
-                    ->end()
-                ->end()
-                    ->children()
+                        ->end()
                         ->scalarNode('branch')
-                    ->end()
-                ->end()
-                ->children()
+                        ->end()
                         ->scalarNode('username')
-                    ->end()
-                ->end()
-                    ->children()
+                        ->end()
                         ->scalarNode('password')
+                        ->end()
                     ->end()
+                    ->validate()
+                    ->always(function ($item) {
+                        if ((empty($item['username']) && !empty($item['password']))
+                            || (!empty($item['username']) && empty($item['password']))
+                        ) {
+                            throw new InvalidConfigurationException('Both username and password has to be set.');
+                        }
+                        return $item;
+                    })
                 ->end()
-                ->validate()
-                ->always(function ($item) {
-                    if ((empty($item['username']) && !empty($item['password']))
-                        || (!empty($item['username']) && empty($item['password']))
-                    ) {
-                        throw new InvalidConfigurationException('Both username and password has to be set.');
-                    }
-                    return $item;
-                })
             ->end()
-            ->end();
+        ->end();
 
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode

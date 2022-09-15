@@ -81,6 +81,16 @@ class Config extends BaseConfig
         }
     }
 
+    public function getConfigId(): string
+    {
+        return $this->getValue(['parameters', 'configId']);
+    }
+
+    public function getBranchId(): string
+    {
+        return $this->getValue(['parameters', 'branchId'], 'default');
+    }
+
     public function getStorageApiToken(): string
     {
         $token = getenv('KBC_TOKEN');

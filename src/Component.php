@@ -154,11 +154,10 @@ class Component extends BaseComponent
      */
     protected function actionDbtDocs(): array
     {
-        $componentId = (string) getenv('KBC_COMPONENTID');
-        $configId = (string) getenv('KBC_CONFIGID');
-        $branchId = (string) getenv('KBC_BRANCHID');
+        $configId = $this->getConfig()->getConfigId();
+        $branchId = $this->getConfig()->getBranchId();
 
-        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+        $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
 
         $html = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'index.html');
         $manifest = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'manifest.json');

@@ -75,7 +75,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $this->assertStringContainsString('Sources and profiles.yml files generated.', $output);
 
         $workspaces = $this->workspaceManagementService->getConfigurationWorkspaces(self::KBC_DEV_TEST);
-        $workspace = array_pop($workspaces);
+        $workspace = (array) array_pop($workspaces);
 
         $this->assertStringContainsString(
             sprintf('export DBT_%s_SCHEMA=%s', self::KBC_DEV_TEST, $workspace['connection']['schema']),

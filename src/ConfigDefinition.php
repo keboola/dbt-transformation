@@ -30,6 +30,16 @@ class ConfigDefinition extends BaseConfigDefinition
             ->isRequired()
             ->children()
                 ->arrayNode('git')
+                    ->validate()
+                        ->always(function ($item) {
+                            if ((empty($item['username']) && !empty($item['password']))
+                                || (!empty($item['username']) && empty($item['password']))
+                            ) {
+                                throw new InvalidConfigurationException('Both username and password has to be set.');
+                            }
+                            return $item;
+                        })
+                    ->end()
                     ->isRequired()
                     ->children()
                         ->scalarNode('repo')
@@ -43,18 +53,8 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->scalarNode('password')
                         ->end()
                     ->end()
-                    ->validate()
-                    ->always(function ($item) {
-                        if ((empty($item['username']) && !empty($item['password']))
-                            || (!empty($item['username']) && empty($item['password']))
-                        ) {
-                            throw new InvalidConfigurationException('Both username and password has to be set.');
-                        }
-                        return $item;
-                    })
                 ->end()
-            ->end()
-        ->end();
+            ->end();
 
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode

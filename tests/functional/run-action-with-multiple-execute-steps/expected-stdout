@@ -32,5 +32,5 @@ Running with dbt=%s
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')
 1 of 2 START freshness of in.c-test-bucket.test %s [RUN]
-2 of 2 START freshness of out.c-my-dbt-transformation-transformation.fct_model %s [RUN]
+%A
 Done.

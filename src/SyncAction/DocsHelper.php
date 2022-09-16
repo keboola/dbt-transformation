@@ -10,7 +10,7 @@ class DocsHelper
     {
         $searchStr = 'o=[i("manifest","manifest.json"+t),i("catalog","catalog.json"+t)]';
         $newStr = sprintf(
-            'o=[{label: \'manifest\', data: "%s"},{label: \'catalog\', data: "%s"}]',
+            'o=[{label: \'manifest\', data: %s},{label: \'catalog\', data: %s}]',
             $manifestJson,
             $catalogJson
         );

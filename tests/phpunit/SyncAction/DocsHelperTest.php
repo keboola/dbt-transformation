@@ -21,8 +21,8 @@ class DocsHelperTest extends TestCase
 
         $expectedHtml = '<html><head></head><body><script type="application/javascript">            
             loadProject=function() {            
-                o=[{label: \'manifest\', data: "{"metadata":{"foo":"bar"}}"},'
-                . '{label: \'catalog\', data: "{"metadata":{"dbt_version":"1.0.6"}}"}];            
+                o=[{label: \'manifest\', data: {"metadata":{"foo":"bar"}}},'
+                . '{label: \'catalog\', data: {"metadata":{"dbt_version":"1.0.6"}}}];            
             }
             </script></body></html>';
 

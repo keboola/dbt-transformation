@@ -1,7 +1,9 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-mssql-sources (%s)
 Remote sqlserver DWH: mssql
+Executing command "dbt deps"
 Running with dbt=%s
 Warning: No packages were found in packages.yml
+Executing command "dbt run"
 Running with dbt=%s
 Partial parse save file not found. Starting full parse.
 Found 2 models, 0 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 1 source, 0 exposures, 0 metrics

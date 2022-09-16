@@ -1,6 +1,8 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch main (1eb5a3acfd31a878eea30cc06079de94f68dafb0)
+Executing command "dbt deps"
 Running with dbt=%s
 Warning: No packages were found in packages.yml
+Executing command "dbt run"
 Running with dbt=%s
 Partial parse save file not found. Starting full parse.
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
@@ -12,12 +14,14 @@ Concurrency: 1 threads (target='kbc_prod')
 Finished running 2 view models in %s hours %s minutes and %s seconds (%ss).
 Completed successfully
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
+Executing command "dbt docs generate"
 Running with dbt=%s
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')
 Done.
 Building catalog
 Catalog written to /tmp/%s/dbt-project/target/catalog.json
+Executing command "dbt test"
 Running with dbt=%s
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')
@@ -28,6 +32,7 @@ Concurrency: 1 threads (target='kbc_prod')
 Finished running 2 tests in %s hours %s minutes and %s seconds (%ss).
 Completed successfully
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
+Executing command "dbt source freshness"
 Running with dbt=%s
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')

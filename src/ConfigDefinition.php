@@ -14,7 +14,12 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
-    private const ACCEPTED_DBT_COMMANDS = ['dbt run', 'dbt docs generate', 'dbt test', 'dbt source freshness'];
+    private const ACCEPTED_DBT_COMMANDS = [
+        Component::STEP_RUN,
+        Component::STEP_DOCS_GENERATE,
+        Component::STEP_TEST,
+        Component::STEP_SOURCE_FRESHNESS,
+    ];
 
     protected function getParametersDefinition(): ArrayNodeDefinition
     {
@@ -25,35 +30,30 @@ class ConfigDefinition extends BaseConfigDefinition
             ->isRequired()
             ->children()
                 ->arrayNode('git')
+                    ->validate()
+                        ->always(function ($item) {
+                            if ((empty($item['username']) && !empty($item['password']))
+                                || (!empty($item['username']) && empty($item['password']))
+                            ) {
+                                throw new InvalidConfigurationException('Both username and password has to be set.');
+                            }
+                            return $item;
+                        })
+                    ->end()
                     ->isRequired()
                     ->children()
                         ->scalarNode('repo')
                             ->isRequired()
                             ->cannotBeEmpty()
-                    ->end()
-                ->end()
-                    ->children()
+                        ->end()
                         ->scalarNode('branch')
-                    ->end()
-                ->end()
-                ->children()
+                        ->end()
                         ->scalarNode('username')
-                    ->end()
-                ->end()
-                    ->children()
+                        ->end()
                         ->scalarNode('password')
+                        ->end()
                     ->end()
                 ->end()
-                ->validate()
-                ->always(function ($item) {
-                    if ((empty($item['username']) && !empty($item['password']))
-                        || (!empty($item['username']) && empty($item['password']))
-                    ) {
-                        throw new InvalidConfigurationException('Both username and password has to be set.');
-                    }
-                    return $item;
-                })
-            ->end()
             ->end();
 
         /** @noinspection NullPointerExceptionInspection */

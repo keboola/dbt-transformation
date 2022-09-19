@@ -35,10 +35,6 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
      */
     public function setUp(): void
     {
-        $application = new Application();
-        $application->add(new GenerateProfilesAndSourcesCommand());
-        $this->command = $application->find('app:generate-profiles-and-sources');
-        $this->commandTester = new CommandTester($this->command);
         $credentials = $this->getEnvVars();
         $this->workspaceManagementService = new WorkspacesManagementService($credentials['url'], $credentials['token']);
         if (in_array($this->getName(false), self::TESTS_WITH_SETUP)) {
@@ -49,6 +45,11 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
             $this->cloneProjectFromGit();
             $this->workspaceManagementService->createWorkspaceWithConfiguration(self::KBC_DEV_TEST);
         }
+
+        $application = new Application();
+        $application->add(new GenerateProfilesAndSourcesCommand());
+        $this->command = $application->find('app:generate-profiles-and-sources');
+        $this->commandTester = new CommandTester($this->command);
     }
 
     public function tearDown(): void
@@ -73,7 +74,9 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
         $this->assertEquals(Command::SUCCESS, $exitCode, $output);
         $this->assertStringContainsString('Sources and profiles.yml files generated.', $output);
 
-        [$workspace] = $this->workspaceManagementService->getConfigurationWorkspaces(self::KBC_DEV_TEST);
+        $workspaces = $this->workspaceManagementService->getConfigurationWorkspaces(self::KBC_DEV_TEST);
+        $workspace = (array) array_pop($workspaces);
+
         $this->assertStringContainsString(
             sprintf('export DBT_%s_SCHEMA=%s', self::KBC_DEV_TEST, $workspace['connection']['schema']),
             $output

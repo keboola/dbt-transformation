@@ -44,6 +44,7 @@ class ConfigTest extends TestCase
     {
         yield 'minimal config' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -57,6 +58,7 @@ class ConfigTest extends TestCase
 
         yield 'config with branch' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -71,6 +73,7 @@ class ConfigTest extends TestCase
 
         yield 'config with credentials' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -86,6 +89,7 @@ class ConfigTest extends TestCase
 
         yield 'config with branch and credentials' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -102,6 +106,7 @@ class ConfigTest extends TestCase
 
         yield 'config with show executed SQLs parameter' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -116,6 +121,7 @@ class ConfigTest extends TestCase
 
         yield 'config with model names' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -133,6 +139,7 @@ class ConfigTest extends TestCase
 
         yield 'config with multiple execute steps' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -146,6 +153,7 @@ class ConfigTest extends TestCase
 
         yield 'config with remote DWH postgres' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -168,6 +176,7 @@ class ConfigTest extends TestCase
 
         yield 'config with remote DWH bigquery' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -195,12 +204,15 @@ class ConfigTest extends TestCase
     public function invalidConfigsData(): Generator
     {
         yield 'empty config' => [
-            'configData' => [],
+            'configData' => [
+                'action' => 'run',
+            ],
             'expectedError' => 'The child config "parameters" under "root" must be configured.',
         ];
 
         yield 'empty parameters' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [],
             ],
             'expectedError' => 'The child config "git" under "root.parameters" must be configured.',
@@ -208,6 +220,7 @@ class ConfigTest extends TestCase
 
         yield 'empty git' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [],
                 ],
@@ -217,6 +230,7 @@ class ConfigTest extends TestCase
 
         yield 'empty git repo' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => '',
@@ -228,6 +242,7 @@ class ConfigTest extends TestCase
 
         yield 'git repo has username but not password' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -240,6 +255,7 @@ class ConfigTest extends TestCase
 
         yield 'git repo has password but not username' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -252,6 +268,7 @@ class ConfigTest extends TestCase
 
         yield 'missing dbt node' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -263,6 +280,7 @@ class ConfigTest extends TestCase
 
         yield 'missing execute steps' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -276,6 +294,7 @@ class ConfigTest extends TestCase
 
         yield 'no execute steps' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -290,6 +309,7 @@ class ConfigTest extends TestCase
 
         yield 'invalid execute steps' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -306,6 +326,7 @@ class ConfigTest extends TestCase
 
         yield 'config with remote DWH non-supported type' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
@@ -326,6 +347,7 @@ class ConfigTest extends TestCase
 
         yield 'config with remote DWH missing credentials' => [
             'configData' => [
+                'action' => 'run',
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',

@@ -54,4 +54,10 @@ class RemoteRedshiftProvider extends RemoteSnowflakeProvider implements DwhProvi
             'threads',
         ];
     }
+
+    protected function getConnectionLogMessage(): string
+    {
+        $dwhConfig = $this->config->getRemoteDwh();
+        return sprintf('Remote %s DWH: %s', self::DWH_PROVIDER_TYPE, $dwhConfig['host']);
+    }
 }

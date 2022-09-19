@@ -1,0 +1,17 @@
+Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-redshift-sources  (%s)
+Remote postgres DWH: testing.cx4py8yq28xb.us-east-1.redshift.amazonaws.com
+Executing command "dbt deps"
+Running with dbt=%s
+Warning: No packages were found in packages.yml
+Executing command "dbt run"
+Running with dbt=%s
+Partial parse save file not found. Starting full parse.
+Found 2 models, 0 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 1 source, 0 exposures, 0 metrics
+Concurrency: 4 threads (target='kbc_prod')
+1 of 2 START view model public.stg_model %s [RUN]
+1 of 2 OK created view model public.stg_model %s [CREATE VIEW in %ss]
+2 of 2 START view model public.fct_model %s [RUN]
+2 of 2 OK created view model public.fct_model %s [CREATE VIEW in %ss]
+Finished running 2 view models in %s hours %s minutes and %s seconds (%ss).
+Completed successfully
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2

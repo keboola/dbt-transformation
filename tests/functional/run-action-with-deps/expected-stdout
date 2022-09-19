@@ -1,8 +1,10 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-deps (%s)
+Executing command "dbt deps"
 Running with dbt=%s
 Installing dbt-labs/dbt_utils
   Installed from version %s
   Up to date!
+Executing command "dbt run"
 Running with dbt=%s
 Partial parse save file not found. Starting full parse.
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics

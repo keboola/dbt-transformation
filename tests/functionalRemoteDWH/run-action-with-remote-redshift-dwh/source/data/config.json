@@ -1,0 +1,31 @@
+{
+  "authorization": {
+    "workspace": {
+      "host": "%env(string:SNOWFLAKE_HOST)%",
+      "warehouse": "%env(string:SNOWFLAKE_WAREHOUSE)%",
+      "database": "%env(string:SNOWFLAKE_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_SCHEMA)%",
+      "user": "%env(string:SNOWFLAKE_USER)%",
+      "password": "%env(string:SNOWFLAKE_PASSWORD)%"
+    }
+  },
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project-public.git",
+      "branch": "branch-with-redshift-sources"
+    },
+    "dbt": {
+      "executeSteps": ["dbt run"]
+    },
+    "remoteDwh": {
+      "type": "redshift",
+      "host": "%env(string:REDSHIFT_DB_HOST)%",
+      "port": "%env(string:REDSHIFT_DB_PORT)%",
+      "user": "%env(string:REDSHIFT_DB_USER)%",
+      "#password": "%env(string:REDSHIFT_DB_PASSWORD)%",
+      "dbname": "%env(string:REDSHIFT_DB_DATABASE)%",
+      "schema": "%env(string:REDSHIFT_DB_SCHEMA)%",
+      "threads": "%env(string:REDSHIFT_DB_THREADS)%"
+    }
+  }
+}

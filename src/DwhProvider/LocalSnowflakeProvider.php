@@ -137,11 +137,14 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     {
         // @todo: tahle metoda se muze zjednodusit a byt pro kazdeho providera specificka
         $values = array_map(function ($item) use ($configurationName) {
-            $asNumber = '';
+            $filter = '';
             if ($item === 'threads' || $item === 'port') {
-                $asNumber = '| as_number';
+                $filter = '| as_number';
             }
-            return sprintf('{{ env_var("DBT_%s_%s")%s }}', $configurationName, strtoupper($item), $asNumber);
+            if ($item === 'trust_cert') {
+                $filter = '| as_bool';
+            }
+            return sprintf('{{ env_var("DBT_%s_%s")%s }}', $configurationName, strtoupper($item), $filter);
         }, $dbtParams);
 
         $outputDefinition = array_combine($dbtParams, $values);

@@ -130,6 +130,7 @@ class Component extends BaseComponent
      */
     protected function executeStep(DbtService $dbtService, string $step): void
     {
+        $this->getLogger()->info(sprintf('Executing command "%s"', $step));
         $output = $dbtService->runCommand($step);
         foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
             $this->getLogger()->info($log);

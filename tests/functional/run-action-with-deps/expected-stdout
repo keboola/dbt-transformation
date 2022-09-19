@@ -3,7 +3,7 @@ Executing command "dbt deps"
 Running with dbt=%s
 Installing dbt-labs/dbt_utils
   Installed from version %s
-  Up to date!
+%A
 Executing command "dbt run"
 Running with dbt=%s
 Partial parse save file not found. Starting full parse.

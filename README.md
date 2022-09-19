@@ -95,7 +95,7 @@ Clone this repository and init the workspace with following command:
 ```shell
 git clone https://github.com/keboola/dbt-transformation.git
 cd dbt-transformation
-docker-compose build
+docker-compose build #on M1 add flag: --build-arg TARGETPLATFORM=linux/arm64
 docker-compose run --rm app composer install --no-scripts
 ```
 

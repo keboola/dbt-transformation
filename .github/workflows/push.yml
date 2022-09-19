@@ -25,7 +25,7 @@ env:
     BIGQUERY_KEY_CONTENT: ${{ secrets.BIGQUERY_KEY_CONTENT }}
 
     # Redshift
-    REDSHIFT_DB_HOST: connection-ci-testing.cx4py8yq28xb.us-east-1.redshift.amazonaws.com
+    REDSHIFT_DB_HOST: testing.cx4py8yq28xb.us-east-1.redshift.amazonaws.com
     REDSHIFT_DB_PORT: 5439
     REDSHIFT_DB_USER: dbt_redshift_ci
     REDSHIFT_DB_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}

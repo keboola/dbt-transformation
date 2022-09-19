@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "dbt_schema_version": "https://schemas.getdbt.com/dbt/run-results/v4.json",
+    "dbt_version": "1.0.6",
+    "generated_at": "2022-09-13T12:47:38.436903Z",
+    "invocation_id": "ab16a97a-5019-44b6-818b-cd35458ab5e7",
+    "env": {
+    }
+  },
+  "results": [
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2022-09-13T12:47:36.498589Z",
+          "completed_at": "2022-09-13T12:47:36.502296Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2022-09-13T12:47:36.503145Z",
+          "completed_at": "2022-09-13T12:47:37.189261Z"
+        }
+      ],
+      "thread_id": "Thread-1",
+      "execution_time": 0.8743953704833984,
+      "adapter_response": {
+        "_message": "SUCCESS 1",
+        "code": "SUCCESS",
+        "rows_affected": 1
+      },
+      "message": "SUCCESS 1",
+      "failures": null,
+      "unique_id": "model.my_new_project.stg_model"
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2022-09-13T12:47:37.378772Z",
+          "completed_at": "2022-09-13T12:47:37.383660Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2022-09-13T12:47:37.384817Z",
+          "completed_at": "2022-09-13T12:47:38.020192Z"
+        }
+      ],
+      "thread_id": "Thread-1",
+      "execution_time": 1.0540132522583008,
+      "adapter_response": {
+        "_message": "SUCCESS 1",
+        "code": "SUCCESS",
+        "rows_affected": 1
+      },
+      "message": "SUCCESS 1",
+      "failures": null,
+      "unique_id": "model.my_new_project.fct_model"
+    }
+  ],
+  "elapsed_time": 4.059321641921997,
+  "args": {
+    "log_format": "json",
+    "write_json": true,
+    "use_colors": true,
+    "printer_width": 80,
+    "warn_error": true,
+    "version_check": true,
+    "partial_parse": true,
+    "static_parser": true,
+    "profiles_dir": "/data/dbt-project",
+    "send_anonymous_usage_stats": false,
+    "event_buffer_size": 100000,
+    "target": "kbc_prod",
+    "which": "run",
+    "rpc_method": "run",
+    "indirect_selection": "eager"
+  }
+}

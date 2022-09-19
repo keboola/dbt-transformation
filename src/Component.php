@@ -147,6 +147,7 @@ class Component extends BaseComponent
     {
         return [
             'dbtDocs' => 'actionDbtDocs',
+            'dbtRunResults' => 'actionDbtRunResults',
         ];
     }
 
@@ -166,6 +167,23 @@ class Component extends BaseComponent
 
         return [
             'html' => DocsHelper::mergeHtml($html, $manifest, $catalog),
+        ];
+    }
+
+    protected function actionDbtRunResults(): array
+    {
+        $configId = $this->getConfig()->getConfigId();
+        $branchId = $this->getConfig()->getBranchId();
+
+        $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
+
+        $manifestJson = $this->artifacts->readFromFile(self::STEP_RUN, 'manifest.json');
+        $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
+        $runResultsJson = $this->artifacts->readFromFile(self::STEP_RUN, 'run_results.json');
+        $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
+
+        return [
+            'modelTiming' => DocsHelper::getModelTiming($manifest, $runResults),
         ];
     }
 }

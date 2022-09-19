@@ -88,7 +88,7 @@ class Artifacts
     public function readFromFile(string $step, string $filePath): string
     {
         $file = new SplFileInfo(sprintf('%s/%s/%s', $this->getDownloadDir(), $step, $filePath));
-        return (string) file_get_contents((string) $file->getRealPath());
+        return (string) file_get_contents($file->getPathname());
     }
 
     private function extractArchive(string $sourcePath, string $targetPath): void

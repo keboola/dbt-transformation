@@ -58,7 +58,7 @@ class DocsHelperTest extends TestCase
                 'dependsOn' => [
                     'model.my_new_project.stg_model',
                 ],
-            ]
+            ],
         ];
 
         echo json_encode($modelTiming);

@@ -170,6 +170,9 @@ class Component extends BaseComponent
         ];
     }
 
+    /**
+     * @return array<string, array<int, array<string, mixed>>>
+     */
     protected function actionDbtRunResults(): array
     {
         $configId = $this->getConfig()->getConfigId();

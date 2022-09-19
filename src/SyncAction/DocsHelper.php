@@ -18,6 +18,11 @@ class DocsHelper
         return (string) str_replace($searchStr, $newStr, $html);
     }
 
+    /**
+     * @param array<string, mixed> $manifest
+     * @param array<string, mixed> $runResults
+     * @return array<int, array<string, mixed>>
+     */
     public static function getModelTiming(array $manifest, array $runResults): array
     {
         $nodes = $manifest['nodes'];

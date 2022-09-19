@@ -61,8 +61,6 @@ class DocsHelperTest extends TestCase
             ],
         ];
 
-        echo json_encode($modelTiming);
-
         self::assertSame($expected, $modelTiming);
     }
 }

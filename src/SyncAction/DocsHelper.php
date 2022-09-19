@@ -38,16 +38,24 @@ class DocsHelper
 
             $idArray = explode('.', $run['unique_id']);
 
+            // deduplicate
+            $dependsOnNodes = array_filter($node['depends_on']['nodes'], function ($node) {
+                $idArray = explode('.', $node);
+                return array_shift($idArray) === 'model';
+            });
+
+            $dependsOn = [];
+            foreach ($dependsOnNodes as $dependOnNode) {
+                $dependsOn[$dependOnNode] = $dependOnNode;
+            }
+
             $result[] = [
                 'id' => $run['unique_id'],
                 'name' => array_pop($idArray),
                 'status' => $run['status'],
                 'timeStarted' => $executeTiming['started_at'],
                 'timeCompleted' => $executeTiming['completed_at'],
-                'dependsOn' => array_filter($node['depends_on']['nodes'], function ($node) {
-                    $idArray = explode('.', $node);
-                    return array_shift($idArray) === 'model';
-                }),
+                'dependsOn' => array_values($dependsOn),
             ];
         }
 

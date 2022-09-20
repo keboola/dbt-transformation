@@ -23,6 +23,9 @@
           "macro.dbt.persist_docs"
         ],
         "nodes": [
+          "model.my_new_project.stg_model",
+          "model.my_new_project.stg_model",
+          "model.my_new_project.stg_model",
           "model.my_new_project.stg_model"
         ]
       },

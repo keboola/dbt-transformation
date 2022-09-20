@@ -83,12 +83,12 @@ class Config extends BaseConfig
 
     public function getConfigId(): string
     {
-        return $this->getValue(['parameters', 'configId']);
+        return $this->getStringValue(['parameters', 'configId']);
     }
 
     public function getBranchId(): string
     {
-        return (string) $this->getValue(['parameters', 'branchId'], 'default');
+        return $this->getStringValue(['parameters', 'branchId'], 'default');
     }
 
     public function getStorageApiToken(): string

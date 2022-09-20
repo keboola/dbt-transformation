@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Tests;
+namespace DbtTransformation\Tests\ConfigDefinition;
 
 use DbtTransformation\Config;
-use DbtTransformation\ConfigDefinition;
+use DbtTransformation\ConfigDefinition\ConfigDefinition;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
-class ConfigTest extends TestCase
+class ConfigDefinitionTest extends TestCase
 {
     /**
      * @param array<string, mixed> $configData

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Command;
 
 use DbtTransformation\Command\CreateWorkspaceCommand;
-use DbtTransformation\WorkspacesManagementService;
+use DbtTransformation\Service\WorkspacesManagementService;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

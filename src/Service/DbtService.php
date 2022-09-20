@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation;
+namespace DbtTransformation\Service;
 
+use DbtTransformation\Helper\ParseDbtOutputHelper;
 use Keboola\Component\UserException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;

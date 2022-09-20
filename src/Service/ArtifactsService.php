@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation;
+namespace DbtTransformation\Service;
 
-use Exception;
 use Keboola\Component\UserException;
 use Keboola\StorageApi\Client as StorageClient;
 use Keboola\StorageApi\Options\ListFilesOptions;
@@ -13,7 +12,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Throwable;
 
-class Artifacts
+class ArtifactsService
 {
     private StorageClient $storageClient;
     private Filesystem $filesystem;

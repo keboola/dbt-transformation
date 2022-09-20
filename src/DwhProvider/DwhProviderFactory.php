@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\DwhProvider;
 
 use DbtTransformation\Config;
-use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 

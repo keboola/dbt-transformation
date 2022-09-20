@@ -4,10 +4,19 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
-use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\ConfigDefinition\ConfigDefinition;
+use DbtTransformation\ConfigDefinition\SyncAction\DbtDocsDefinition;
+use DbtTransformation\ConfigDefinition\SyncAction\DbtRunResultsDefinition;
+use DbtTransformation\ConfigDefinition\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
-use DbtTransformation\SyncAction\DocsHelper;
+use DbtTransformation\Helper\DbtDocsHelper;
+use DbtTransformation\Helper\ParseDbtOutputHelper;
+use DbtTransformation\Helper\ParseLogFileHelper;
+use DbtTransformation\Service\ArtifactsService;
+use DbtTransformation\Service\DbtService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\Service\GitRepositoryService;
 use Keboola\Component\BaseComponent;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
@@ -23,23 +32,24 @@ class Component extends BaseComponent
 
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
-    private CloneRepositoryService $cloneRepositoryService;
+    private GitRepositoryService $gitRepositoryService;
     private string $projectPath;
     private StorageClient $storageClient;
-    private Artifacts $artifacts;
+    private ArtifactsService $artifacts;
 
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
-        $this->cloneRepositoryService = new CloneRepositoryService($this->getLogger());
+        $this->gitRepositoryService = new GitRepositoryService($this->getDataDir());
 
         $this->storageClient = new StorageClient([
             'url' => $this->getConfig()->getStorageApiUrl(),
             'token' => $this->getConfig()->getStorageApiToken(),
         ]);
-        $this->artifacts = new Artifacts($this->storageClient, $this->getDataDir());
+        $this->artifacts = new ArtifactsService($this->storageClient, $this->getDataDir());
+        $this->setProjectPath($this->getDataDir());
     }
 
     /**
@@ -47,11 +57,8 @@ class Component extends BaseComponent
      */
     protected function run(): void
     {
-        $dataDir = $this->getDataDir();
         $config = $this->getConfig();
-        $gitRepositoryUrl = $config->getGitRepositoryUrl();
-        $this->cloneRepository($config, $gitRepositoryUrl);
-        $this->setProjectPath($dataDir);
+        $this->cloneRepository($config);
 
         $dwhProviderFactory = new DwhProviderFactory(
             $this->createSourceFileService,
@@ -91,10 +98,19 @@ class Component extends BaseComponent
     protected function getConfigDefinitionClass(): string
     {
         $configRaw = $this->getRawConfig();
-        if (($configRaw['action'] ?? 'run') !== 'run') {
-            return ConfigDefinitionSyncActions::class;
+        $action = $configRaw['action'] ?? 'run';
+
+        switch ($action) {
+            case 'dbtDocs':
+                return DbtDocsDefinition::class;
+            case 'dbtRunResults':
+                return DbtRunResultsDefinition::class;
+            case 'gitRepository':
+                return GitRepositoryDefinition::class;
+            case 'run':
+            default:
+                return ConfigDefinition::class;
         }
-        return ConfigDefinition::class;
     }
 
     protected function setProjectPath(string $dataDir): void
@@ -105,20 +121,28 @@ class Component extends BaseComponent
     /**
      * @throws \Keboola\Component\UserException
      */
-    protected function cloneRepository(Config $config, string $gitRepositoryUrl): void
+    protected function cloneRepository(Config $config): void
     {
-        $this->cloneRepositoryService->clone(
-            $this->getDataDir(),
-            $gitRepositoryUrl,
+        $this->gitRepositoryService->clone(
+            $config->getGitRepositoryUrl(),
             $config->getGitRepositoryBranch(),
             $config->getGitRepositoryUsername(),
             $config->getGitRepositoryPassword()
         );
+
+        $branch = $this->gitRepositoryService->getCurrentBranch($this->projectPath);
+
+        $this->getLogger()->info(sprintf(
+            'Successfully cloned repository %s from branch %s (%s)',
+            $config->getGitRepositoryUrl(),
+            $branch['name'],
+            $branch['ref']
+        ));
     }
 
     protected function logExecutedSqls(): void
     {
-        $sqls = (new ParseLogFileService(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
+        $sqls = (new ParseLogFileHelper(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
         $this->getLogger()->info('Executed SQLs:');
         foreach ($sqls as $sql) {
             $this->getLogger()->info($sql);
@@ -148,6 +172,7 @@ class Component extends BaseComponent
         return [
             'dbtDocs' => 'actionDbtDocs',
             'dbtRunResults' => 'actionDbtRunResults',
+            'gitRepository' => 'actionGitRepository',
         ];
     }
 
@@ -166,7 +191,7 @@ class Component extends BaseComponent
         $catalog = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'catalog.json');
 
         return [
-            'html' => DocsHelper::mergeHtml($html, $manifest, $catalog),
+            'html' => DbtDocsHelper::mergeHtml($html, $manifest, $catalog),
         ];
     }
 
@@ -186,7 +211,31 @@ class Component extends BaseComponent
         $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
 
         return [
-            'modelTiming' => DocsHelper::getModelTiming($manifest, $runResults),
+            'modelTiming' => DbtDocsHelper::getModelTiming($manifest, $runResults),
+        ];
+    }
+
+    /**
+     * @return array<string, array<string, array<int, string>|string>>
+     */
+    protected function actionGitRepository(): array
+    {
+        $config = $this->getConfig();
+
+        $this->gitRepositoryService->clone(
+            $config->getGitRepositoryUrl(),
+            $config->getGitRepositoryBranch(),
+            $config->getGitRepositoryUsername(),
+            $config->getGitRepositoryPassword()
+        );
+
+        $branches = $this->gitRepositoryService->listRemoteBranches($this->projectPath);
+
+        return [
+            'repository' => [
+                'url' => $config->getGitRepositoryUrl(),
+                'branches' => $branches,
+            ],
         ];
     }
 }

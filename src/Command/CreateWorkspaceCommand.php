@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Command;
 
-use DbtTransformation\WorkspacesManagementService;
+use DbtTransformation\Service\WorkspacesManagementService;
 use Dotenv\Dotenv;
 use Keboola\StorageApi\ClientException;
 use Symfony\Component\Console\Command\Command;

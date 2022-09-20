@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Command;
 
-use DbtTransformation\Component;
-use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
-use DbtTransformation\WorkspacesManagementService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\Service\WorkspacesManagementService;
 use Dotenv\Dotenv;
 use Generator;
 use Keboola\Component\UserException;
 use Keboola\Sandboxes\Api\Sandbox;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\ClientException;
-use Psr\Log\NullLogger;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 

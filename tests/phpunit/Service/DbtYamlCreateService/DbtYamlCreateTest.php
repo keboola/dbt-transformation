@@ -2,22 +2,20 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Tests;
+namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
-use DbtTransformation\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
-use DbtTransformation\Tests\Command\GenerateProfilesAndSourcesCommandTest;
+use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 class DbtYamlCreateTest extends TestCase
 {
-    protected string $dataDir = __DIR__ . '/../../data';
-    protected string $providerDataDir = __DIR__ . '/data';
+    protected string $dataDir = __DIR__ . '/../../../../data';
+    protected string $providerDataDir = __DIR__ . '/../../data';
 
     public function tearDown(): void
     {

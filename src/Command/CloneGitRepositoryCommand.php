@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Command;
 
-use DbtTransformation\CloneRepositoryService;
+use DbtTransformation\Service\GitRepositoryService;
 use Keboola\Component\UserException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,12 +27,12 @@ class CloneGitRepositoryCommand extends Command
      */
     protected static $defaultDescription = 'Clone GIT repository with your DBT project';
 
-    private CloneRepositoryService $cloneRepositoryService;
+    private GitRepositoryService $cloneRepositoryService;
 
     public function __construct(?string $name = null)
     {
         parent::__construct($name);
-        $this->cloneRepositoryService = new CloneRepositoryService();
+        $this->cloneRepositoryService = new GitRepositoryService(self::DATA_DIR);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -54,7 +54,7 @@ class CloneGitRepositoryCommand extends Command
         $password = $helper->ask($input, $output, $questionPassword);
 
         try {
-            $this->cloneRepositoryService->clone(self::DATA_DIR, $repositoryUrl, $branch, $username, $password);
+            $this->cloneRepositoryService->clone($repositoryUrl, $branch, $username, $password);
         } catch (UserException $e) {
             $output->writeln($e->getMessage());
             return Command::FAILURE;

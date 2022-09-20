@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Tests;
+namespace DbtTransformation\Tests\Service;
 
-use DbtTransformation\Artifacts;
 use DbtTransformation\Component;
+use DbtTransformation\Service\ArtifactsService;
 use Keboola\Component\UserException;
 use Keboola\StorageApi\Client as StorageClient;
 use Keboola\StorageApi\Options\FileUploadOptions;
 use Keboola\Temp\Temp;
 use PHPUnit\Framework\TestCase;
 
-class ArtifactsTest extends TestCase
+class ArtifactsServiceTest extends TestCase
 {
     private StorageClient $storageClient;
 
@@ -30,7 +30,7 @@ class ArtifactsTest extends TestCase
         sleep(1);
 
         $temp = new Temp();
-        $artifacts = new Artifacts($this->storageClient, $temp->getTmpFolder());
+        $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
         $downloadedFileId = $artifacts->downloadLastRun(Component::COMPONENT_ID, '123', 'default');
         self::assertEquals($fileId, $downloadedFileId);
 
@@ -65,7 +65,7 @@ class ArtifactsTest extends TestCase
     public function testDownloadLastRunNotFound(): void
     {
         $temp = new Temp();
-        $artifacts = new Artifacts($this->storageClient, $temp->getTmpFolder());
+        $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
 
         $this->expectException(UserException::class);
         $this->expectExceptionMessage('No artifact from previous run found. Run the component first.');
@@ -84,7 +84,7 @@ class ArtifactsTest extends TestCase
         sleep(1);
 
         $temp = new Temp();
-        $artifacts = new Artifacts($this->storageClient, $temp->getTmpFolder());
+        $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
         $downloadedFileId = $artifacts->downloadLastRun(Component::COMPONENT_ID, '123', 'default');
         self::assertEquals($fileId, $downloadedFileId);
 
@@ -117,6 +117,6 @@ class ArtifactsTest extends TestCase
 
     protected function getArtifactArchivePath(): string
     {
-        return __DIR__ . '/data/artifacts.tar.gz';
+        return __DIR__ . '/../data/artifacts.tar.gz';
     }
 }

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Tests\SyncAction;
+namespace DbtTransformation\Tests\Helper;
 
-use DbtTransformation\SyncAction\DocsHelper;
+use DbtTransformation\Helper\DbtDocsHelper;
 use PHPUnit\Framework\TestCase;
 
-class DocsHelperTest extends TestCase
+class DbtDocsHelperTest extends TestCase
 {
     public function testMergeHtml(): void
     {
@@ -26,7 +26,7 @@ class DocsHelperTest extends TestCase
             }
             </script></body></html>';
 
-        $resultHtml = DocsHelper::mergeHtml($html, $catalogJson, $manifestJson);
+        $resultHtml = DbtDocsHelper::mergeHtml($html, $catalogJson, $manifestJson);
         self::assertEquals($expectedHtml, $resultHtml);
     }
 
@@ -38,7 +38,7 @@ class DocsHelperTest extends TestCase
         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
         $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
 
-        $modelTiming = DocsHelper::getModelTiming($manifest, $runResults);
+        $modelTiming = DbtDocsHelper::getModelTiming($manifest, $runResults);
 
         $expected = [
             [

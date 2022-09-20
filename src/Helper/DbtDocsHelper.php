@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\SyncAction;
+namespace DbtTransformation\Helper;
 
-class DocsHelper
+class DbtDocsHelper
 {
     public static function mergeHtml(string $html, string $catalogJson, string $manifestJson): string
     {

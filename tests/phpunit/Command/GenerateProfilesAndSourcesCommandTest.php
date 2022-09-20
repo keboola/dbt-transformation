@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Tests\Command;
 
-use DbtTransformation\CloneRepositoryService;
 use DbtTransformation\Command\GenerateProfilesAndSourcesCommand;
-use DbtTransformation\WorkspacesManagementService;
+use DbtTransformation\Service\GitRepositoryService;
+use DbtTransformation\Service\WorkspacesManagementService;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -163,8 +163,7 @@ class GenerateProfilesAndSourcesCommandTest extends TestCase
      */
     private function cloneProjectFromGit(): void
     {
-        (new CloneRepositoryService())->clone(
-            $this->dataDir,
+        (new GitRepositoryService($this->dataDir))->clone(
             'https://github.com/keboola/dbt-test-project-public.git'
         );
     }

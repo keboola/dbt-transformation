@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\DbtYamlCreateService;
+namespace DbtTransformation\Service\DbtYamlCreateService;
 
 use Closure;
 use Symfony\Component\Yaml\Yaml;

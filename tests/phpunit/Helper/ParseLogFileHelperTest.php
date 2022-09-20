@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Tests;
+namespace DbtTransformation\Tests\Helper;
 
-use DbtTransformation\ParseLogFileService;
+use DbtTransformation\Helper\ParseLogFileHelper;
 use PHPUnit\Framework\TestCase;
 
-class GetSqlsFromDbtLogFileTest extends TestCase
+class ParseLogFileHelperTest extends TestCase
 {
-    protected string $providerDataDir = __DIR__ . '/data';
+    protected string $providerDataDir = __DIR__ . '/../data';
 
     public function testGetSqlsFromDbtLogFile(): void
     {
-        $sqls = (new ParseLogFileService(sprintf('%s/dbt.log', $this->providerDataDir)))->getSqls();
+        $sqls = (new ParseLogFileHelper(sprintf('%s/dbt.log', $this->providerDataDir)))->getSqls();
         $expectedSqls = $this->getExpectedSqls();
         foreach ($sqls as $key => $sql) {
             $this->assertEquals($expectedSqls[$key], $sql);

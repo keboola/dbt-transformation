@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation;
+namespace DbtTransformation\ConfigDefinition;
 
+use DbtTransformation\Component;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
 use DbtTransformation\DwhProvider\RemoteMssqlProvider;

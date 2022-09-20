@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation;
+namespace DbtTransformation\Service;
 
-use DbtTransformation\Command\CreateWorkspaceCommand;
 use Keboola\Sandboxes\Api\Client as SandboxesClient;
 use Keboola\Sandboxes\Api\Sandbox;
 use Keboola\StorageApi\Client as SapiClient;

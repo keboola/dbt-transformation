@@ -1,0 +1,9 @@
+{
+  "componentId": "keboola.dbt-transformation",
+  "action": "gitRepository",
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project-public.git"
+    }
+  }
+}

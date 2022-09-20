@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation;
+namespace DbtTransformation\Helper;
 
 use Generator;
 use SplFileObject;
+use function mb_strlen;
+use function mb_substr;
 
-class ParseLogFileService
+class ParseLogFileHelper
 {
 
     private string $logFilePath;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation;
+namespace DbtTransformation\Helper;
 
 use Generator;
 

@@ -59,6 +59,9 @@ class GitRepositoryService
         }
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function listRemoteBranches(string $projectPath): array
     {
         $args = ['git', 'branch', '-r', '--format', '"%(refname:short)"'];

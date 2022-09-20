@@ -20,7 +20,7 @@ class ConfigDefinitionSyncActions extends BaseConfigDefinition
                 ->scalarNode('configId')
                     ->isRequired()
                 ->end()
-                ->scalarNode('branchId')
+                ->integerNode('branchId')
                 ->end()
             ->end();
 

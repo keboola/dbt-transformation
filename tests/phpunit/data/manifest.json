@@ -1,0 +1,566 @@
+{
+  "metadata": {
+    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v4.json",
+    "dbt_version": "1.0.6",
+    "generated_at": "2022-09-13T12:47:33.576488Z",
+    "invocation_id": "ab16a97a-5019-44b6-818b-cd35458ab5e7",
+    "env": {
+    },
+    "project_id": "faebc42304447d4427374f806679ecb5",
+    "user_id": null,
+    "send_anonymous_usage_stats": false,
+    "adapter_type": "snowflake"
+  },
+  "nodes": {
+    "model.my_new_project.fct_model": {
+      "raw_sql": "-- Use the `ref` function to select from other models\n\nselect *\nfrom {{ ref('stg_model') }}\nwhere \"id\" = 1",
+      "compiled": true,
+      "resource_type": "model",
+      "depends_on": {
+        "macros": [
+          "macro.dbt_snowflake.set_query_tag",
+          "macro.dbt.create_or_replace_view",
+          "macro.dbt.persist_docs"
+        ],
+        "nodes": [
+          "model.my_new_project.stg_model",
+          "model.my_new_project.stg_model",
+          "model.my_new_project.stg_model",
+          "model.my_new_project.stg_model"
+        ]
+      },
+      "config": {
+        "enabled": true,
+        "alias": null,
+        "schema": null,
+        "database": null,
+        "tags": [
+
+        ],
+        "meta": {
+        },
+        "materialized": "view",
+        "persist_docs": {
+        },
+        "quoting": {
+        },
+        "column_types": {
+        },
+        "full_refresh": null,
+        "on_schema_change": "ignore",
+        "post-hook": [
+
+        ],
+        "pre-hook": [
+
+        ]
+      },
+      "database": "SAPI_9317",
+      "schema": "WORKSPACE_900750935",
+      "fqn": [
+        "my_new_project",
+        "example",
+        "fct_model"
+      ],
+      "unique_id": "model.my_new_project.fct_model",
+      "package_name": "my_new_project",
+      "root_path": "/data/dbt-project",
+      "path": "example/fct_model.sql",
+      "original_file_path": "models/example/fct_model.sql",
+      "name": "fct_model",
+      "alias": "fct_model",
+      "checksum": {
+        "name": "sha256",
+        "checksum": "68d9cb718e6e815b63cf081b6be9db289a670c43a00de6f880682274f0457166"
+      },
+      "tags": [
+
+      ],
+      "refs": [
+        [
+          "stg_model"
+        ]
+      ],
+      "sources": [
+
+      ],
+      "description": "",
+      "columns": {
+      },
+      "meta": {
+      },
+      "docs": {
+        "show": true
+      },
+      "patch_path": null,
+      "compiled_path": "target/compiled/my_new_project/models/example/fct_model.sql",
+      "build_path": "target/run/my_new_project/models/example/fct_model.sql",
+      "deferred": false,
+      "unrendered_config": {
+        "materialized": "view"
+      },
+      "created_at": 1663073254.270489,
+      "compiled_sql": "-- Use the `ref` function to select from other models\n\nselect *\nfrom \"SAPI_9317\".\"WORKSPACE_900750935\".\"stg_model\"\nwhere \"id\" = 1",
+      "extra_ctes_injected": true,
+      "extra_ctes": [
+
+      ],
+      "relation_name": "\"SAPI_9317\".\"WORKSPACE_900750935\".\"fct_model\""
+    },
+    "model.my_new_project.stg_model": {
+      "raw_sql": "with source as (\n        \n        select * from {{ source('in.c-test-bucket', 'test') }}\n        \n    ),\n    \n    renamed as (\n        \n        select\n            \"id\",\n            \"col2\",\n            \"col3\",\n            \"col4\"\n        from source\n    \n    )\n    \n    select * from renamed",
+      "compiled": true,
+      "resource_type": "model",
+      "depends_on": {
+        "macros": [
+          "macro.dbt_snowflake.set_query_tag",
+          "macro.dbt.create_or_replace_view",
+          "macro.dbt.persist_docs"
+        ],
+        "nodes": [
+          "source.my_new_project.in.c-test-bucket.test"
+        ]
+      },
+      "config": {
+        "enabled": true,
+        "alias": null,
+        "schema": null,
+        "database": null,
+        "tags": [
+
+        ],
+        "meta": {
+        },
+        "materialized": "view",
+        "persist_docs": {
+        },
+        "quoting": {
+        },
+        "column_types": {
+        },
+        "full_refresh": null,
+        "on_schema_change": "ignore",
+        "post-hook": [
+
+        ],
+        "pre-hook": [
+
+        ]
+      },
+      "database": "SAPI_9317",
+      "schema": "WORKSPACE_900750935",
+      "fqn": [
+        "my_new_project",
+        "example",
+        "stg_model"
+      ],
+      "unique_id": "model.my_new_project.stg_model",
+      "package_name": "my_new_project",
+      "root_path": "/data/dbt-project",
+      "path": "example/stg_model.sql",
+      "original_file_path": "models/example/stg_model.sql",
+      "name": "stg_model",
+      "alias": "stg_model",
+      "checksum": {
+        "name": "sha256",
+        "checksum": "7b1ba2a8c0cec0888d6cb8cf2a850f81b4886f566ef4175ed22a64c2d176ca38"
+      },
+      "tags": [
+
+      ],
+      "refs": [
+
+      ],
+      "sources": [
+        [
+          "in.c-test-bucket",
+          "test"
+        ]
+      ],
+      "description": "",
+      "columns": {
+      },
+      "meta": {
+      },
+      "docs": {
+        "show": true
+      },
+      "patch_path": null,
+      "compiled_path": "target/compiled/my_new_project/models/example/stg_model.sql",
+      "build_path": "target/run/my_new_project/models/example/stg_model.sql",
+      "deferred": false,
+      "unrendered_config": {
+        "materialized": "view"
+      },
+      "created_at": 1663073254.2875552,
+      "compiled_sql": "with source as (\n        \n        select * from \"SAPI_9317\".\"in.c-test-bucket\".\"test\"\n        \n    ),\n    \n    renamed as (\n        \n        select\n            \"id\",\n            \"col2\",\n            \"col3\",\n            \"col4\"\n        from source\n    \n    )\n    \n    select * from renamed",
+      "extra_ctes_injected": true,
+      "extra_ctes": [
+
+      ],
+      "relation_name": "\"SAPI_9317\".\"WORKSPACE_900750935\".\"stg_model\""
+    },
+    "test.my_new_project.source_unique_in.c-test-bucket_test__id_.09a5f34b8a": {
+      "raw_sql": "{{ test_unique(**_dbt_generic_test_kwargs) }}",
+      "test_metadata": {
+        "name": "unique",
+        "kwargs": {
+          "column_name": "\"id\"",
+          "model": "{{ get_where_subquery(source('in.c-test-bucket', 'test')) }}"
+        },
+        "namespace": null
+      },
+      "resource_type": "test",
+      "depends_on": {
+        "macros": [
+          "macro.dbt.test_unique"
+        ],
+        "nodes": [
+          "source.my_new_project.in.c-test-bucket.test"
+        ]
+      },
+      "config": {
+        "enabled": true,
+        "alias": null,
+        "schema": "dbt_test__audit",
+        "database": null,
+        "tags": [
+
+        ],
+        "meta": {
+        },
+        "materialized": "test",
+        "severity": "ERROR",
+        "store_failures": null,
+        "where": null,
+        "limit": null,
+        "fail_calc": "count(*)",
+        "warn_if": "!= 0",
+        "error_if": "!= 0"
+      },
+      "database": "SAPI_9317",
+      "schema": "WORKSPACE_900750935_dbt_test__audit",
+      "fqn": [
+        "my_new_project",
+        "_sources",
+        "source_unique_in.c-test-bucket_test__id_"
+      ],
+      "unique_id": "test.my_new_project.source_unique_in.c-test-bucket_test__id_.09a5f34b8a",
+      "package_name": "my_new_project",
+      "root_path": "/data/dbt-project",
+      "path": "source_unique_in.c-test-bucket_test__id_.sql",
+      "original_file_path": "models/_sources/in.c-test-bucket.yml",
+      "name": "source_unique_in.c-test-bucket_test__id_",
+      "alias": "source_unique_in.c-test-bucket_test__id_",
+      "checksum": {
+        "name": "none",
+        "checksum": ""
+      },
+      "tags": [
+
+      ],
+      "refs": [
+
+      ],
+      "sources": [
+        [
+          "in.c-test-bucket",
+          "test"
+        ]
+      ],
+      "description": "",
+      "columns": {
+      },
+      "meta": {
+      },
+      "docs": {
+        "show": true
+      },
+      "patch_path": null,
+      "compiled_path": null,
+      "build_path": null,
+      "deferred": false,
+      "unrendered_config": {
+      },
+      "created_at": 1663073254.3425705,
+      "column_name": "\"id\"",
+      "file_key_name": "sources.in.c-test-bucket"
+    },
+    "test.my_new_project.source_not_null_in.c-test-bucket_test__id_.f9579daf33": {
+      "raw_sql": "{{ test_not_null(**_dbt_generic_test_kwargs) }}",
+      "test_metadata": {
+        "name": "not_null",
+        "kwargs": {
+          "column_name": "\"id\"",
+          "model": "{{ get_where_subquery(source('in.c-test-bucket', 'test')) }}"
+        },
+        "namespace": null
+      },
+      "resource_type": "test",
+      "depends_on": {
+        "macros": [
+          "macro.dbt.test_not_null"
+        ],
+        "nodes": [
+          "source.my_new_project.in.c-test-bucket.test"
+        ]
+      },
+      "config": {
+        "enabled": true,
+        "alias": null,
+        "schema": "dbt_test__audit",
+        "database": null,
+        "tags": [
+
+        ],
+        "meta": {
+        },
+        "materialized": "test",
+        "severity": "ERROR",
+        "store_failures": null,
+        "where": null,
+        "limit": null,
+        "fail_calc": "count(*)",
+        "warn_if": "!= 0",
+        "error_if": "!= 0"
+      },
+      "database": "SAPI_9317",
+      "schema": "WORKSPACE_900750935_dbt_test__audit",
+      "fqn": [
+        "my_new_project",
+        "_sources",
+        "source_not_null_in.c-test-bucket_test__id_"
+      ],
+      "unique_id": "test.my_new_project.source_not_null_in.c-test-bucket_test__id_.f9579daf33",
+      "package_name": "my_new_project",
+      "root_path": "/data/dbt-project",
+      "path": "source_not_null_in.c-test-bucket_test__id_.sql",
+      "original_file_path": "models/_sources/in.c-test-bucket.yml",
+      "name": "source_not_null_in.c-test-bucket_test__id_",
+      "alias": "source_not_null_in.c-test-bucket_test__id_",
+      "checksum": {
+        "name": "none",
+        "checksum": ""
+      },
+      "tags": [
+
+      ],
+      "refs": [
+
+      ],
+      "sources": [
+        [
+          "in.c-test-bucket",
+          "test"
+        ]
+      ],
+      "description": "",
+      "columns": {
+      },
+      "meta": {
+      },
+      "docs": {
+        "show": true
+      },
+      "patch_path": null,
+      "compiled_path": null,
+      "build_path": null,
+      "deferred": false,
+      "unrendered_config": {
+      },
+      "created_at": 1663073254.3463893,
+      "column_name": "\"id\"",
+      "file_key_name": "sources.in.c-test-bucket"
+    }
+  },
+  "sources": {
+    "source.my_new_project.in.c-test-bucket.test": {
+      "fqn": [
+        "my_new_project",
+        "_sources",
+        "in.c-test-bucket",
+        "test"
+      ],
+      "database": "SAPI_9317",
+      "schema": "in.c-test-bucket",
+      "unique_id": "source.my_new_project.in.c-test-bucket.test",
+      "package_name": "my_new_project",
+      "root_path": "/data/dbt-project",
+      "path": "models/_sources/in.c-test-bucket.yml",
+      "original_file_path": "models/_sources/in.c-test-bucket.yml",
+      "name": "test",
+      "source_name": "in.c-test-bucket",
+      "source_description": "",
+      "loader": "",
+      "identifier": "test",
+      "resource_type": "source",
+      "quoting": {
+        "database": true,
+        "schema": true,
+        "identifier": true,
+        "column": null
+      },
+      "loaded_at_field": "\"_timestamp\"",
+      "freshness": {
+        "warn_after": {
+          "count": 1,
+          "period": "day"
+        },
+        "error_after": {
+          "count": null,
+          "period": null
+        },
+        "filter": null
+      },
+      "external": null,
+      "description": "",
+      "columns": {
+        "\"id\"": {
+          "name": "\"id\"",
+          "description": "",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        }
+      },
+      "meta": {
+      },
+      "source_meta": {
+      },
+      "tags": [
+
+      ],
+      "config": {
+        "enabled": true
+      },
+      "patch_path": null,
+      "unrendered_config": {
+      },
+      "relation_name": "\"SAPI_9317\".\"in.c-test-bucket\".\"test\"",
+      "created_at": 1663073254.3485985
+    },
+    "source.my_new_project.out.c-my-dbt-transformation-transformation.fct_model": {
+      "fqn": [
+        "my_new_project",
+        "_sources",
+        "out.c-my-dbt-transformation-transformation",
+        "fct_model"
+      ],
+      "database": "SAPI_9317",
+      "schema": "out.c-my-dbt-transformation-transformation",
+      "unique_id": "source.my_new_project.out.c-my-dbt-transformation-transformation.fct_model",
+      "package_name": "my_new_project",
+      "root_path": "/data/dbt-project",
+      "path": "models/_sources/out.c-my-dbt-transformation-transformation.yml",
+      "original_file_path": "models/_sources/out.c-my-dbt-transformation-transformation.yml",
+      "name": "fct_model",
+      "source_name": "out.c-my-dbt-transformation-transformation",
+      "source_description": "",
+      "loader": "",
+      "identifier": "fct_model",
+      "resource_type": "source",
+      "quoting": {
+        "database": true,
+        "schema": true,
+        "identifier": true,
+        "column": null
+      },
+      "loaded_at_field": "\"_timestamp\"",
+      "freshness": {
+        "warn_after": {
+          "count": 1,
+          "period": "day"
+        },
+        "error_after": {
+          "count": null,
+          "period": null
+        },
+        "filter": null
+      },
+      "external": null,
+      "description": "",
+      "columns": {
+      },
+      "meta": {
+      },
+      "source_meta": {
+      },
+      "tags": [
+
+      ],
+      "config": {
+        "enabled": true
+      },
+      "patch_path": null,
+      "unrendered_config": {
+      },
+      "relation_name": "\"SAPI_9317\".\"out.c-my-dbt-transformation-transformation\".\"fct_model\"",
+      "created_at": 1663073254.348859
+    }
+  },
+  "docs": {
+    "dbt.__overview__": {
+      "unique_id": "dbt.__overview__",
+      "package_name": "dbt",
+      "root_path": "/usr/local/lib/python3.9/dist-packages/dbt/include/global_project",
+      "path": "overview.md",
+      "original_file_path": "docs/overview.md",
+      "name": "__overview__",
+      "block_contents": "### Welcome!\n\nWelcome to the auto-generated documentation for your dbt project!\n\n### Navigation\n\nYou can use the `Project` and `Database` navigation tabs on the left side of the window to explore the models\nin your project.\n\n#### Project Tab\nThe `Project` tab mirrors the directory structure of your dbt project. In this tab, you can see all of the\nmodels defined in your dbt project, as well as models imported from dbt packages.\n\n#### Database Tab\nThe `Database` tab also exposes your models, but in a format that looks more like a database explorer. This view\nshows relations (tables and views) grouped into database schemas. Note that ephemeral models are _not_ shown\nin this interface, as they do not exist in the database.\n\n### Graph Exploration\nYou can click the blue icon on the bottom-right corner of the page to view the lineage graph of your models.\n\nOn model pages, you'll see the immediate parents and children of the model you're exploring. By clicking the `Expand`\nbutton at the top-right of this lineage pane, you'll be able to see all of the models that are used to build,\nor are built from, the model you're exploring.\n\nOnce expanded, you'll be able to use the `--select` and `--exclude` model selection syntax to filter the\nmodels in the graph. For more information on model selection, check out the [dbt docs](https://docs.getdbt.com/docs/model-selection-syntax).\n\nNote that you can also right-click on models to interactively filter and explore the graph.\n\n---\n\n### More information\n\n- [What is dbt](https://docs.getdbt.com/docs/introduction)?\n- Read the [dbt viewpoint](https://docs.getdbt.com/docs/viewpoint)\n- [Installation](https://docs.getdbt.com/docs/installation)\n- Join the [dbt Community](https://www.getdbt.com/community/) for questions and discussion"
+    }
+  },
+  "exposures": {
+  },
+  "metrics": {
+  },
+  "selectors": {
+  },
+  "disabled": {
+  },
+  "parent_map": {
+    "model.my_new_project.fct_model": [
+      "model.my_new_project.stg_model"
+    ],
+    "model.my_new_project.stg_model": [
+      "source.my_new_project.in.c-test-bucket.test"
+    ],
+    "test.my_new_project.source_unique_in.c-test-bucket_test__id_.09a5f34b8a": [
+      "source.my_new_project.in.c-test-bucket.test"
+    ],
+    "test.my_new_project.source_not_null_in.c-test-bucket_test__id_.f9579daf33": [
+      "source.my_new_project.in.c-test-bucket.test"
+    ],
+    "source.my_new_project.in.c-test-bucket.test": [
+
+    ],
+    "source.my_new_project.out.c-my-dbt-transformation-transformation.fct_model": [
+
+    ]
+  },
+  "child_map": {
+    "model.my_new_project.fct_model": [
+
+    ],
+    "model.my_new_project.stg_model": [
+      "model.my_new_project.fct_model"
+    ],
+    "test.my_new_project.source_unique_in.c-test-bucket_test__id_.09a5f34b8a": [
+
+    ],
+    "test.my_new_project.source_not_null_in.c-test-bucket_test__id_.f9579daf33": [
+
+    ],
+    "source.my_new_project.in.c-test-bucket.test": [
+      "model.my_new_project.stg_model",
+      "test.my_new_project.source_not_null_in.c-test-bucket_test__id_.f9579daf33",
+      "test.my_new_project.source_unique_in.c-test-bucket_test__id_.09a5f34b8a"
+    ],
+    "source.my_new_project.out.c-my-dbt-transformation-transformation.fct_model": [
+
+    ]
+  }
+}

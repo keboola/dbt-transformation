@@ -216,7 +216,7 @@ class Component extends BaseComponent
     }
 
     /**
-     * @return array<string, array<string, string>>
+     * @return array<string, array<string, array<int, string>|string>>
      */
     protected function actionGitRepository(): array
     {

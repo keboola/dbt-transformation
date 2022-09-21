@@ -1,0 +1,9 @@
+{
+  "componentId": "keboola.dbt-transformation",
+  "action": "gitRepository",
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/non-exist-repo.git"
+    }
+  }
+}

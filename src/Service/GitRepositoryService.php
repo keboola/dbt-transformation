@@ -40,22 +40,31 @@ class GitRepositoryService
             $branchArgument = ['-b', $branch];
         }
 
-        $url = $repositoryUrl;
+        $parsedUrl = parse_url($repositoryUrl);
+        if (!$parsedUrl || !array_key_exists('host', $parsedUrl)) {
+            throw new UserException(sprintf('Wrong URL format "%s"', $repositoryUrl));
+        }
         if ($username && $password) {
-            $githubUrl = 'github.com';
-            $url = str_replace($githubUrl, sprintf(
+            $url = str_replace($parsedUrl['host'], sprintf(
                 '%s:%s@%s',
                 $username,
                 $password,
-                $githubUrl
+                $parsedUrl['host']
             ), $repositoryUrl);
+        } else {
+            $url = $repositoryUrl;
         }
 
         try {
             $process = new Process(['git', 'clone', ...$branchArgument, $url, 'dbt-project'], $this->dataDir);
             $process->mustRun();
         } catch (ProcessFailedException $e) {
-            throw new UserException(sprintf('Failed to clone your repository: %s', $url));
+            $match = preg_match('/remote: (.*)/', $e->getProcess()->getErrorOutput(), $matches);
+            throw new UserException(sprintf(
+                'Failed to clone your repository "%s"%s',
+                $repositoryUrl,
+                !$match ? '' : (': ' . $matches[1])
+            ));
         }
     }
 

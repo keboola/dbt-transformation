@@ -16,6 +16,10 @@ $environments = [
     'SNOWFLAKE_PASSWORD',
     'GITHUB_USERNAME',
     'GITHUB_PASSWORD',
+    'GITLAB_USERNAME',
+    'GITLAB_PASSWORD',
+    'BITBUCKET_USERNAME',
+    'BITBUCKET_PASSWORD',
 ];
 
 foreach ($environments as $environment) {

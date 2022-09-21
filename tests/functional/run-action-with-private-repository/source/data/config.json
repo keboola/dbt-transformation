@@ -13,7 +13,7 @@
     "git": {
       "repo": "https://github.com/keboola/dbt-test-project.git",
       "username": "%env(string:GITHUB_USERNAME)%",
-      "password": "%env(string:GITHUB_PASSWORD)%"
+      "#password": "%env(string:GITHUB_PASSWORD)%"
     },
     "dbt": {
       "executeSteps": ["dbt run"]

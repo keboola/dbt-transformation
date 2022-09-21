@@ -21,8 +21,8 @@ class GitRepositoryDefinition extends BaseConfigDefinition
                 ->arrayNode('git')
                     ->validate()
                         ->always(function ($item) {
-                            if ((empty($item['username']) && !empty($item['password']))
-                                || (!empty($item['username']) && empty($item['password']))
+                            if ((empty($item['username']) && !empty($item['#password']))
+                                || (!empty($item['username']) && empty($item['#password']))
                             ) {
                                 throw new InvalidConfigurationException('Both username and password has to be set.');
                             }
@@ -39,7 +39,7 @@ class GitRepositoryDefinition extends BaseConfigDefinition
                         ->end()
                         ->scalarNode('username')
                         ->end()
-                        ->scalarNode('password')
+                        ->scalarNode('#password')
                         ->end()
                     ->end()
                 ->end()

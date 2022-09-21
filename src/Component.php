@@ -25,18 +25,14 @@ class Component extends BaseComponent
 {
     public const COMPONENT_ID = 'keboola.dbt-transformation';
 
-    public const STEP_RUN = 'dbt run';
-    public const STEP_DOCS_GENERATE = 'dbt docs generate';
-    public const STEP_TEST = 'dbt test';
-    public const STEP_SOURCE_FRESHNESS = 'dbt source freshness';
-    public const STEP_SEED = 'dbt seed';
-
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;
     private GitRepositoryService $gitRepositoryService;
     private string $projectPath;
     private StorageClient $storageClient;
     private ArtifactsService $artifacts;
+    private DbtService $dbtService;
+    private DwhProviderFactory $dwhProviderFactory;
 
     public function __construct(LoggerInterface $logger)
     {
@@ -44,13 +40,18 @@ class Component extends BaseComponent
         $this->createProfilesFileService = new DbtProfilesYamlCreateService;
         $this->createSourceFileService = new DbtSourceYamlCreateService;
         $this->gitRepositoryService = new GitRepositoryService($this->getDataDir());
-
         $this->storageClient = new StorageClient([
             'url' => $this->getConfig()->getStorageApiUrl(),
             'token' => $this->getConfig()->getStorageApiToken(),
         ]);
         $this->artifacts = new ArtifactsService($this->storageClient, $this->getDataDir());
         $this->setProjectPath($this->getDataDir());
+        $this->dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
+        $this->dwhProviderFactory = new DwhProviderFactory(
+            $this->createSourceFileService,
+            $this->createProfilesFileService,
+            $this->getLogger()
+        );
     }
 
     /**
@@ -61,22 +62,14 @@ class Component extends BaseComponent
         $config = $this->getConfig();
         $this->cloneRepository($config);
 
-        $dwhProviderFactory = new DwhProviderFactory(
-            $this->createSourceFileService,
-            $this->createProfilesFileService,
-            $this->getLogger()
-        );
-        $provider = $dwhProviderFactory->getProvider($config, $this->projectPath);
+        $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
         $provider->createDbtYamlFiles();
-
-        $dbtService = new DbtService($this->projectPath);
-        $dbtService->setModelNames($config->getModelNames());
 
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');
 
         foreach ($executeSteps as $step) {
-            $this->executeStep($dbtService, $step);
+            $this->executeStep($step);
         }
 
         if ($config->showSqls()) {
@@ -153,10 +146,10 @@ class Component extends BaseComponent
     /**
      * @throws \Keboola\Component\UserException
      */
-    protected function executeStep(DbtService $dbtService, string $step): void
+    protected function executeStep(string $step): void
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
-        $output = $dbtService->runCommand($step);
+        $output = $this->dbtService->runCommand($step);
         foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
             $this->getLogger()->info($log);
         }
@@ -187,9 +180,9 @@ class Component extends BaseComponent
 
         $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
 
-        $html = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'index.html');
-        $manifest = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'manifest.json');
-        $catalog = $this->artifacts->readFromFile(self::STEP_DOCS_GENERATE, 'catalog.json');
+        $html = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'index.html');
+        $manifest = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'manifest.json');
+        $catalog = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'catalog.json');
 
         return [
             'html' => DbtDocsHelper::mergeHtml($html, $manifest, $catalog),
@@ -206,13 +199,42 @@ class Component extends BaseComponent
 
         $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
 
-        $manifestJson = $this->artifacts->readFromFile(self::STEP_RUN, 'manifest.json');
+        $manifestJson = $this->artifacts->readFromFile(DbtService::COMMAND_RUN, 'manifest.json');
         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
-        $runResultsJson = $this->artifacts->readFromFile(self::STEP_RUN, 'run_results.json');
+        $runResultsJson = $this->artifacts->readFromFile(DbtService::COMMAND_RUN, 'run_results.json');
         $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
 
         return [
             'modelTiming' => DbtDocsHelper::getModelTiming($manifest, $runResults),
+        ];
+    }
+
+    protected function actionDbtCompile(): array
+    {
+        $configId = $this->getConfig()->getConfigId();
+        $branchId = $this->getConfig()->getBranchId();
+
+        $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
+
+        return [
+            'compiled' => $this->artifacts->getCompiledSqlFiles(),
+        ];
+    }
+
+    protected function actionDbtDebug(): array
+    {
+        $config = $this->getConfig();
+        $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
+        $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
+        $provider->createDbtYamlFiles();
+
+        $output = $this->dbtService->runCommand(DbtService::COMMAND_DEBUG);
+
+        // strip json log line
+        $outputClean = preg_replace('/{.*}/', '', $output);
+
+        return [
+            'output' => $outputClean
         ];
     }
 

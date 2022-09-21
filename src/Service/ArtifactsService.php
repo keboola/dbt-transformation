@@ -9,6 +9,8 @@ use Keboola\StorageApi\Client as StorageClient;
 use Keboola\StorageApi\Options\ListFilesOptions;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 use Throwable;
 
@@ -88,6 +90,35 @@ class ArtifactsService
     {
         $file = new SplFileInfo(sprintf('%s/%s/%s', $this->getDownloadDir(), $step, $filePath));
         return (string) file_get_contents($file->getPathname());
+    }
+
+    public function getCompiledSqlFiles(): array
+    {
+        $compiledDirInfo = new SplFileInfo(
+            sprintf('%s/%s/%s/', $this->getDownloadDir(), DbtService::COMMAND_COMPILE, 'compiled')
+        );
+
+        try {
+            $finder = new Finder();
+            $filePaths = iterator_to_array($finder
+                ->files()
+                ->in($compiledDirInfo->getPathname())
+                ->name('*.sql'));
+        } catch (DirectoryNotFoundException $e) {
+            throw new UserException('1Compiled SQL files not found in artifact. Run "dbt compile" step first.');
+        }
+
+        /** @var SplFileInfo $sqlFile */
+        $filenames = array_map(fn($sqlFile) => $sqlFile->getFilename(), $filePaths);
+
+        reset($filePaths);
+
+        /** @var SplFileInfo $sqlFile */
+        $contents = array_map(fn($sqlFile) => trim(
+            (string) file_get_contents($sqlFile->getPathname())
+        ), $filePaths);
+
+        return array_combine($filenames, $contents);
     }
 
     private function extractArchive(string $sourcePath, string $targetPath): void

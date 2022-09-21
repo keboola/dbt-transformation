@@ -101,6 +101,68 @@ class ArtifactsServiceTest extends TestCase
         self::assertArrayHasKey('results', $runResults);
     }
 
+    public function testGetCompiledSqlFiles(): void
+    {
+        $dataDir = __DIR__ . '/../data';
+        $artifacts = new ArtifactsService($this->storageClient, $dataDir);
+        $compiled = $artifacts->getCompiledSqlFiles();
+
+        self::assertSame([
+            'source_not_null_in.c-test-bucket_test__id_.sql' => 'select "id"' . PHP_EOL
+                . 'from "SAPI_9317"."in.c-test-bucket"."test"' . PHP_EOL
+                . 'where "id" is null',
+            'source_unique_in.c-test-bucket_test__id_.sql' => 'select' . PHP_EOL
+                . '    "id" as unique_field,' . PHP_EOL
+                . '    count(*) as n_records' . PHP_EOL
+                . PHP_EOL
+                . 'from "SAPI_9317"."in.c-test-bucket"."test"' . PHP_EOL
+                . 'where "id" is not null' . PHP_EOL
+                . 'group by "id"' . PHP_EOL
+                . 'having count(*) > 1',
+            'fct_model.sql' =>
+<<<EOT
+-- Use the `ref` function to select from other models
+
+select *
+from "SAPI_9317"."WORKSPACE_875822722"."stg_model"
+where "id" = 1
+EOT,
+            'stg_model.sql' =>
+<<<EOT
+with source as (
+        
+        select * from "SAPI_9317"."in.c-test-bucket"."test"
+        
+    ),
+    
+    renamed as (
+        
+        select
+            "id",
+            "col2",
+            "col3",
+            "col4"
+        from source
+    
+    )
+    
+    select * from renamed
+EOT
+,
+        ], $compiled);
+    }
+
+    public function testGetCompiledSqlFilesNotFound(): void
+    {
+        $temp = new Temp();
+        $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Compiled SQL files not found in artifact. Run "dbt compile" step first.');
+
+        $artifacts->getCompiledSqlFiles();
+    }
+
     protected function uploadTestArtifact(): int
     {
         $options = new FileUploadOptions();

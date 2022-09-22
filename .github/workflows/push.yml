@@ -36,6 +36,12 @@ env:
     GITHUB_USERNAME: "dbt-test-project-user"
     GITHUB_PASSWORD: ${{ secrets.GH_PAT }}
 
+    GITLAB_USERNAME: "dbt-test-project-user"
+    GITLAB_PASSWORD: ${{ secrets.GITLAB_PAT }}
+
+    BITBUCKET_USERNAME: "dbt-test-project-user"
+    BITBUCKET_PASSWORD: ${{ secrets.BITBUCKET_PAT }}
+
     KBC_URL: "https://connection.keboola.com"
     KBC_TOKEN: ${{ secrets.KBC_API_TOKEN }}
     KBC_TOKEN_NO_RO_MAPPING: ${{ secrets.KBC_API_TOKEN_NO_RO_MAPPING }}
@@ -129,6 +135,10 @@ jobs:
                     -e REDSHIFT_DB_THREADS \
                     -e GITHUB_USERNAME \
                     -e GITHUB_PASSWORD \
+                    -e GITLAB_USERNAME \
+                    -e GITLAB_PASSWORD \
+                    -e BITBUCKET_USERNAME \
+                    -e BITBUCKET_PASSWORD \
                     -e KBC_URL \
                     -e KBC_TOKEN \
                     -e KBC_TOKEN_NO_RO_MAPPING \

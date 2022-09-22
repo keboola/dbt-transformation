@@ -78,7 +78,7 @@ class ConfigDefinitionTest extends TestCase
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
                         'username' => 'test',
-                        'password' => 'test',
+                        '#password' => 'test',
                     ],
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
@@ -95,7 +95,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                         'branch' => 'master',
                         'username' => 'test',
-                        'password' => 'test',
+                        '#password' => 'test',
                     ],
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
@@ -127,7 +127,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                         'branch' => 'master',
                         'username' => 'test',
-                        'password' => 'test',
+                        '#password' => 'test',
                     ],
                     'dbt' => [
                         'modelNames' => ['stg_model'],
@@ -259,7 +259,7 @@ class ConfigDefinitionTest extends TestCase
                 'parameters' => [
                     'git' => [
                         'repo' => 'https://github.com/my-repo',
-                        'password' => 'test',
+                        '#password' => 'test',
                     ],
                 ],
             ],

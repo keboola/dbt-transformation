@@ -123,8 +123,8 @@ class CloneGitRepositoryCommandTest extends TestCase
             'branch' => '',
             'username' => '',
             'password' => '',
-            'expectedError' => 'Failed to clone your repository: ' .
-                'https://github.com/keboola/non-existing-repository.git',
+            'expectedError' => 'Failed to clone your repository ' .
+                '"https://github.com/keboola/non-existing-repository.git"',
         ];
 
         yield 'wrong credentials to private repository' => [
@@ -132,8 +132,8 @@ class CloneGitRepositoryCommandTest extends TestCase
             'branch' => '',
             'username' => 'wrong',
             'password' => 'credentials',
-            'expectedError' => 'Failed to clone your repository: ' .
-                'https://wrong:credentials@github.com/keboola/dbt-test-project.git',
+            'expectedError' => 'Failed to clone your repository ' .
+                '"https://github.com/keboola/dbt-test-project.git"',
         ];
 
         yield 'non existing branch' => [
@@ -141,8 +141,8 @@ class CloneGitRepositoryCommandTest extends TestCase
             'branch' => 'non-existing-branch',
             'username' => '',
             'password' => '',
-            'expectedError' => 'Failed to clone your repository: ' .
-                'https://github.com/keboola/dbt-test-project-public.git',
+            'expectedError' => 'Failed to clone your repository ' .
+                '"https://github.com/keboola/dbt-test-project-public.git"',
         ];
     }
 }

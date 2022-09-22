@@ -36,7 +36,7 @@ class Config extends BaseConfig
     public function getGitRepositoryPassword(): ?string
     {
         try {
-            return $this->getValue(['parameters', 'git', 'password']);
+            return $this->getValue(['parameters', 'git', '#password']);
         } catch (InvalidArgumentException $e) {
             return null;
         }

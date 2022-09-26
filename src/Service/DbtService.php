@@ -24,6 +24,9 @@ class DbtService
     /** @var array<string> */
     private array $modelNames;
 
+    /**
+     * @param array<string> $modelNames
+     */
     public function __construct(string $projectPath, array $modelNames = [])
     {
         $this->projectPath = $projectPath;

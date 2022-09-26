@@ -120,7 +120,7 @@ class ArtifactsServiceTest extends TestCase
                 . 'group by "id"' . PHP_EOL
                 . 'having count(*) > 1',
             'fct_model.sql' =>
-<<<EOT
+        <<<EOT
 -- Use the `ref` function to select from other models
 
 select *
@@ -128,7 +128,7 @@ from "SAPI_9317"."WORKSPACE_875822722"."stg_model"
 where "id" = 1
 EOT,
             'stg_model.sql' =>
-<<<EOT
+        <<<EOT
 with source as (
         
         select * from "SAPI_9317"."in.c-test-bucket"."test"

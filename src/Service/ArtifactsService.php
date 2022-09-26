@@ -92,6 +92,10 @@ class ArtifactsService
         return (string) file_get_contents($file->getPathname());
     }
 
+    /**
+     * @return array<string, string>
+     * @throws UserException
+     */
     public function getCompiledSqlFiles(): array
     {
         $compiledDirInfo = new SplFileInfo(

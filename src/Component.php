@@ -209,6 +209,9 @@ class Component extends BaseComponent
         ];
     }
 
+    /**
+     * @return array<string, array<string, string>>
+     */
     protected function actionDbtCompile(): array
     {
         $configId = $this->getConfig()->getConfigId();
@@ -218,23 +221,6 @@ class Component extends BaseComponent
 
         return [
             'compiled' => $this->artifacts->getCompiledSqlFiles(),
-        ];
-    }
-
-    protected function actionDbtDebug(): array
-    {
-        $config = $this->getConfig();
-        $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
-        $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
-        $provider->createDbtYamlFiles();
-
-        $output = $this->dbtService->runCommand(DbtService::COMMAND_DEBUG);
-
-        // strip json log line
-        $outputClean = preg_replace('/{.*}/', '', $output);
-
-        return [
-            'output' => $outputClean
         ];
     }
 

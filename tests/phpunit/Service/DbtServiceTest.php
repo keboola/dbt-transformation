@@ -105,7 +105,8 @@ class DbtServiceTest extends TestCase
         self::assertSame([
             'Running with dbt=1.2.1',
             'Partial parse save file not found. Starting full parse.',
-            'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics',
+            'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations,'
+            . ' 0 seed files, 2 sources, 0 exposures, 0 metrics',
             'Concurrency: 1 threads (target=\'kbc_prod\')',
             'Done.',
         ], $parsedOutput);

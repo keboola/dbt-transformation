@@ -47,6 +47,7 @@ class DbtDocsHelper
                 'id' => $run['unique_id'],
                 'name' => array_pop($idArray),
                 'status' => $run['status'],
+                'thread' => $run['thread_id'],
                 'timeStarted' => $executeTiming['started_at'],
                 'timeCompleted' => $executeTiming['completed_at'],
                 'dependsOn' => array_unique($dependsOn),

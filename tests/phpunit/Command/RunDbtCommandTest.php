@@ -171,6 +171,7 @@ class RunDbtCommandTest extends TestCase
         putenv(sprintf('DBT_KBC_DEV_TEST_TYPE=%s', $workspace->getType()));
         putenv(sprintf('DBT_KBC_DEV_TEST_USER=%s', $workspace->getUser()));
         putenv(sprintf('DBT_KBC_DEV_TEST_PASSWORD=%s', $workspace->getPassword()));
+        putenv(sprintf('DBT_KBC_DEV_TEST_THREADS=%s', 4));
 
         $projectPath = sprintf('%s/dbt-project/', $this->dataDir);
         (new DbtProfilesYamlCreateService())->dumpYaml(

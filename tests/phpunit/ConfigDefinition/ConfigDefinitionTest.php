@@ -56,6 +56,21 @@ class ConfigDefinitionTest extends TestCase
             ],
         ];
 
+        yield 'config with threads' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'threads' => 1,
+                    ],
+                ],
+            ],
+        ];
+
         yield 'config with branch' => [
             'configData' => [
                 'action' => 'run',
@@ -380,6 +395,15 @@ class ConfigDefinitionTest extends TestCase
 
         if (empty($configData['parameters']['dbt']['modelNames'])) {
             $configData['parameters']['dbt']['modelNames'] = [];
+        }
+
+        if (!array_key_exists('threads', $configData['parameters']['dbt'])) {
+            $configData['parameters']['dbt']['threads'] = 4;
+        }
+
+        if (array_key_exists('remoteDwh', $configData['parameters'])
+            && !array_key_exists('threads', $configData['parameters']['remoteDwh'])) {
+            $configData['parameters']['remoteDwh']['threads'] = 4;
         }
 
         return $configData;

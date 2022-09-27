@@ -21,6 +21,7 @@ class RemoteMssqlProvider extends RemoteSnowflakeProvider implements DwhProvider
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
         putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+        putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
     }
 
     /**
@@ -35,6 +36,7 @@ class RemoteMssqlProvider extends RemoteSnowflakeProvider implements DwhProvider
             'port',
             'user',
             '#password',
+            'threads',
         ];
     }
 
@@ -53,6 +55,7 @@ class RemoteMssqlProvider extends RemoteSnowflakeProvider implements DwhProvider
             'user',
             'password',
             'trust_cert',
+            'threads',
         ];
     }
 

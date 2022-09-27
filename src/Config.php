@@ -55,6 +55,11 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'dbt', 'modelNames']);
     }
 
+    public function getThreads(): int
+    {
+        return $this->getIntValue(['parameters', 'dbt', 'threads']);
+    }
+
     /**
      * @return array<string>
      */

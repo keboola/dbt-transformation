@@ -45,6 +45,7 @@ class DbtDocsHelperTest extends TestCase
                 'id' => 'model.my_new_project.stg_model',
                 'name' => 'stg_model',
                 'status' => 'success',
+                'thread' => 'Thread-1',
                 'timeStarted' => '2022-09-13T12:47:36.503145Z',
                 'timeCompleted' => '2022-09-13T12:47:37.189261Z',
                 'dependsOn' => [],
@@ -53,6 +54,7 @@ class DbtDocsHelperTest extends TestCase
                 'id' => 'model.my_new_project.fct_model',
                 'name' => 'fct_model',
                 'status' => 'success',
+                'thread' => 'Thread-1',
                 'timeStarted' => '2022-09-13T12:47:37.384817Z',
                 'timeCompleted' => '2022-09-13T12:47:38.020192Z',
                 'dependsOn' => [

@@ -78,7 +78,7 @@ class GitRepositoryService
         $process->mustRun();
         $branches = (array) explode("\n", trim($process->getOutput()));
 
-        return array_map(fn ($item) => trim($item, '"'), $branches);
+        return array_map(fn ($item) => str_replace('origin/', '', trim($item, '"')), $branches);
     }
 
     /**

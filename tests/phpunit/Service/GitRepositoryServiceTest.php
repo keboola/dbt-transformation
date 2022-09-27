@@ -31,10 +31,10 @@ class GitRepositoryServiceTest extends TestCase
 
         self::assertIsArray($branches);
         self::assertNotEmpty($branches);
-        self::assertContains('origin/main', $branches);
-        self::assertContains('origin/branch-with-postgres-sources', $branches);
-        self::assertContains('origin/branch-with-redshift-sources', $branches);
-        self::assertContains('origin/branch-with-bigquery-sources', $branches);
+        self::assertContains('main', $branches);
+        self::assertContains('branch-with-postgres-sources', $branches);
+        self::assertContains('branch-with-redshift-sources', $branches);
+        self::assertContains('branch-with-bigquery-sources', $branches);
     }
 
     /**

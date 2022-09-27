@@ -29,6 +29,7 @@ class Component extends BaseComponent
     public const STEP_DOCS_GENERATE = 'dbt docs generate';
     public const STEP_TEST = 'dbt test';
     public const STEP_SOURCE_FRESHNESS = 'dbt source freshness';
+    public const STEP_SEED = 'dbt seed';
 
     private DbtSourceYamlCreateService $createSourceFileService;
     private DbtProfilesYamlCreateService $createProfilesFileService;

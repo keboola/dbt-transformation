@@ -22,6 +22,7 @@ class ConfigDefinition extends BaseConfigDefinition
         Component::STEP_DOCS_GENERATE,
         Component::STEP_TEST,
         Component::STEP_SOURCE_FRESHNESS,
+        Component::STEP_SEED,
     ];
 
     protected function getParametersDefinition(): ArrayNodeDefinition

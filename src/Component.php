@@ -154,7 +154,7 @@ class Component extends BaseComponent
             $this->getLogger()->info($log);
         }
         if ($step !== 'dbt deps') {
-            $this->artifacts->uploadResults($this->projectPath, $step);
+            $this->artifacts->writeResults($this->projectPath, $step);
         }
     }
 

@@ -41,7 +41,7 @@ class ArtifactsService
         return $this->downloadDir;
     }
 
-    public function uploadResults(string $projectPath, string $step): void
+    public function writeResults(string $projectPath, string $step): void
     {
         $artifactsPath = sprintf('%s/out/current/%s', $this->artifactsDir, $step);
         $this->filesystem->mkdir($artifactsPath);

@@ -27,8 +27,8 @@ Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 see
 Concurrency: 4 threads (target='kbc_prod')
 1 of 2 START test source_not_null_in.c-test-bucket_test__id_ %s [RUN]
 2 of 2 START test source_unique_in.c-test-bucket_test__id_ %s [RUN]
-1 of 2 PASS source_not_null_in.c-test-bucket_test__id_ %s [PASS in %ss]
 2 of 2 PASS source_unique_in.c-test-bucket_test__id_ %s [PASS in %ss]
+1 of 2 PASS source_not_null_in.c-test-bucket_test__id_ %s [PASS in %ss]
 Finished running 2 tests in %s hours %s minutes and %s seconds (%ss).
 Completed successfully
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2

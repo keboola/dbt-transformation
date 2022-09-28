@@ -77,6 +77,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
         putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+        putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $this->config->getThreads()));
     }
 
     /**
@@ -91,6 +92,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             'host',
             'user',
             '#password',
+            'threads',
         ];
     }
 
@@ -107,6 +109,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             'warehouse',
             'database',
             'account',
+            'threads',
         ];
     }
 

@@ -11,6 +11,7 @@ default:
             warehouse: '{{ env_var("DBT_KBC_DEV_CHOCHO_WAREHOUSE") }}'
             database: '{{ env_var("DBT_KBC_DEV_CHOCHO_DATABASE") }}'
             account: '{{ env_var("DBT_KBC_DEV_CHOCHO_ACCOUNT") }}'
+            threads: '{{ env_var("DBT_KBC_DEV_CHOCHO_THREADS")| as_number }}'
         kbc_dev_padak:
             type: '{{ env_var("DBT_KBC_DEV_PADAK_TYPE") }}'
             user: '{{ env_var("DBT_KBC_DEV_PADAK_USER") }}'
@@ -19,3 +20,4 @@ default:
             warehouse: '{{ env_var("DBT_KBC_DEV_PADAK_WAREHOUSE") }}'
             database: '{{ env_var("DBT_KBC_DEV_PADAK_DATABASE") }}'
             account: '{{ env_var("DBT_KBC_DEV_PADAK_ACCOUNT") }}'
+            threads: '{{ env_var("DBT_KBC_DEV_PADAK_THREADS")| as_number }}'

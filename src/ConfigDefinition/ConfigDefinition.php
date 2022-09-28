@@ -122,7 +122,7 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->cannotBeEmpty()
                     ->end()
                     ->scalarNode('threads')
-                        ->cannotBeEmpty()
+                        ->defaultValue(4)
                     ->end()
                     ->scalarNode('#key_content')
                         ->cannotBeEmpty()
@@ -145,6 +145,9 @@ class ConfigDefinition extends BaseConfigDefinition
                             ->enumPrototype()
                                 ->values(self::ACCEPTED_DBT_COMMANDS)
                             ->end()
+                        ->end()
+                        ->scalarNode('threads')
+                            ->defaultValue(4)
                         ->end()
                     ->end()
             ->end();

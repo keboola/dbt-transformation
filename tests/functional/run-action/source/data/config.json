@@ -14,7 +14,8 @@
       "repo": "https://github.com/keboola/dbt-test-project-public.git"
     },
     "dbt": {
-      "executeSteps": ["dbt run"]
+      "executeSteps": ["dbt run"],
+      "threads": 1
     }
   }
 }

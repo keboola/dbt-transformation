@@ -210,7 +210,7 @@ class Component extends BaseComponent
     }
 
     /**
-     * @return array<string, array<string, string>>
+     * @return array<string, array<int|string, string|false>>
      */
     protected function actionDbtCompile(): array
     {

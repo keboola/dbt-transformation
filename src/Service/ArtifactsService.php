@@ -93,7 +93,7 @@ class ArtifactsService
     }
 
     /**
-     * @return array<string, string>
+     * @return array<int|string, string|false>
      * @throws UserException
      */
     public function getCompiledSqlFiles(): array
@@ -109,20 +109,17 @@ class ArtifactsService
                 ->in($compiledDirInfo->getPathname())
                 ->name('*.sql'));
         } catch (DirectoryNotFoundException $e) {
-            throw new UserException('1Compiled SQL files not found in artifact. Run "dbt compile" step first.');
+            throw new UserException('Compiled SQL files not found in artifact. Run "dbt compile" step first.');
         }
 
-        /** @var SplFileInfo $sqlFile */
-        $filenames = array_map(fn($sqlFile) => $sqlFile->getFilename(), $filePaths);
-
+        $filenames = array_map(fn($sqlFile) => (string) $sqlFile->getFilename(), $filePaths);
         reset($filePaths);
 
-        /** @var SplFileInfo $sqlFile */
         $contents = array_map(fn($sqlFile) => trim(
             (string) file_get_contents($sqlFile->getPathname())
         ), $filePaths);
 
-        return array_combine($filenames, $contents);
+        return (array) array_combine($filenames, $contents);
     }
 
     private function extractArchive(string $sourcePath, string $targetPath): void

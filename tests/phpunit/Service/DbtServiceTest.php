@@ -107,7 +107,7 @@ class DbtServiceTest extends TestCase
             'Partial parse save file not found. Starting full parse.',
             'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations,'
             . ' 0 seed files, 2 sources, 0 exposures, 0 metrics',
-            'Concurrency: 1 threads (target=\'kbc_prod\')',
+            'Concurrency: 4 threads (target=\'kbc_prod\')',
             'Done.',
         ], $parsedOutput);
 

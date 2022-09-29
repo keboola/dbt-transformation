@@ -114,26 +114,26 @@ class ArtifactsServiceTest extends TestCase
 
         self::assertStringContainsString(
             'from "SAPI_9317"."in.c-test-bucket"."test"',
-            $compiled['source_not_null_in.c-test-bucket_test__id_.sql']
+            (string) $compiled['source_not_null_in.c-test-bucket_test__id_.sql']
         );
 
         self::assertStringContainsString(
             '"id" as unique_field,',
-            $compiled['source_unique_in.c-test-bucket_test__id_.sql']
+            (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql']
         );
         self::assertStringContainsString(
             'from "SAPI_9317"."in.c-test-bucket"."test"',
-            $compiled['source_unique_in.c-test-bucket_test__id_.sql']
+            (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql']
         );
 
         self::assertStringContainsString(
             'from "SAPI_9317"."WORKSPACE_875822722"."stg_model"',
-            $compiled['fct_model.sql']
+            (string) $compiled['fct_model.sql']
         );
 
         self::assertStringContainsString(
             'select * from "SAPI_9317"."in.c-test-bucket"."test"',
-            $compiled['stg_model.sql']
+            (string) $compiled['stg_model.sql']
         );
     }
 

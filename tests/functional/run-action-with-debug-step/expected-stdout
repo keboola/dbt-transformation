@@ -1,14 +1,6 @@
-Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-seed (%s)
+Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch main (%s)
 Executing command "dbt deps"
-Running with dbt=%s
-Warning: No packages were found in packages.yml
-Executing command "dbt seed"
 Running with dbt=1.2.1
-Partial parse save file not found. Starting full parse.
-Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 1 seed file, 2 sources, 0 exposures, 0 metrics
-Concurrency: 4 threads (target='kbc_prod')
-1 of 1 START seed file %s.countries ........................... [RUN]
-1 of 1 OK loaded seed file %s.countries ....................... [INSERT %s in %ss]
-Finished running 1 seed in 0 hours 0 minutes and %s seconds (%ss).
-Completed successfully
-Done. PASS=1 WARN=0 ERROR=0 SKIP=0 TOTAL=1
+Warning: No packages were found in packages.yml
+Executing command "dbt debug"
+Running with dbt=1.2.1

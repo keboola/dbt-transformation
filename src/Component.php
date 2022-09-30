@@ -153,7 +153,7 @@ class Component extends BaseComponent
         foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
             $this->getLogger()->info($log);
         }
-        if ($step !== 'dbt deps') {
+        if ($step !== 'dbt deps' && $step !== 'dbt debug') {
             $this->artifacts->writeResults($this->projectPath, $step);
         }
     }

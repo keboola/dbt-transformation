@@ -31,7 +31,6 @@ class Component extends BaseComponent
     private string $projectPath;
     private StorageClient $storageClient;
     private ArtifactsService $artifacts;
-    private DbtService $dbtService;
     private DwhProviderFactory $dwhProviderFactory;
 
     public function __construct(LoggerInterface $logger)
@@ -46,7 +45,6 @@ class Component extends BaseComponent
         ]);
         $this->artifacts = new ArtifactsService($this->storageClient, $this->getDataDir());
         $this->setProjectPath($this->getDataDir());
-        $this->dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
         $this->dwhProviderFactory = new DwhProviderFactory(
             $this->createSourceFileService,
             $this->createProfilesFileService,
@@ -149,7 +147,8 @@ class Component extends BaseComponent
     protected function executeStep(string $step): void
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
-        $output = $this->dbtService->runCommand($step);
+        $dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
+        $output = $dbtService->runCommand($step);
         foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
             $this->getLogger()->info($log);
         }
@@ -166,6 +165,7 @@ class Component extends BaseComponent
         return [
             'dbtDocs' => 'actionDbtDocs',
             'dbtRunResults' => 'actionDbtRunResults',
+            'dbtCompile' => 'actionDbtCompile',
             'gitRepository' => 'actionGitRepository',
         ];
     }
@@ -175,10 +175,11 @@ class Component extends BaseComponent
      */
     protected function actionDbtDocs(): array
     {
+        $componentId = $this->getRawConfig()['componentId'];
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 
-        $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
+        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
 
         $html = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'index.html');
         $manifest = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'manifest.json');
@@ -194,10 +195,11 @@ class Component extends BaseComponent
      */
     protected function actionDbtRunResults(): array
     {
+        $componentId = $this->getRawConfig()['componentId'];
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 
-        $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
+        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
 
         $manifestJson = $this->artifacts->readFromFile(DbtService::COMMAND_RUN, 'manifest.json');
         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
@@ -214,10 +216,11 @@ class Component extends BaseComponent
      */
     protected function actionDbtCompile(): array
     {
+        $componentId = $this->getRawConfig()['componentId'];
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 
-        $this->artifacts->downloadLastRun(self::COMPONENT_ID, $configId, $branchId);
+        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
 
         return [
             'compiled' => $this->artifacts->getCompiledSqlFiles(),

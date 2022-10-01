@@ -11,15 +11,26 @@ use Symfony\Component\Process\Process;
 
 class DbtService
 {
+    public const COMMAND_COMPILE = 'dbt compile';
+    public const COMMAND_DOCS_GENERATE = 'dbt docs generate';
+    public const COMMAND_DEBUG = 'dbt debug';
+    public const COMMAND_RUN = 'dbt run';
+    public const COMMAND_SOURCE_FRESHNESS = 'dbt source freshness';
+    public const COMMAND_TEST = 'dbt test';
+    public const STEP_SEED = 'dbt seed';
 
     private string $projectPath;
 
     /** @var array<string> */
-    private array $modelNames = [];
+    private array $modelNames;
 
-    public function __construct(string $projectPath)
+    /**
+     * @param array<string> $modelNames
+     */
+    public function __construct(string $projectPath, array $modelNames = [])
     {
         $this->projectPath = $projectPath;
+        $this->modelNames = $modelNames;
     }
 
     /**
@@ -66,6 +77,7 @@ class DbtService
             '--log-format',
             'json',
             '--warn-error',
+            '--no-use-colors',
             ...$this->getCommandWithoutDbt($command),
             '-t',
             $target,

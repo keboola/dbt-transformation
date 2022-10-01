@@ -11,6 +11,7 @@ use DbtTransformation\DwhProvider\RemoteMssqlProvider;
 use DbtTransformation\DwhProvider\RemotePostgresProvider;
 use DbtTransformation\DwhProvider\RemoteRedshiftProvider;
 use DbtTransformation\DwhProvider\RemoteSnowflakeProvider;
+use DbtTransformation\Service\DbtService;
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -18,11 +19,13 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 class ConfigDefinition extends BaseConfigDefinition
 {
     private const ACCEPTED_DBT_COMMANDS = [
-        Component::STEP_RUN,
-        Component::STEP_DOCS_GENERATE,
-        Component::STEP_TEST,
-        Component::STEP_SOURCE_FRESHNESS,
-        Component::STEP_SEED,
+        DbtService::COMMAND_RUN,
+        DbtService::COMMAND_DOCS_GENERATE,
+        DbtService::COMMAND_TEST,
+        DbtService::COMMAND_SOURCE_FRESHNESS,
+        DbtService::COMMAND_DEBUG,
+        DbtService::COMMAND_COMPILE,
+        DbtService::STEP_SEED,
     ];
 
     protected function getParametersDefinition(): ArrayNodeDefinition

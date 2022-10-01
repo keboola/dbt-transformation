@@ -186,7 +186,7 @@ class Component extends BaseComponent
         $catalog = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'catalog.json');
 
         return [
-            'html' => DbtDocsHelper::mergeHtml($html, $manifest, $catalog),
+            'html' => DbtDocsHelper::mergeHtml($html, $catalog, $manifest),
         ];
     }
 

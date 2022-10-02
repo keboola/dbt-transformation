@@ -175,7 +175,7 @@ class Component extends BaseComponent
      */
     protected function actionDbtDocs(): array
     {
-        $componentId = $this->getConfig()->getStringValue(['componentId']);
+        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 
@@ -195,7 +195,7 @@ class Component extends BaseComponent
      */
     protected function actionDbtRunResults(): array
     {
-        $componentId = $this->getConfig()->getStringValue(['componentId']);
+        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 
@@ -216,7 +216,7 @@ class Component extends BaseComponent
      */
     protected function actionDbtCompile(): array
     {
-        $componentId = $this->getConfig()->getStringValue(['componentId']);
+        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 

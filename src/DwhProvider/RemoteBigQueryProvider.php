@@ -4,11 +4,35 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
-use RuntimeException;
+use DbtTransformation\Config;
+use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
+use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
+use Keboola\Temp\Temp;
+use Psr\Log\LoggerInterface;
 
 class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProviderInterface
 {
     public const DWH_PROVIDER_TYPE = 'bigquery';
+
+    private Temp $temp;
+
+    public function __construct(
+        DbtSourceYamlCreateService $createSourceFileService,
+        DbtProfilesYamlCreateService $createProfilesFileService,
+        LoggerInterface $logger,
+        Config $config,
+        string $projectPath
+    ) {
+        parent::__construct(
+            $createSourceFileService,
+            $createProfilesFileService,
+            $logger,
+            $config,
+            $projectPath
+        );
+
+        $this->temp = new Temp('dbt-big-query');
+    }
 
     public function setEnvVars(): void
     {
@@ -21,11 +45,8 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
         putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['dataset']));
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
         // create temp file with key
-        $tmpKeyFile = tempnam(__DIR__ . '/../../', 'key-');
-        if ($tmpKeyFile === false) {
-            throw new RuntimeException('Creating temp file with key for BigQuery failed');
-        }
-        file_put_contents($tmpKeyFile, $workspace['#key_content']);
+        $tmpKeyFile = $this->temp->createFile('key');
+        file_put_contents($tmpKeyFile->getPathname(), $workspace['#key_content']);
         putenv(sprintf('DBT_KBC_PROD_KEYFILE=%s', $tmpKeyFile));
     }
 
@@ -63,5 +84,10 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
     {
         $dwhConfig = $this->config->getRemoteDwh();
         return sprintf('Remote %s DWH: %s', self::DWH_PROVIDER_TYPE, $dwhConfig['project']);
+    }
+
+    public function __destruct()
+    {
+        $this->temp->remove();
     }
 }

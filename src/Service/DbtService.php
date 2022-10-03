@@ -55,14 +55,17 @@ class DbtService
     }
 
     /**
-     * @param array<int, string> $modelNames
      * @return array<int, string>
      */
-    protected function getSelectParameter(array $modelNames): array
+    protected function getSelectParameter(string $command): array
     {
+        if ($command === self::COMMAND_DEPS || $command === self::COMMAND_DEBUG) {
+            return [];
+        }
+
         $selectParameter = [];
-        if (!empty($modelNames)) {
-            $selectParameter = ['--select', ...$modelNames];
+        if (!empty($this->modelNames)) {
+            $selectParameter = ['--select', ...$this->modelNames];
         }
 
         return $selectParameter;
@@ -82,7 +85,7 @@ class DbtService
             ...$this->getCommandWithoutDbt($command),
             '-t',
             $target,
-            ...$command !== 'dbt deps' ? $this->getSelectParameter($this->modelNames) : [],
+            ...$this->getSelectParameter($command),
             '--profiles-dir',
             $this->projectPath,
         ];

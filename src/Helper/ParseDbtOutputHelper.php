@@ -18,6 +18,7 @@ class ParseDbtOutputHelper
         if (!$matches) {
             return yield $output;
         }
+
         foreach (reset($messages) as $messageJson) {
             $message = json_decode($messageJson, true);
             if ($message === null || is_numeric(array_key_first($message))) {

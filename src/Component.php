@@ -149,9 +149,19 @@ class Component extends BaseComponent
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
         $dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
         $output = $dbtService->runCommand($step);
+
         foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
             $this->getLogger()->info($log);
         }
+
+        if ($step == 'dbt debug') {
+            $lines = explode(PHP_EOL, $output);
+            array_shift($lines); // remove the first json line
+            foreach ($lines as $log) {
+                $this->getLogger()->info($log);
+            }
+        }
+
         if ($step !== 'dbt deps' && $step !== 'dbt debug') {
             $this->artifacts->writeResults($this->projectPath, $step);
         }

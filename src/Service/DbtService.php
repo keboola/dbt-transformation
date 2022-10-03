@@ -17,7 +17,8 @@ class DbtService
     public const COMMAND_RUN = 'dbt run';
     public const COMMAND_SOURCE_FRESHNESS = 'dbt source freshness';
     public const COMMAND_TEST = 'dbt test';
-    public const STEP_SEED = 'dbt seed';
+    public const COMMAND_SEED = 'dbt seed';
+    public const COMMAND_DEPS = 'dbt deps';
 
     private string $projectPath;
 

@@ -25,7 +25,7 @@ class ConfigDefinition extends BaseConfigDefinition
         DbtService::COMMAND_SOURCE_FRESHNESS,
         DbtService::COMMAND_DEBUG,
         DbtService::COMMAND_COMPILE,
-        DbtService::STEP_SEED,
+        DbtService::COMMAND_SEED,
     ];
 
     protected function getParametersDefinition(): ArrayNodeDefinition

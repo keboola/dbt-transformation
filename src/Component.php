@@ -154,7 +154,7 @@ class Component extends BaseComponent
             $this->getLogger()->info($log);
         }
 
-        if ($step === 'dbt debug') {
+        if ($step === DbtService::COMMAND_DEBUG) {
             $lines = explode(PHP_EOL, $output);
             array_shift($lines); // remove the first json line
             foreach ($lines as $log) {
@@ -162,7 +162,7 @@ class Component extends BaseComponent
             }
         }
 
-        if ($step !== 'dbt deps' && $step !== 'dbt debug') {
+        if ($step !== DbtService::COMMAND_DEPS && $step !== DbtService::COMMAND_DEBUG) {
             $this->artifacts->writeResults($this->projectPath, $step);
         }
     }

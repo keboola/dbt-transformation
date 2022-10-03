@@ -154,7 +154,7 @@ class Component extends BaseComponent
             $this->getLogger()->info($log);
         }
 
-        if ($step == 'dbt debug') {
+        if ($step === 'dbt debug') {
             $lines = explode(PHP_EOL, $output);
             array_shift($lines); // remove the first json line
             foreach ($lines as $log) {

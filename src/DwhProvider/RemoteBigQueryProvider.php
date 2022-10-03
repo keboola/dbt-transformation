@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
+use Keboola\Temp\Temp;
 use RuntimeException;
 
 class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProviderInterface
@@ -21,11 +22,9 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
         putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['dataset']));
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
         // create temp file with key
-        $tmpKeyFile = tempnam(__DIR__ . '/../../', 'key-');
-        if ($tmpKeyFile === false) {
-            throw new RuntimeException('Creating temp file with key for BigQuery failed');
-        }
-        file_put_contents($tmpKeyFile, $workspace['#key_content']);
+        $temp = new Temp('dbt-big-query');
+        $tmpKeyFile = $temp->createFile('key');
+        file_put_contents($tmpKeyFile->getPathname(), $workspace['#key_content']);
         putenv(sprintf('DBT_KBC_PROD_KEYFILE=%s', $tmpKeyFile));
     }
 

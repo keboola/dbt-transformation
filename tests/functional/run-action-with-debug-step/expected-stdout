@@ -4,3 +4,28 @@ Running with dbt=1.2.1
 Warning: No packages were found in packages.yml
 Executing command "dbt debug"
 Running with dbt=1.2.1
+dbt version: 1.2.1
+python version: 3.9.2
+python path: /usr/bin/python3
+os info: %s
+Using profiles.yml file at /tmp/%s/dbt-project/profiles.yml
+Using dbt_project.yml file at /tmp/%s/dbt-project/dbt_project.yml
+
+Configuration:
+  profiles.yml file [OK found and valid]
+  dbt_project.yml file [OK found and valid]
+
+Required dependencies:
+ - git [OK found]
+
+Connection:
+  account: keboola
+  user: SAPI_WORKSPACE_875822722
+  database: SAPI_9317
+  schema: WORKSPACE_875822722
+  warehouse: KEBOOLA_PROD_SMALL
+  role: None
+  client_session_keep_alive: False
+  Connection test: [OK connection ok]
+
+All checks passed!

@@ -42,8 +42,6 @@ class GitRepositoryDefinition extends BaseConfigDefinition
                         ->end()
                         ->scalarNode('#password')
                         ->end()
-                        ->scalarNode('username')
-                        ->end()
                     ->end()
                 ->end()
             ->end();

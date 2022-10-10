@@ -103,7 +103,7 @@ class DbtServiceTest extends TestCase
         $parsedOutput = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
 
         self::assertSame([
-            'Running with dbt=1.2.1',
+            'Running with dbt=1.2.2',
             'Partial parse save file not found. Starting full parse.',
             'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations,'
             . ' 0 seed files, 2 sources, 0 exposures, 0 metrics',

@@ -1,10 +1,10 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch main (%s)
 Executing command "dbt deps"
-Running with dbt=1.2.1
+Running with dbt=%s
 Warning: No packages were found in packages.yml
 Executing command "dbt debug"
-Running with dbt=1.2.1
-dbt version: 1.2.1
+Running with dbt=%s
+dbt version: %s
 python version: 3.9.2
 python path: /usr/bin/python3
 os info: %s

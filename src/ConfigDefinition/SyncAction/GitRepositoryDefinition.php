@@ -19,6 +19,7 @@ class GitRepositoryDefinition extends BaseConfigDefinition
             ->isRequired()
             ->children()
                 ->arrayNode('git')
+                    ->ignoreExtraKeys()
                     ->validate()
                         ->always(function ($item) {
                             if ((empty($item['username']) && !empty($item['#password']))

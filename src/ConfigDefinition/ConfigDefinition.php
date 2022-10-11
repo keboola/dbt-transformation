@@ -28,6 +28,8 @@ class ConfigDefinition extends BaseConfigDefinition
         DbtService::COMMAND_SEED,
     ];
 
+    private const ACCEPTED_PERIODS = ['minute', 'hour', 'day'];
+
     protected function getParametersDefinition(): ArrayNodeDefinition
     {
         $parametersNode = parent::getParametersDefinition();
@@ -147,6 +149,32 @@ class ConfigDefinition extends BaseConfigDefinition
                             ->requiresAtLeastOneElement()
                             ->enumPrototype()
                                 ->values(self::ACCEPTED_DBT_COMMANDS)
+                            ->end()
+                        ->end()
+                        ->arrayNode('freshness')
+                                ->children()
+                                ->arrayNode('warn_after')
+                                    ->children()
+                                        ->integerNode('count')
+                                            ->isRequired()
+                                        ->end()
+                                        ->enumNode('period')
+                                            ->isRequired()
+                                            ->values(self::ACCEPTED_PERIODS)
+                                        ->end()
+                                    ->end()
+                                ->end()
+                                ->arrayNode('error_after')
+                                    ->children()
+                                        ->integerNode('count')
+                                            ->isRequired()
+                                        ->end()
+                                        ->enumNode('period')
+                                            ->isRequired()
+                                            ->values(self::ACCEPTED_PERIODS)
+                                        ->end()
+                                    ->end()
+                                ->end()
                             ->end()
                         ->end()
                         ->scalarNode('threads')

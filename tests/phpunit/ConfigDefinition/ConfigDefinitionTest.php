@@ -211,6 +211,58 @@ class ConfigDefinitionTest extends TestCase
                 ],
             ],
         ];
+
+        yield 'config with freshness' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['count' => 1, 'period' => 'hour'],
+                            'error_after' => ['count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with freshness warn only' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['count' => 1, 'period' => 'hour'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with freshness error only' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' =>[
+                            'error_after' => ['count' => 30, 'period' => 'minute'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -380,6 +432,74 @@ class ConfigDefinitionTest extends TestCase
                 ],
             ],
             'expectedError' => 'The path "root.parameters.remoteDwh.user" cannot contain an empty value, but got "".',
+        ];
+
+        yield 'config with empty warn after' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => ['warn_after' => []],
+                    ],
+                ],
+            ],
+            'expectedError' => 'The child config "count" under "root.parameters.dbt.freshness.warn_after" must be' .
+                ' configured.',
+        ];
+
+        yield 'config with freshness with missing count' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => ['warn_after' => ['period' => 'day']],
+                    ],
+                ],
+            ],
+            'expectedError' => 'The child config "count" under "root.parameters.dbt.freshness.warn_after" must be ' .
+                'configured.',
+        ];
+
+        yield 'config with freshness with wrong period' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => ['warn_after' => ['period' => 'year', 'count' => 1]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'The value "year" is not allowed for path "root.parameters.dbt.freshness.warn_after.' .
+                'period". Permissible values: "minute", "hour", "day"',
+        ];
+
+        yield 'config with freshness with non-integer count' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => ['warn_after' => ['period' => 'month', 'count' => 'one']],
+                    ],
+                ],
+            ],
+            'expectedError' => 'Invalid type for path "root.parameters.dbt.freshness.warn_after.count". Expected "int",'
+                . ' but got "string".',
         ];
     }
 

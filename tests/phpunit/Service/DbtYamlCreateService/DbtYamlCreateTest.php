@@ -83,9 +83,15 @@ class DbtYamlCreateTest extends TestCase
             ],
         ];
 
+        $freshness = [
+            'warn_after' => ['count' => 1, 'period' => 'hour'],
+            'error_after' => ['count' => 1, 'period' => 'day'],
+        ];
+
         $service->dumpYaml(
             $this->dataDir,
-            $tablesData
+            $tablesData,
+            $freshness
         );
 
         foreach ($tablesData as $bucket => $tables) {

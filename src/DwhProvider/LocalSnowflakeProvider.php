@@ -60,7 +60,8 @@ class LocalSnowflakeProvider implements DwhProviderInterface
 
         $this->createSourceFileService->dumpYaml(
             $this->projectPath,
-            $tablesData
+            $tablesData,
+            $this->config->getFreshness()
         );
     }
 

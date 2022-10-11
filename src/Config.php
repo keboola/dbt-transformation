@@ -69,6 +69,18 @@ class Config extends BaseConfig
     }
 
     /**
+     * @return array<string, array{period: string, count: int}>
+     */
+    public function getFreshness(): array
+    {
+        try {
+            return $this->getValue(['parameters', 'dbt', 'freshness']);
+        } catch (InvalidArgumentException $e) {
+            return [];
+        }
+    }
+
+    /**
      * @return array<string, string>
      */
     public function getRemoteDwh(): array

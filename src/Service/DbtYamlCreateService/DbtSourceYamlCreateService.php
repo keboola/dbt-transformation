@@ -11,10 +11,12 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
 {
     /**
      * @param array<string, array<int, array<string, mixed>>> $tablesData
+     * @param array<string, array{period: string, count: int}> $freshness
      */
     public function dumpYaml(
         string $projectPath,
         array $tablesData,
+        array $freshness,
         string $dbEnvVarName = 'DBT_KBC_PROD_DATABASE'
     ): void {
         $modelFolderPath = sprintf('%s/models/_sources/', $projectPath);
@@ -28,7 +30,7 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                     'sources' => [
                         [
                             'name' => $bucket,
-                            'freshness' => ['warn_after' => ['count' => 1, 'period' => 'day']],
+                            'freshness' => $freshness,
                             'database' => sprintf('{{ env_var("%s") }}', $dbEnvVarName),
                             'schema' => $bucket,
                             'loaded_at_field' => '"_timestamp"',

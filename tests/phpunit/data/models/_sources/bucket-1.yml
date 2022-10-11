@@ -5,6 +5,9 @@ sources:
         freshness:
             warn_after:
                 count: 1
+                period: hour
+            error_after:
+                count: 1
                 period: day
         database: '{{ env_var("DBT_KBC_PROD_DATABASE") }}'
         schema: bucket-1

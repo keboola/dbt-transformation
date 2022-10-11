@@ -15,7 +15,10 @@
     },
     "dbt": {
       "executeSteps": ["dbt run", "dbt docs generate", "dbt test", "dbt source freshness"],
-      "threads": 1
+      "threads": 1,
+      "freshness": {
+        "warn_after": {"count": 1, "period": "day"}
+      }
     }
   }
 }

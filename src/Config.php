@@ -69,7 +69,7 @@ class Config extends BaseConfig
     }
 
     /**
-     * @return array<string, <array{period: string, count: int}>
+     * @return array<string, array{period: string, count: int}>
      */
     public function getFreshness(): array
     {

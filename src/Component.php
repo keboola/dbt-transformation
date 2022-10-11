@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation;
 
 use DbtTransformation\ConfigDefinition\ConfigDefinition;
+use DbtTransformation\ConfigDefinition\SyncAction\DbtCompileDefinition;
 use DbtTransformation\ConfigDefinition\SyncAction\DbtDocsDefinition;
 use DbtTransformation\ConfigDefinition\SyncAction\DbtRunResultsDefinition;
 use DbtTransformation\ConfigDefinition\SyncAction\GitRepositoryDefinition;
@@ -93,6 +94,8 @@ class Component extends BaseComponent
         $action = $configRaw['action'] ?? 'run';
 
         switch ($action) {
+            case 'dbtCompile':
+                return DbtCompileDefinition::class;
             case 'dbtDocs':
                 return DbtDocsDefinition::class;
             case 'dbtRunResults':

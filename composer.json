@@ -8,7 +8,6 @@
         "keboola/php-component": "^9.1",
         "keboola/sandboxes-api-php-client": "^6.21",
         "keboola/storage-api-client": "^12.10",
-        "symfony/console": "^5.4",
         "symfony/filesystem": "^5.4",
         "symfony/process": "^5.4",
         "symfony/yaml": "^5.4",

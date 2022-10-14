@@ -17,8 +17,8 @@
       "executeSteps": ["dbt source freshness"],
       "threads": 1,
       "freshness": {
-        "warn_after": {"count": 1, "period": "minute"},
-        "error_after": {"count": 2, "period": "minute"}
+        "warn_after": {"active": true, "count": 1, "period": "minute"},
+        "error_after": {"active": true, "count": 2, "period": "minute"}
       }
     }
   }

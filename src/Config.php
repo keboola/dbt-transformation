@@ -74,10 +74,20 @@ class Config extends BaseConfig
     public function getFreshness(): array
     {
         try {
-            return $this->getValue(['parameters', 'dbt', 'freshness']);
+            $freshness = $this->getValue(['parameters', 'dbt', 'freshness']);
         } catch (InvalidArgumentException $e) {
             return [];
         }
+
+        foreach ($freshness as $key => $value) {
+            if ($value['active']) {
+                unset($freshness[$key]['active']);
+            } else {
+                unset($freshness[$key]);
+            }
+        }
+
+        return $freshness;
     }
 
     /**

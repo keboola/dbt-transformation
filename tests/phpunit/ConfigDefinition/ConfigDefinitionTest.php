@@ -222,8 +222,8 @@ class ConfigDefinitionTest extends TestCase
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
                         'freshness' => [
-                            'warn_after' => ['count' => 1, 'period' => 'hour'],
-                            'error_after' => ['count' => 1, 'period' => 'day'],
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
                         ],
                     ],
                 ],
@@ -240,7 +240,7 @@ class ConfigDefinitionTest extends TestCase
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
                         'freshness' => [
-                            'warn_after' => ['count' => 1, 'period' => 'hour'],
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                         ],
                     ],
                 ],
@@ -257,7 +257,7 @@ class ConfigDefinitionTest extends TestCase
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
                         'freshness' =>[
-                            'error_after' => ['count' => 30, 'period' => 'minute'],
+                            'error_after' => ['active' => true, 'count' => 30, 'period' => 'minute'],
                         ],
                     ],
                 ],
@@ -443,7 +443,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
-                        'freshness' => ['warn_after' => []],
+                        'freshness' => ['warn_after' => ['active' => true]],
                     ],
                 ],
             ],
@@ -460,7 +460,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
-                        'freshness' => ['warn_after' => ['period' => 'day']],
+                        'freshness' => ['warn_after' => ['active' => true, 'period' => 'day']],
                     ],
                 ],
             ],
@@ -477,7 +477,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
-                        'freshness' => ['warn_after' => ['period' => 'year', 'count' => 1]],
+                        'freshness' => ['warn_after' => ['active' => true, 'period' => 'year', 'count' => 1]],
                     ],
                 ],
             ],
@@ -494,7 +494,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                     'dbt' => [
                         'executeSteps' => ['dbt run'],
-                        'freshness' => ['warn_after' => ['period' => 'month', 'count' => 'one']],
+                        'freshness' => ['warn_after' => ['active' => true, 'period' => 'month', 'count' => 'one']],
                     ],
                 ],
             ],

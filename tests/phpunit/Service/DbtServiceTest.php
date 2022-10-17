@@ -109,7 +109,7 @@ class DbtServiceTest extends TestCase
             var_export($parsedOutput, true)
         );
         self::assertContains(
-            'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 303 macros, 0 operations,'
+            'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations,'
             . ' 0 seed files, 2 sources, 0 exposures, 0 metrics',
             $parsedOutput,
             var_export($parsedOutput, true)

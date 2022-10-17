@@ -239,7 +239,7 @@ class Component extends BaseComponent
         $dbtService->runCommand(DbtService::COMMAND_COMPILE);
 
         return [
-            'compiled' => DbtCompileHelper::getCompiledSqlFiles($this->projectPath)
+            'compiled' => DbtCompileHelper::getCompiledSqlFiles($this->projectPath),
         ];
     }
 

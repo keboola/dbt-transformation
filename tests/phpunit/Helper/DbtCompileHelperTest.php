@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DbtTransformation\Tests\Helper;
 
 use DbtTransformation\Helper\DbtCompileHelper;
@@ -50,7 +52,7 @@ class DbtCompileHelperTest extends TestCase
         $temp = new Temp();
 
         $this->expectException(UserException::class);
-        $this->expectExceptionMessage('Compiled SQL files not found in artifact. Run "dbt compile" step first.');
+        $this->expectExceptionMessage('Compiled SQL files not found');
 
         DbtCompileHelper::getCompiledSqlFiles($temp->getTmpFolder());
     }

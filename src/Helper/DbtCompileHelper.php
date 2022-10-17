@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DbtTransformation\Helper;
 
 use DbtTransformation\Service\DbtService;
@@ -11,7 +13,6 @@ use Symfony\Component\Finder\Finder;
 class DbtCompileHelper
 {
     /**
-     * @param string $projectDir
      * @return array<int|string, string|false>
      * @throws UserException
      */

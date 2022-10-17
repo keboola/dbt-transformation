@@ -10,6 +10,7 @@ use DbtTransformation\ConfigDefinition\SyncAction\DbtDocsDefinition;
 use DbtTransformation\ConfigDefinition\SyncAction\DbtRunResultsDefinition;
 use DbtTransformation\ConfigDefinition\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
@@ -226,22 +227,25 @@ class Component extends BaseComponent
 
     /**
      * @return array<string, array<int|string, string|false>>
+     * @throws \Keboola\Component\UserException
      */
     protected function actionDbtCompile(): array
     {
-        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
-        $configId = $this->getConfig()->getConfigId();
-        $branchId = $this->getConfig()->getBranchId();
-
-        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+        $config = $this->getConfig();
+        $this->cloneRepository($config);
+        $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
+        $provider->createDbtYamlFiles();
+        $dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
+        $dbtService->runCommand(DbtService::COMMAND_COMPILE);
 
         return [
-            'compiled' => $this->artifacts->getCompiledSqlFiles(),
+            'compiled' => DbtCompileHelper::getCompiledSqlFiles($this->projectPath)
         ];
     }
 
     /**
      * @return array<string, array<string, array<int, string>|string>>
+     * @throws \Keboola\Component\UserException
      */
     protected function actionGitRepository(): array
     {

@@ -7,6 +7,7 @@ namespace DbtTransformation\Tests\Service;
 use DbtTransformation\Config;
 use DbtTransformation\ConfigDefinition\ConfigDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
@@ -102,15 +103,37 @@ class DbtServiceTest extends TestCase
         $output = $this->dbtService->runCommand(DbtService::COMMAND_COMPILE);
         $parsedOutput = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
 
-        self::assertSame([
-            'Running with dbt=1.2.2',
+        self::assertContains(
             'Partial parse save file not found. Starting full parse.',
-            'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations,'
+            $parsedOutput
+        );
+        self::assertContains(
+            'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 303 macros, 0 operations,'
             . ' 0 seed files, 2 sources, 0 exposures, 0 metrics',
+            $parsedOutput
+        );
+        self::assertContains(
             'Concurrency: 4 threads (target=\'kbc_prod\')',
-            'Done.',
-        ], $parsedOutput);
+            $parsedOutput
+        );
+        self::assertContains('Done.', $parsedOutput);
 
-        //@todo test generated compiled sql files in data/dbt-project/target/dir
+        $compiledSql = DbtCompileHelper::getCompiledSqlFiles($this->getProjectPath());
+
+        $keys = array_keys($compiledSql);
+        self::assertContains('source_not_null_in.c-test-bucket_test__id_.sql', $keys);
+        self::assertContains('source_unique_in.c-test-bucket_test__id_.sql', $keys);
+        self::assertContains('fct_model.sql', $keys);
+        self::assertContains('stg_model.sql', $keys);
+
+        self::assertStringContainsString(
+            'select "id"' . PHP_EOL . 'from "SAPI_9317"."in.c-test-bucket"."test"',
+            $compiledSql['source_not_null_in.c-test-bucket_test__id_.sql']
+        );
+        self::assertStringContainsString('with source as (', $compiledSql['stg_model.sql']);
+        self::assertStringContainsString(
+            'select * from "SAPI_9317"."in.c-test-bucket"."test"',
+            $compiledSql['stg_model.sql']
+        );
     }
 }

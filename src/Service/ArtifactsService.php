@@ -92,36 +92,6 @@ class ArtifactsService
         return (string) file_get_contents($file->getPathname());
     }
 
-    /**
-     * @return array<int|string, string|false>
-     * @throws UserException
-     */
-    public function getCompiledSqlFiles(): array
-    {
-        $compiledDirInfo = new SplFileInfo(
-            sprintf('%s/%s/%s/', $this->getDownloadDir(), DbtService::COMMAND_COMPILE, 'compiled')
-        );
-
-        try {
-            $finder = new Finder();
-            $filePaths = iterator_to_array($finder
-                ->files()
-                ->in($compiledDirInfo->getPathname())
-                ->name('*.sql'));
-        } catch (DirectoryNotFoundException $e) {
-            throw new UserException('Compiled SQL files not found in artifact. Run "dbt compile" step first.');
-        }
-
-        $filenames = array_map(fn($sqlFile) => (string) $sqlFile->getFilename(), $filePaths);
-        reset($filePaths);
-
-        $contents = array_map(fn($sqlFile) => trim(
-            (string) file_get_contents($sqlFile->getPathname())
-        ), $filePaths);
-
-        return (array) array_combine($filenames, $contents);
-    }
-
     private function extractArchive(string $sourcePath, string $targetPath): void
     {
         $this->mkdir($targetPath);

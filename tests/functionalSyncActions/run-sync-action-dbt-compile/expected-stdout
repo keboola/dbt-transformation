@@ -1,0 +1,1 @@
+{"compiled":{"stg_model.sql":"with source as (\n        \n        select * from \"SAPI_9317\".\"in.c-test-bucket\".\"test\"\n        \n    ),\n    \n    renamed as (\n        \n        select\n            \"id\",\n            \"col2\",\n            \"col3\",\n            \"col4\"\n        from source\n    \n    )\n    \n    select * from renamed"}}

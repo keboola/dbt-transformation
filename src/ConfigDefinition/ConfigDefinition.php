@@ -75,7 +75,7 @@ class ConfigDefinition extends BaseConfigDefinition
                         if (!is_array($v)) {
                             return true;
                         }
-                        $requiredSettings = $this->getRemoteDwhConnectionParams($v['type']);
+                        $requiredSettings = self::getRemoteDwhConnectionParams($v['type']);
                         foreach ($requiredSettings as $setting) {
                             if (!array_key_exists($setting, $v)) {
                                 return true;
@@ -203,7 +203,7 @@ class ConfigDefinition extends BaseConfigDefinition
     /**
      * @return array<int, string>
      */
-    private function getRemoteDwhConnectionParams(string $type): array
+    public static function getRemoteDwhConnectionParams(string $type): array
     {
         switch ($type) {
             case RemoteSnowflakeProvider::DWH_PROVIDER_TYPE:

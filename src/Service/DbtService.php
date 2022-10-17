@@ -20,6 +20,12 @@ class DbtService
     public const COMMAND_SEED = 'dbt seed';
     public const COMMAND_DEPS = 'dbt deps';
 
+    private const COMMANDS_TO_RUN_WITHOUT_SELECT = [
+        self::COMMAND_DEPS,
+        self::COMMAND_DEBUG,
+        self::COMMAND_SOURCE_FRESHNESS,
+    ];
+
     private string $projectPath;
 
     /** @var array<string> */
@@ -59,16 +65,11 @@ class DbtService
      */
     protected function getSelectParameter(string $command): array
     {
-        if ($command === self::COMMAND_DEPS || $command === self::COMMAND_DEBUG) {
+        if (in_array($command, self::COMMANDS_TO_RUN_WITHOUT_SELECT) || empty($this->modelNames)) {
             return [];
         }
 
-        $selectParameter = [];
-        if (!empty($this->modelNames)) {
-            $selectParameter = ['--select', ...$this->modelNames];
-        }
-
-        return $selectParameter;
+        return ['--select', ...$this->modelNames];
     }
 
     /**

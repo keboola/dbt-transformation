@@ -106,20 +106,20 @@ class DbtServiceTest extends TestCase
         self::assertContains(
             'Partial parse save file not found. Starting full parse.',
             $parsedOutput,
-            var_export($parsedOutput)
+            var_export($parsedOutput, true)
         );
         self::assertContains(
             'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 303 macros, 0 operations,'
             . ' 0 seed files, 2 sources, 0 exposures, 0 metrics',
             $parsedOutput,
-            var_export($parsedOutput)
+            var_export($parsedOutput, true)
         );
         self::assertContains(
             'Concurrency: 4 threads (target=\'kbc_prod\')',
             $parsedOutput,
-            var_export($parsedOutput)
+            var_export($parsedOutput, true)
         );
-        self::assertContains('Done.', $parsedOutput, var_export($parsedOutput));
+        self::assertContains('Done.', $parsedOutput, var_export($parsedOutput, true));
 
         $compiledSql = DbtCompileHelper::getCompiledSqlFiles($this->getProjectPath());
 

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
-use DbtTransformation\ConfigDefinition\ConfigDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\DbtCompileDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\DbtDocsDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\DbtRunResultsDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\GitRepositoryDefinition;
+use DbtTransformation\Configuration\ConfigDefinition;
+use DbtTransformation\Configuration\SyncAction\DbtCompileDefinition;
+use DbtTransformation\Configuration\SyncAction\DbtDocsDefinition;
+use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
+use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
@@ -235,7 +235,11 @@ class Component extends BaseComponent
         $this->cloneRepository($config);
         $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
         $provider->createDbtYamlFiles();
+
         $dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
+        if (file_exists($this->projectPath . '/packages.yml')) {
+            $dbtService->runCommand(DbtService::COMMAND_DEPS);
+        }
         $dbtService->runCommand(DbtService::COMMAND_COMPILE);
 
         return [

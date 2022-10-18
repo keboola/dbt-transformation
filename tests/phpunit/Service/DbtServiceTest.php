@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Service;
 
 use DbtTransformation\Config;
-use DbtTransformation\ConfigDefinition\ConfigDefinition;
+use DbtTransformation\Configuration\ConfigDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;

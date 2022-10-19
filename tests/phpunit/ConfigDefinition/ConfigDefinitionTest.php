@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\ConfigDefinition;
 
 use DbtTransformation\Config;
-use DbtTransformation\ConfigDefinition\ConfigDefinition;
+use DbtTransformation\Configuration\ConfigDefinition;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;

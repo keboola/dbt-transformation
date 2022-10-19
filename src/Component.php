@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
-use DbtTransformation\ConfigDefinition\ConfigDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\DbtCompileDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\DbtDocsDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\DbtRunResultsDefinition;
-use DbtTransformation\ConfigDefinition\SyncAction\GitRepositoryDefinition;
+use DbtTransformation\Configuration\ConfigDefinition;
+use DbtTransformation\Configuration\SyncAction\DbtCompileDefinition;
+use DbtTransformation\Configuration\SyncAction\DbtDocsDefinition;
+use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
+use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
@@ -226,22 +227,29 @@ class Component extends BaseComponent
 
     /**
      * @return array<string, array<int|string, string|false>>
+     * @throws \Keboola\Component\UserException
      */
     protected function actionDbtCompile(): array
     {
-        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
-        $configId = $this->getConfig()->getConfigId();
-        $branchId = $this->getConfig()->getBranchId();
+        $config = $this->getConfig();
+        $this->cloneRepository($config);
+        $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
+        $provider->createDbtYamlFiles();
 
-        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+        $dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
+        if (file_exists($this->projectPath . '/packages.yml')) {
+            $dbtService->runCommand(DbtService::COMMAND_DEPS);
+        }
+        $dbtService->runCommand(DbtService::COMMAND_COMPILE);
 
         return [
-            'compiled' => $this->artifacts->getCompiledSqlFiles(),
+            'compiled' => DbtCompileHelper::getCompiledSqlFiles($this->projectPath),
         ];
     }
 
     /**
      * @return array<string, array<string, array<int, string>|string>>
+     * @throws \Keboola\Component\UserException
      */
     protected function actionGitRepository(): array
     {

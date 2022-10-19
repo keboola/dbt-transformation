@@ -39,6 +39,6 @@ class DatadirTest extends DatadirTestCase
     {
         $fs = new Filesystem();
         $finder = new Finder();
-        $fs->remove($finder->in(__DIR__ . '/../../data'));
+//        $fs->remove($finder->in(__DIR__ . '/../../data'));
     }
 }

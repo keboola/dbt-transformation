@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Helper;
 
-use DbtTransformation\Service\DbtService;
 use Keboola\Component\UserException;
 use SplFileInfo;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
@@ -16,10 +15,10 @@ class DbtCompileHelper
      * @return array<int|string, string|false>
      * @throws UserException
      */
-    public static function getCompiledSqlFiles(string $projectDir): array
+    public static function getCompiledSqlFiles(string $directory): array
     {
         $compiledDirInfo = new SplFileInfo(
-            sprintf('%s/%s/%s', $projectDir, 'target', 'compiled')
+            sprintf('%s/%s', $directory, 'compiled')
         );
 
         try {
@@ -29,7 +28,7 @@ class DbtCompileHelper
                 ->in($compiledDirInfo->getPathname())
                 ->name('*.sql'));
         } catch (DirectoryNotFoundException $e) {
-            throw new UserException('Compiled SQL files not found.');
+            throw new UserException('Compiled SQL files not found. Run the component with "dbt run" step first.');
         }
 
         $filenames = array_map(fn($sqlFile) => (string) $sqlFile->getFilename(), $filePaths);

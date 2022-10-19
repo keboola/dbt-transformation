@@ -103,25 +103,21 @@ class DbtServiceTest extends TestCase
         $output = $this->dbtService->runCommand(DbtService::COMMAND_COMPILE);
         $parsedOutput = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Partial parse save file not found. Starting full parse.',
-            $parsedOutput,
-            var_export($parsedOutput, true)
+            $parsedOutput[1]
         );
-        self::assertContains(
-            'Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations,'
-            . ' 0 seed files, 2 sources, 0 exposures, 0 metrics',
-            $parsedOutput,
-            var_export($parsedOutput, true)
+        self::assertStringContainsString(
+            'Found 2 models, 2 tests',
+            $parsedOutput[2]
         );
-        self::assertContains(
+        self::assertStringContainsString(
             'Concurrency: 4 threads (target=\'kbc_prod\')',
-            $parsedOutput,
-            var_export($parsedOutput, true)
+            $parsedOutput[3]
         );
-        self::assertContains('Done.', $parsedOutput, var_export($parsedOutput, true));
+        self::assertStringContainsString('Done.', $parsedOutput[4]);
 
-        $compiledSql = DbtCompileHelper::getCompiledSqlFiles($this->getProjectPath());
+        $compiledSql = DbtCompileHelper::getCompiledSqlFiles($this->getProjectPath() . '/target');
 
         $keys = array_keys($compiledSql);
         self::assertContains('source_not_null_in.c-test-bucket_test__id_.sql', $keys);

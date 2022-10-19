@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Helper;
 
 use DbtTransformation\Helper\DbtCompileHelper;
-use DbtTransformation\Service\ArtifactsService;
 use Keboola\Component\UserException;
 use Keboola\Temp\Temp;
 use PHPUnit\Framework\TestCase;
+use SplFileInfo;
 
 class DbtCompileHelperTest extends TestCase
 {
     public function testGetCompiledSqlFiles(): void
     {
-        $dataDir = __DIR__ . '/../data';
-        $compiled = DbtCompileHelper::getCompiledSqlFiles($dataDir);
+        $dataDir = new SplFileInfo(__DIR__ . '/../data/artifacts/in/dbt run');
+        $compiled = DbtCompileHelper::getCompiledSqlFiles($dataDir->getPathname());
 
         self::assertArrayHasKey('source_not_null_in.c-test-bucket_test__id_.sql', $compiled);
         self::assertArrayHasKey('source_unique_in.c-test-bucket_test__id_.sql', $compiled);
@@ -52,7 +52,7 @@ class DbtCompileHelperTest extends TestCase
         $temp = new Temp();
 
         $this->expectException(UserException::class);
-        $this->expectExceptionMessage('Compiled SQL files not found');
+        $this->expectExceptionMessage('Compiled SQL files not found. Run the component with "dbt run" step first.');
 
         DbtCompileHelper::getCompiledSqlFiles($temp->getTmpFolder());
     }

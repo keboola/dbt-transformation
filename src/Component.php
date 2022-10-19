@@ -231,19 +231,14 @@ class Component extends BaseComponent
      */
     protected function actionDbtCompile(): array
     {
-        $config = $this->getConfig();
-        $this->cloneRepository($config);
-        $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
-        $provider->createDbtYamlFiles();
-
-        $dbtService = new DbtService($this->projectPath, $this->getConfig()->getModelNames());
-        if (file_exists($this->projectPath . '/packages.yml')) {
-            $dbtService->runCommand(DbtService::COMMAND_DEPS);
-        }
-        $dbtService->runCommand(DbtService::COMMAND_COMPILE);
+        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
+        $configId = $this->getConfig()->getConfigId();
+        $branchId = $this->getConfig()->getBranchId();
+        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+        $runArtifactPath = $this->artifacts->getDownloadDir() . '/' . DbtService::COMMAND_RUN;
 
         return [
-            'compiled' => DbtCompileHelper::getCompiledSqlFiles($this->projectPath),
+            'compiled' => DbtCompileHelper::getCompiledSqlFiles($runArtifactPath),
         ];
     }
 

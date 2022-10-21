@@ -263,6 +263,76 @@ class ConfigDefinitionTest extends TestCase
                 ],
             ],
         ];
+
+        yield 'config with storage input source only' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => [
+                        'input' => [
+                            'tables' => [['source' => 'tableName']],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with storage input source and destination' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => [
+                        'input' => ['tables' => [['source' => 'tableName', 'destination' => 'tableName.csv']]],
+                    ]
+                ],
+            ],
+        ];
+
+        yield 'config with storage multiple source tables' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => [
+                        'input' => [
+                            'tables' => [
+                                ['source' => 'tableName', 'destination' => 'tableName.csv'],
+                                ['source' => 'tableName2', 'destination' => 'tableName2.csv']
+                            ],
+                        ],
+                    ]
+                ],
+            ],
+        ];
     }
 
     /**
@@ -500,6 +570,109 @@ class ConfigDefinitionTest extends TestCase
             ],
             'expectedError' => 'Invalid type for path "root.parameters.dbt.freshness.warn_after.count". Expected "int",'
                 . ' but got "string".',
+        ];
+
+        yield 'config with empty storage' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => [],
+                ],
+            ],
+            'expectedError' => 'The child config "input" under "root.parameters.storage" must be configured.',
+        ];
+
+        yield 'config with empty storage input' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => ['input' => []],
+                ],
+            ],
+            'expectedError' => 'The child config "tables" under "root.parameters.storage.input" must be configured.',
+        ];
+
+        yield 'config with empty storage input tables' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => ['input' => ['tables' => []]],
+                ],
+            ],
+            'expectedError' => 'The path "root.parameters.storage.input.tables" should have at least 1 element(s)' .
+                ' defined.',
+        ];
+
+        yield 'config with empty storage input table source node' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => ['input' => ['tables' => [['source']]]],
+                ],
+            ],
+            'expectedError' => 'Unrecognized option "0" under "root.parameters.storage.input.tables.0". Available ' .
+                'options are "destination", "source".',
+        ];
+
+        yield 'config with empty storage input table source' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                        'freshness' => [
+                            'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
+                            'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
+                        ],
+                    ],
+                    'storage' => ['input' => ['tables' => [['source' => '']]]],
+                ],
+            ],
+            'expectedError' => 'The path "root.parameters.storage.input.tables.0.source" cannot contain an empty ' .
+                'value, but got "".',
         ];
     }
 

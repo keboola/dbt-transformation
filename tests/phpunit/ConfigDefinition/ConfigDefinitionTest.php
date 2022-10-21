@@ -303,7 +303,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                     'storage' => [
                         'input' => ['tables' => [['source' => 'tableName', 'destination' => 'tableName.csv']]],
-                    ]
+                    ],
                 ],
             ],
         ];
@@ -326,10 +326,10 @@ class ConfigDefinitionTest extends TestCase
                         'input' => [
                             'tables' => [
                                 ['source' => 'tableName', 'destination' => 'tableName.csv'],
-                                ['source' => 'tableName2', 'destination' => 'tableName2.csv']
+                                ['source' => 'tableName2', 'destination' => 'tableName2.csv'],
                             ],
                         ],
-                    ]
+                    ],
                 ],
             ],
         ];

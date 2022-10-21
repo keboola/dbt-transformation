@@ -52,10 +52,14 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             'url' => $this->config->getStorageApiUrl(),
             'token' => $this->config->getStorageApiToken(),
         ]);
+
+        $inputTables = $this->config->getStorageInputTables();
         $tables = $client->listTables();
         $tablesData = [];
         foreach ($tables as $table) {
-            $tablesData[(string) $table['bucket']['id']][] = $table;
+            if (empty($inputTables) || in_array($table['id'], $inputTables)) {
+                $tablesData[(string) $table['bucket']['id']][] = $table;
+            }
         }
 
         $this->createSourceFileService->dumpYaml(

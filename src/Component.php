@@ -12,6 +12,7 @@ use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
+use DbtTransformation\FileDumper\OutputManifest\ManifestConverter;
 use DbtTransformation\FileDumper\OutputManifestJson;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
@@ -56,7 +57,7 @@ class Component extends BaseComponent
             $this->createProfilesFileService,
             $this->getLogger()
         );
-        $this->outputManifestDumper = new OutputManifestJson($this->getDataDir(), $this->projectPath);
+        $this->outputManifestDumper = new OutputManifestJson($this->getDataDir());
     }
 
     /**
@@ -77,7 +78,10 @@ class Component extends BaseComponent
             $this->executeStep($step);
         }
 
-        $this->outputManifestDumper->dumpJson();
+        $manifestConverter = new ManifestConverter($this->projectPath);
+        foreach ($manifestConverter->toOutputTables() as $tableName => $manifestData) {
+            $this->outputManifestDumper->dumpJson($tableName, $manifestData);
+        }
 
         if ($config->showSqls()) {
             $this->logExecutedSqls();

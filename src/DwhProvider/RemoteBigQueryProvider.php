@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\DwhProvider;
 
 use DbtTransformation\Config;
-use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\FileDumper\DbtProfilesYaml;
+use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
 
@@ -17,8 +17,8 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
     private Temp $temp;
 
     public function __construct(
-        DbtSourceYamlCreateService $createSourceFileService,
-        DbtProfilesYamlCreateService $createProfilesFileService,
+        DbtSourcesYaml $createSourceFileService,
+        DbtProfilesYaml $createProfilesFileService,
         LoggerInterface $logger,
         Config $config,
         string $projectPath

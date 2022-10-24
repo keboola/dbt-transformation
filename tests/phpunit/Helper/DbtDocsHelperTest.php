@@ -32,8 +32,8 @@ class DbtDocsHelperTest extends TestCase
 
     public function testGetModelTiming(): void
     {
-        $manifestJson = (string) file_get_contents(__DIR__ . '/../data/manifest.json');
-        $runResultsJson = (string) file_get_contents(__DIR__ . '/../data/run_results.json');
+        $manifestJson = (string) file_get_contents(__DIR__ . '/../data/model_timing/manifest.json');
+        $runResultsJson = (string) file_get_contents(__DIR__ . '/../data/model_timing/run_results.json');
 
         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
         $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);

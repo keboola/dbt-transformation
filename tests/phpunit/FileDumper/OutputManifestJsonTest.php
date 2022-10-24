@@ -26,8 +26,8 @@ class OutputManifestJsonTest extends TestCase
         $outputManifest = new OutputManifestJson($this->dataDir, $this->providerDataDir);
         $outputManifest->dumpJson();
 
-        $tableManifestPath1 = $this->dataDir . '/out/tables/beers_with_breweries.json';
-        $tableManifestPath2 = $this->dataDir . '/out/tables/beers.json';
+        $tableManifestPath1 = $this->dataDir . '/out/tables/beers_with_breweries.manifest';
+        $tableManifestPath2 = $this->dataDir . '/out/tables/beers.manifest';
         self::assertFileExists($tableManifestPath1);
         self::assertFileExists($tableManifestPath2);
 

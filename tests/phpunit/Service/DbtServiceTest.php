@@ -7,11 +7,11 @@ namespace DbtTransformation\Tests\Service;
 use DbtTransformation\Config;
 use DbtTransformation\Configuration\ConfigDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\FileDumper\DbtProfilesYaml;
+use DbtTransformation\FileDumper\DbtSourcesYaml;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Service\DbtService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\Service\GitRepositoryService;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
@@ -28,8 +28,8 @@ class DbtServiceTest extends TestCase
 
     public function setUp(): void
     {
-        $createProfilesFileService = new DbtProfilesYamlCreateService;
-        $createSourceFileService = new DbtSourceYamlCreateService;
+        $createProfilesFileService = new DbtProfilesYaml;
+        $createSourceFileService = new DbtSourcesYaml;
         $this->gitRepositoryService = new GitRepositoryService($this->dataDir);
         $this->logger = new TestLogger();
 

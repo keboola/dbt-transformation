@@ -10,36 +10,40 @@ use DbtTransformation\Configuration\SyncAction\DbtDocsDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
 use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\FileDumper\DbtProfilesYaml;
+use DbtTransformation\FileDumper\DbtSourcesYaml;
+use DbtTransformation\FileDumper\OutputManifestJson;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
 use DbtTransformation\Service\ArtifactsService;
 use DbtTransformation\Service\DbtService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\Service\GitRepositoryService;
 use Keboola\Component\BaseComponent;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 class Component extends BaseComponent
 {
     public const COMPONENT_ID = 'keboola.dbt-transformation';
 
-    private DbtSourceYamlCreateService $createSourceFileService;
-    private DbtProfilesYamlCreateService $createProfilesFileService;
+    private DbtSourcesYaml $createSourceFileService;
+    private DbtProfilesYaml $createProfilesFileService;
     private GitRepositoryService $gitRepositoryService;
     private string $projectPath;
     private StorageClient $storageClient;
     private ArtifactsService $artifacts;
     private DwhProviderFactory $dwhProviderFactory;
+    private OutputManifestJson $outputManifestDumper;
 
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
-        $this->createProfilesFileService = new DbtProfilesYamlCreateService;
-        $this->createSourceFileService = new DbtSourceYamlCreateService;
+        $this->createProfilesFileService = new DbtProfilesYaml;
+        $this->createSourceFileService = new DbtSourcesYaml;
         $this->gitRepositoryService = new GitRepositoryService($this->getDataDir());
         $this->storageClient = new StorageClient([
             'url' => $this->getConfig()->getStorageApiUrl(),
@@ -52,6 +56,7 @@ class Component extends BaseComponent
             $this->createProfilesFileService,
             $this->getLogger()
         );
+        $this->outputManifestDumper = new OutputManifestJson($this->getDataDir(), $this->projectPath);
     }
 
     /**
@@ -71,6 +76,9 @@ class Component extends BaseComponent
         foreach ($executeSteps as $step) {
             $this->executeStep($step);
         }
+
+        $this->outputManifestDumper->dumpJson();
+        ;
 
         if ($config->showSqls()) {
             $this->logExecutedSqls();
@@ -169,6 +177,10 @@ class Component extends BaseComponent
         if ($step !== DbtService::COMMAND_DEPS && $step !== DbtService::COMMAND_DEBUG) {
             $this->artifacts->writeResults($this->projectPath, $step);
         }
+    }
+
+    protected function writeOutputManifests(): void
+    {
     }
 
     /**

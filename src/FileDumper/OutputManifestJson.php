@@ -73,6 +73,7 @@ class OutputManifestJson extends FilesystemAwareDumper
             }
 
             $manifestData = [
+                'source' => $tableData['name'],
                 'columns' => array_keys($tableData['columns']),
                 'primary_key' => $primaryKey,
                 'metadata' => $tableMetadata,
@@ -80,7 +81,7 @@ class OutputManifestJson extends FilesystemAwareDumper
             ];
 
             $this->filesystem->dumpFile(
-                sprintf('%s/%s.json', $this->outputDir, $tableData['name']),
+                sprintf('%s/%s.manifest', $this->outputDir, $tableData['name']),
                 (string) json_encode(array_filter($manifestData))
             );
         }

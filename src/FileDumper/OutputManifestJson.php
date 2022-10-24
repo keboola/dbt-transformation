@@ -73,7 +73,6 @@ class OutputManifestJson extends FilesystemAwareDumper
             }
 
             $manifestData = [
-                'source' => $tableData['name'],
                 'columns' => array_keys($tableData['columns']),
                 'primary_key' => $primaryKey,
                 'metadata' => $tableMetadata,

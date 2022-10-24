@@ -78,7 +78,6 @@ class Component extends BaseComponent
         }
 
         $this->outputManifestDumper->dumpJson();
-        ;
 
         if ($config->showSqls()) {
             $this->logExecutedSqls();
@@ -177,10 +176,6 @@ class Component extends BaseComponent
         if ($step !== DbtService::COMMAND_DEPS && $step !== DbtService::COMMAND_DEBUG) {
             $this->artifacts->writeResults($this->projectPath, $step);
         }
-    }
-
-    protected function writeOutputManifests(): void
-    {
     }
 
     /**

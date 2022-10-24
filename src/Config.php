@@ -91,6 +91,18 @@ class Config extends BaseConfig
     }
 
     /**
+     * @return string[]
+     */
+    public function getStorageInputTables(): array
+    {
+        try {
+            return array_column($this->getValue(['parameters', 'storage', 'input', 'tables']), 'source');
+        } catch (InvalidArgumentException $e) {
+            return [];
+        }
+    }
+
+    /**
      * @return array<string, string>
      */
     public function getRemoteDwh(): array

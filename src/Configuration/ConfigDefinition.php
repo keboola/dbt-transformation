@@ -7,6 +7,7 @@ namespace DbtTransformation\Configuration;
 use DbtTransformation\Configuration\NodeDefinition\DbtNode;
 use DbtTransformation\Configuration\NodeDefinition\GitNode;
 use DbtTransformation\Configuration\NodeDefinition\RemoteDwhNode;
+use DbtTransformation\Configuration\NodeDefinition\StorageInputNode;
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
@@ -23,6 +24,7 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->append(new GitNode())
                 ->append(new RemoteDwhNode())
                 ->append(new DbtNode())
+                ->append(new StorageInputNode())
             ->end();
 
         /** @noinspection NullPointerExceptionInspection */

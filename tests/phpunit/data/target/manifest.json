@@ -1,0 +1,719 @@
+{
+  "metadata": {
+    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v6.json",
+    "dbt_version": "1.2.1",
+    "generated_at": "2022-09-19T13:34:22.844671Z",
+    "invocation_id": "593bb7d1-5df1-49a4-8fdb-f069edf2d8cc",
+    "env": {
+    },
+    "project_id": "45d78351bcb6df8550a66c11d8f7eafb",
+    "user_id": null,
+    "send_anonymous_usage_stats": false,
+    "adapter_type": "snowflake"
+  },
+  "nodes": {
+    "model.beer_analytics.beers_with_breweries": {
+      "raw_sql": "{{ config(\n    materialized=\"table\",\n    persist_docs={\"relation\": true, \"columns\": true}\n) }}\n\nSELECT *\nFROM {{ ref('beers') }} beers\nJOIN {{ ref('breweries') }} breweries USING (brewery_id)",
+      "compiled": true,
+      "resource_type": "model",
+      "depends_on": {
+        "macros": [
+          "macro.dbt_snowflake.set_query_tag",
+          "macro.dbt.run_hooks",
+          "macro.dbt.statement",
+          "macro.dbt.should_revoke",
+          "macro.dbt.apply_grants",
+          "macro.dbt.persist_docs",
+          "macro.dbt_snowflake.unset_query_tag"
+        ],
+        "nodes": [
+          "model.beer_analytics.beers",
+          "model.beer_analytics.breweries"
+        ]
+      },
+      "config": {
+        "enabled": true,
+        "alias": null,
+        "schema": null,
+        "database": null,
+        "tags": [
+
+        ],
+        "meta": {
+          "owner": "fisa@keboola.com"
+        },
+        "materialized": "table",
+        "persist_docs": {
+          "relation": true,
+          "columns": true
+        },
+        "quoting": {
+        },
+        "column_types": {
+        },
+        "full_refresh": null,
+        "unique_key": null,
+        "on_schema_change": "ignore",
+        "grants": {
+        },
+        "post-hook": [
+
+        ],
+        "pre-hook": [
+
+        ]
+      },
+      "database": "KEBOOLA_7167",
+      "schema": "WORKSPACE_24414928",
+      "fqn": [
+        "beer_analytics",
+        "beers",
+        "beers_with_breweries"
+      ],
+      "unique_id": "model.beer_analytics.beers_with_breweries",
+      "package_name": "beer_analytics",
+      "root_path": "/data/dbt-project",
+      "path": "beers/beers_with_breweries.sql",
+      "original_file_path": "models/beers/beers_with_breweries.sql",
+      "name": "beers_with_breweries",
+      "alias": "beers_with_breweries",
+      "checksum": {
+        "name": "sha256",
+        "checksum": "553c08f8745db1db963f39346b0516848ef19e4c3f1ff29b1ca1df0ceef3910a"
+      },
+      "tags": [
+
+      ],
+      "refs": [
+        [
+          "beers"
+        ],
+        [
+          "breweries"
+        ]
+      ],
+      "sources": [
+
+      ],
+      "metrics": [
+
+      ],
+      "description": "Beers joined with their breweries",
+      "columns": {
+        "brewery_id": {
+          "name": "brewery_id",
+          "description": "The unique identifier for the brewery",
+          "meta": {
+            "primary-key": true,
+            "dimension": {
+              "sql": "${TABLE}.brewery_id"
+            },
+            "meta": null,
+            "metrics": {
+              "num_unique_breweries": {
+                "type": "count_distinct"
+              }
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "beer_id": {
+          "name": "beer_id",
+          "description": "The unique identifier for the beer",
+          "meta": {
+            "primary-key": true,
+            "dimension": {
+              "sql": "${TABLE}.beer_id"
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "beer_name": {
+          "name": "beer_name",
+          "description": "The name of the beer",
+          "meta": {
+            "primary-key": true
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "beer_style": {
+          "name": "beer_style",
+          "description": "Style of the beer (IPA, Porter, etc)",
+          "meta": {
+            "dimension": {
+              "sql": "${TABLE}.beer_style"
+            },
+            "metrics": {
+              "num_unique_beer_styles": {
+                "type": "count_distinct"
+              }
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "abv": {
+          "name": "abv",
+          "description": "Alcohol percentage in the beer",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "ibu": {
+          "name": "ibu",
+          "description": "The bitterness of the beer in IBUs",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "bitterness": {
+          "name": "bitterness",
+          "description": "The bitterness category of the beer (based on IBUs)",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "ounces": {
+          "name": "ounces",
+          "description": "The volume of the beer",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "brewery_name": {
+          "name": "brewery_name",
+          "description": "Name of the brewery",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "brewery_city": {
+          "name": "brewery_city",
+          "description": "City of the brewery",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "brewery_state": {
+          "name": "brewery_state",
+          "description": "State of the brewery",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        }
+      },
+      "meta": {
+        "owner": "fisa@keboola.com"
+      },
+      "docs": {
+        "show": true
+      },
+      "patch_path": "beer_analytics://models/beers/schema.yml",
+      "compiled_path": "target/compiled/beer_analytics/models/beers/beers_with_breweries.sql",
+      "build_path": "target/run/beer_analytics/models/beers/beers_with_breweries.sql",
+      "deferred": false,
+      "unrendered_config": {
+        "materialized": "table",
+        "persist_docs": {
+          "relation": true,
+          "columns": true
+        }
+      },
+      "created_at": 1663594464.689879,
+      "compiled_sql": "\n\nSELECT *\nFROM \"KEBOOLA_7167\".\"WORKSPACE_24414928\".\"beers\" beers\nJOIN \"KEBOOLA_7167\".\"WORKSPACE_24414928\".\"breweries\" breweries USING (brewery_id)",
+      "extra_ctes_injected": true,
+      "extra_ctes": [
+
+      ],
+      "relation_name": "\"KEBOOLA_7167\".\"WORKSPACE_24414928\".\"beers_with_breweries\""
+    },
+    "model.beer_analytics.beers": {
+      "raw_sql": "{{ config(\n    materialized=\"table\"\n) }}\n\nSELECT\n  \"id\"            AS beer_id,\n  TRIM(\"name\")    AS beer_name,\n  \"style\"         AS beer_style,\n  TRY_TO_NUMERIC(\"abv\",14,8)           AS abv,\n  TRY_TO_NUMERIC(\"ibu\",14,8)           AS ibu,\n  CASE \n       WHEN ibu <= 50 THEN 'Malty'\n       WHEN ibu > 50 THEN 'Hoppy'\n   END AS bitterness,\n  \"brewery_id\"    AS brewery_id,\n  \"ounces\"        AS ounces\nFROM\n   {{ source('in.c-dbt_beer_seed', 'seed_beers') }}",
+      "compiled": true,
+      "resource_type": "model",
+      "depends_on": {
+        "macros": [
+          "macro.dbt_snowflake.set_query_tag",
+          "macro.dbt.run_hooks",
+          "macro.dbt.statement",
+          "macro.dbt.should_revoke",
+          "macro.dbt.apply_grants",
+          "macro.dbt.persist_docs",
+          "macro.dbt_snowflake.unset_query_tag"
+        ],
+        "nodes": [
+          "source.beer_analytics.in.c-dbt_beer_seed.seed_beers"
+        ]
+      },
+      "config": {
+        "enabled": true,
+        "alias": null,
+        "schema": null,
+        "database": null,
+        "tags": [
+
+        ],
+        "meta": {
+          "owner": "fisa@keboola.com"
+        },
+        "materialized": "table",
+        "persist_docs": {
+        },
+        "quoting": {
+        },
+        "column_types": {
+        },
+        "full_refresh": null,
+        "unique_key": null,
+        "on_schema_change": "ignore",
+        "grants": {
+        },
+        "post-hook": [
+
+        ],
+        "pre-hook": [
+
+        ]
+      },
+      "database": "KEBOOLA_7167",
+      "schema": "WORKSPACE_24414928",
+      "fqn": [
+        "beer_analytics",
+        "beers",
+        "beers"
+      ],
+      "unique_id": "model.beer_analytics.beers",
+      "package_name": "beer_analytics",
+      "root_path": "/data/dbt-project",
+      "path": "beers/beers.sql",
+      "original_file_path": "models/beers/beers.sql",
+      "name": "beers",
+      "alias": "beers",
+      "checksum": {
+        "name": "sha256",
+        "checksum": "23b02d882d41d90b5349c46ff94ce6e467e309d0bf8b49743265fda1ecf76211"
+      },
+      "tags": [
+
+      ],
+      "refs": [
+
+      ],
+      "sources": [
+        [
+          "in.c-dbt_beer_seed",
+          "seed_beers"
+        ]
+      ],
+      "metrics": [
+
+      ],
+      "description": "Beer List",
+      "columns": {
+        "beer_id": {
+          "name": "beer_id",
+          "description": "The unique indentifier of the beer",
+          "meta": {
+            "primary-key": true,
+            "dimension": {
+              "sql": "${TABLE}.beer_id"
+            },
+            "metrics": {
+              "num_unique_beers": {
+                "type": "count_distinct"
+              }
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "beer_name": {
+          "name": "beer_name",
+          "description": "The name of the beer as on the label",
+          "meta": {
+            "dimension": {
+              "sql": "${TABLE}.beer_name"
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "beer_style": {
+          "name": "beer_style",
+          "description": "The style of the beer (IPA, Porter, etc)",
+          "meta": {
+            "dimension": {
+              "sql": "${TABLE}.beer_style"
+            },
+            "metrics": {
+              "num_unique_beer_styles": {
+                "type": "count_distinct",
+                "description": "Distinct Beer Styles"
+              }
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "abv": {
+          "name": "abv",
+          "description": "Alcohol by volume",
+          "meta": {
+            "metrics": {
+              "avg_abv": {
+                "type": "average",
+                "description": "Average Alcohol by volume"
+              }
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "ibu": {
+          "name": "ibu",
+          "description": "Bitterness in International Bitterness Units",
+          "meta": {
+            "metrics": {
+              "avg_ibu": {
+                "type": "average",
+                "description": "Average Bitterness in International Bitterness Units"
+              }
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "bitterness": {
+          "name": "bitterness",
+          "description": "The bitterness category of the beer (based on IBUs)",
+          "meta": {
+            "dimension": {
+              "sql": "${TABLE}.bitterness",
+              "description": "Bitterness Types"
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        },
+        "brewery_id": {
+          "name": "brewery_id",
+          "description": "The unique indentifier of the brewery",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ],
+          "metrics": {
+            "num_unique_breweries": {
+              "type": "count_distinct",
+              "description": "Distinct Number of Breweries"
+            }
+          }
+        },
+        "ounces": {
+          "name": "ounces",
+          "description": "Volume of a single unit",
+          "meta": {
+            "metrics": {
+              "avg_ounces": {
+                "type": "average",
+                "description": "Average Volume of a single unit"
+              }
+            }
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+
+          ]
+        }
+      },
+      "meta": {
+        "owner": "fisa@keboola.com"
+      },
+      "docs": {
+        "show": true
+      },
+      "patch_path": "beer_analytics://models/beers/schema.yml",
+      "compiled_path": "target/compiled/beer_analytics/models/beers/beers.sql",
+      "build_path": "target/run/beer_analytics/models/beers/beers.sql",
+      "deferred": false,
+      "unrendered_config": {
+        "materialized": "table"
+      },
+      "created_at": 1663594464.7005322,
+      "compiled_sql": "\n\nSELECT\n  \"id\"            AS beer_id,\n  TRIM(\"name\")    AS beer_name,\n  \"style\"         AS beer_style,\n  TRY_TO_NUMERIC(\"abv\",14,8)           AS abv,\n  TRY_TO_NUMERIC(\"ibu\",14,8)           AS ibu,\n  CASE \n       WHEN ibu <= 50 THEN 'Malty'\n       WHEN ibu > 50 THEN 'Hoppy'\n   END AS bitterness,\n  \"brewery_id\"    AS brewery_id,\n  \"ounces\"        AS ounces\nFROM\n   \"KEBOOLA_7167\".\"in.c-dbt_beer_seed\".\"seed_beers\"",
+      "extra_ctes_injected": true,
+      "extra_ctes": [
+
+      ],
+      "relation_name": "\"KEBOOLA_7167\".\"WORKSPACE_24414928\".\"beers\""
+    }
+  },
+  "sources": {
+    "source.beer_analytics.in.c-keboola-ex-google-analytics-v4-18160214.google-analytics-report": {
+      "fqn": [
+        "beer_analytics",
+        "_sources",
+        "in.c-keboola-ex-google-analytics-v4-18160214",
+        "google-analytics-report"
+      ],
+      "database": "KEBOOLA_7167",
+      "schema": "in.c-keboola-ex-google-analytics-v4-18160214",
+      "unique_id": "source.beer_analytics.in.c-keboola-ex-google-analytics-v4-18160214.google-analytics-report",
+      "package_name": "beer_analytics",
+      "root_path": "/data/dbt-project",
+      "path": "models/_sources/in.c-keboola-ex-google-analytics-v4-18160214.yml",
+      "original_file_path": "models/_sources/in.c-keboola-ex-google-analytics-v4-18160214.yml",
+      "name": "google-analytics-report",
+      "source_name": "in.c-keboola-ex-google-analytics-v4-18160214",
+      "source_description": "",
+      "loader": "",
+      "identifier": "google-analytics-report",
+      "resource_type": "source",
+      "quoting": {
+        "database": true,
+        "schema": true,
+        "identifier": true,
+        "column": null
+      },
+      "loaded_at_field": "\"_timestamp\"",
+      "freshness": {
+        "warn_after": {
+          "count": 1,
+          "period": "day"
+        },
+        "error_after": {
+          "count": null,
+          "period": null
+        },
+        "filter": null
+      },
+      "external": null,
+      "description": "",
+      "columns": {
+        "\"id\"": {
+          "name": "\"id\"",
+          "description": "",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+          ]
+        }
+      },
+      "meta": {
+      },
+      "source_meta": {
+      },
+      "tags": [
+      ],
+      "config": {
+        "enabled": true
+      },
+      "patch_path": null,
+      "unrendered_config": {
+      },
+      "relation_name": "\"KEBOOLA_7167\".\"in.c-keboola-ex-google-analytics-v4-18160214\".\"google-analytics-report\"",
+      "created_at": 1663594465.0346928
+    },
+    "source.beer_analytics.in.c-keboola-ex-google-analytics-v4-18160214.profiles": {
+      "fqn": [
+        "beer_analytics",
+        "_sources",
+        "in.c-keboola-ex-google-analytics-v4-18160214",
+        "profiles"
+      ],
+      "database": "KEBOOLA_7167",
+      "schema": "in.c-keboola-ex-google-analytics-v4-18160214",
+      "unique_id": "source.beer_analytics.in.c-keboola-ex-google-analytics-v4-18160214.profiles",
+      "package_name": "beer_analytics",
+      "root_path": "/data/dbt-project",
+      "path": "models/_sources/in.c-keboola-ex-google-analytics-v4-18160214.yml",
+      "original_file_path": "models/_sources/in.c-keboola-ex-google-analytics-v4-18160214.yml",
+      "name": "profiles",
+      "source_name": "in.c-keboola-ex-google-analytics-v4-18160214",
+      "source_description": "",
+      "loader": "",
+      "identifier": "profiles",
+      "resource_type": "source",
+      "quoting": {
+        "database": true,
+        "schema": true,
+        "identifier": true,
+        "column": null
+      },
+      "loaded_at_field": "\"_timestamp\"",
+      "freshness": {
+        "warn_after": {
+          "count": 1,
+          "period": "day"
+        },
+        "error_after": {
+          "count": null,
+          "period": null
+        },
+        "filter": null
+      },
+      "external": null,
+      "description": "",
+      "columns": {
+        "\"id\"": {
+          "name": "\"id\"",
+          "description": "",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+          ]
+        }
+      },
+      "meta": {
+      },
+      "source_meta": {
+      },
+      "tags": [
+      ],
+      "config": {
+        "enabled": true
+      },
+      "patch_path": null,
+      "unrendered_config": {
+      },
+      "relation_name": "\"KEBOOLA_7167\".\"in.c-keboola-ex-google-analytics-v4-18160214\".\"profiles\"",
+      "created_at": 1663594465.0394921
+    },
+    "source.beer_analytics.in.c-dbt_beer_seed.seed_beers": {
+      "fqn": [
+        "beer_analytics",
+        "_sources",
+        "in.c-dbt_beer_seed",
+        "seed_beers"
+      ],
+      "database": "KEBOOLA_7167",
+      "schema": "in.c-dbt_beer_seed",
+      "unique_id": "source.beer_analytics.in.c-dbt_beer_seed.seed_beers",
+      "package_name": "beer_analytics",
+      "root_path": "/data/dbt-project",
+      "path": "models/_sources/in.c-dbt_beer_seed.yml",
+      "original_file_path": "models/_sources/in.c-dbt_beer_seed.yml",
+      "name": "seed_beers",
+      "source_name": "in.c-dbt_beer_seed",
+      "source_description": "",
+      "loader": "",
+      "identifier": "seed_beers",
+      "resource_type": "source",
+      "quoting": {
+        "database": true,
+        "schema": true,
+        "identifier": true,
+        "column": null
+      },
+      "loaded_at_field": "\"_timestamp\"",
+      "freshness": {
+        "warn_after": {
+          "count": 1,
+          "period": "day"
+        },
+        "error_after": {
+          "count": null,
+          "period": null
+        },
+        "filter": null
+      },
+      "external": null,
+      "description": "",
+      "columns": {
+        "\"id\"": {
+          "name": "\"id\"",
+          "description": "",
+          "meta": {
+          },
+          "data_type": null,
+          "quote": null,
+          "tags": [
+          ]
+        }
+      },
+      "meta": {
+      },
+      "source_meta": {
+      },
+      "tags": [
+      ],
+      "config": {
+        "enabled": true
+      },
+      "patch_path": null,
+      "unrendered_config": {
+      },
+      "relation_name": "\"KEBOOLA_7167\".\"in.c-dbt_beer_seed\".\"seed_beers\"",
+      "created_at": 1663594465.0439467
+    }
+  }
+}

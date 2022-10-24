@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Service\DbtYamlCreateService;
+namespace DbtTransformation\FileDumper;
 
 use RuntimeException;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-abstract class DbtYamlCreateService
+abstract class FilesystemAwareDumper
 {
     public Filesystem $filesystem;
 

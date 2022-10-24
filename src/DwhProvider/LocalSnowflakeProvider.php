@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\DwhProvider;
 
 use DbtTransformation\Config;
-use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\FileDumper\DbtProfilesYaml;
+use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -16,15 +16,15 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     public const DWH_PROVIDER_TYPE = 'snowflake';
     public const STRING_TO_REMOVE_FROM_HOST = '.snowflakecomputing.com';
 
-    protected DbtSourceYamlCreateService $createSourceFileService;
-    protected DbtProfilesYamlCreateService $createProfilesFileService;
+    protected DbtSourcesYaml $createSourceFileService;
+    protected DbtProfilesYaml $createProfilesFileService;
     protected Config $config;
     protected string $projectPath;
     protected LoggerInterface $logger;
 
     public function __construct(
-        DbtSourceYamlCreateService $createSourceFileService,
-        DbtProfilesYamlCreateService $createProfilesFileService,
+        DbtSourcesYaml $createSourceFileService,
+        DbtProfilesYaml $createProfilesFileService,
         LoggerInterface $logger,
         Config $config,
         string $projectPath

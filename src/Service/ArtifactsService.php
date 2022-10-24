@@ -9,8 +9,6 @@ use Keboola\StorageApi\Client as StorageClient;
 use Keboola\StorageApi\Options\ListFilesOptions;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 use Throwable;
 

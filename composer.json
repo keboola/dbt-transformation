@@ -30,7 +30,8 @@
         "psr-4": {
             "DbtTransformation\\Tests\\": "tests/phpunit/",
             "DbtTransformation\\FunctionalTests\\": "tests/functional/",
-            "DbtTransformation\\Traits\\": "tests/traits/"
+            "DbtTransformation\\FunctionalRemoteDwhTests\\": "tests/functionalRemoteDWH/",
+            "DbtTransformation\\FunctionalSyncActionsTests\\": "tests/functionalSyncActions/"
         }
     },
     "scripts": {

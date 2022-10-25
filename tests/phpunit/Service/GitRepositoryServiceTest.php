@@ -39,10 +39,19 @@ class GitRepositoryServiceTest extends TestCase
 
         $mainBranches = array_filter($branches, fn ($item) => $item['branch'] === 'main');
         $mainBranch = (array) array_shift($mainBranches);
+
         self::assertArrayHasKey('comment', $mainBranch);
         self::assertArrayHasKey('sha', $mainBranch);
+        self::assertArrayHasKey('author', $mainBranch);
+        $author = (array) $mainBranch['author'];
+        self::assertArrayHasKey('name', $author);
+        self::assertArrayHasKey('email', $author);
+        self::assertArrayHasKey('date', $mainBranch);
         self::assertNotEmpty($mainBranch['comment']);
         self::assertNotEmpty($mainBranch['sha']);
+        self::assertNotEmpty($author['name']);
+        self::assertNotEmpty($author['email']);
+        self::assertNotEmpty($mainBranch['date']);
     }
 
     /**

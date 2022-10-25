@@ -69,16 +69,35 @@ class GitRepositoryService
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, array<string, array<string, string>|string>>
      */
     public function listRemoteBranches(string $projectPath): array
     {
-        $args = ['git', 'branch', '-r', '--format', '"%(refname:short)"'];
+        $args = [
+            'git',
+            'branch',
+            '-r',
+            '--format',
+            '"%(refname:short),%(subject),%(objectname:short),%(authorname),%(authoremail),%(authordate)"',
+        ];
         $process = new Process($args, $projectPath);
         $process->mustRun();
         $branches = (array) explode("\n", trim($process->getOutput()));
 
-        return array_map(fn ($item) => str_replace('origin/', '', trim($item, '"')), $branches);
+        return array_map(function ($item) {
+            [$branchRaw, $comment, $sha, $author, $email, $date] = explode(',', $item);
+            $branch = str_replace('origin/', '', trim($branchRaw, '"'));
+            return [
+                'branch' => $branch,
+                'comment' => $comment,
+                'sha' => $sha,
+                'author' => [
+                    'name' => $author,
+                    'email' => $email,
+                ],
+                'date' => $date,
+            ];
+        }, $branches);
     }
 
     /**

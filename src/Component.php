@@ -243,7 +243,7 @@ class Component extends BaseComponent
     }
 
     /**
-     * @return array<string, array<string, array<int, string>|string>>
+     * @return array<string, array<string, array<int, array<string, string>>|string>>
      * @throws \Keboola\Component\UserException
      */
     protected function actionGitRepository(): array

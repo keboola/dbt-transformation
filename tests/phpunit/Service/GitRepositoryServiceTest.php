@@ -31,10 +31,18 @@ class GitRepositoryServiceTest extends TestCase
 
         self::assertIsArray($branches);
         self::assertNotEmpty($branches);
-        self::assertContains('main', $branches);
-        self::assertContains('branch-with-postgres-sources', $branches);
-        self::assertContains('branch-with-redshift-sources', $branches);
-        self::assertContains('branch-with-bigquery-sources', $branches);
+        $branchNames = array_column($branches, 'branch');
+        self::assertContains('main', $branchNames);
+        self::assertContains('branch-with-postgres-sources', $branchNames);
+        self::assertContains('branch-with-redshift-sources', $branchNames);
+        self::assertContains('branch-with-bigquery-sources', $branchNames);
+
+        $mainBranches = array_filter($branches, fn ($item) => $item['branch'] === 'main');
+        $mainBranch = (array) array_shift($mainBranches);
+        self::assertArrayHasKey('comment', $mainBranch);
+        self::assertArrayHasKey('sha', $mainBranch);
+        self::assertNotEmpty($mainBranch['comment']);
+        self::assertNotEmpty($mainBranch['sha']);
     }
 
     /**

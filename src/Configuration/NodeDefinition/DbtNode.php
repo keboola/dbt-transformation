@@ -13,6 +13,7 @@ class DbtNode extends ArrayNodeDefinition
     public const NODE_NAME = 'dbt';
 
     private const ACCEPTED_DBT_COMMANDS = [
+        DbtService::COMMAND_BUILD,
         DbtService::COMMAND_RUN,
         DbtService::COMMAND_DOCS_GENERATE,
         DbtService::COMMAND_TEST,

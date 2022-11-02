@@ -11,6 +11,7 @@ use Symfony\Component\Process\Process;
 
 class DbtService
 {
+    public const COMMAND_BUILD = 'dbt build';
     public const COMMAND_COMPILE = 'dbt compile';
     public const COMMAND_DOCS_GENERATE = 'dbt docs generate';
     public const COMMAND_DEBUG = 'dbt debug';

@@ -457,8 +457,8 @@ class ConfigDefinitionTest extends TestCase
                 ],
             ],
             'expectedError' => 'The value "dbt do nothing" is not allowed for path ' .
-                '"root.parameters.dbt.executeSteps.0". Permissible values: "dbt run", "dbt docs generate", ' .
-                '"dbt test", "dbt source freshness"',
+                '"root.parameters.dbt.executeSteps.0". Permissible values: "dbt build", "dbt run", ' .
+                '"dbt docs generate", "dbt test", "dbt source freshness"',
         ];
 
         yield 'config with remote DWH non-supported type' => [

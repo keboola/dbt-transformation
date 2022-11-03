@@ -2,9 +2,24 @@ Successfully cloned repository https://github.com/keboola/dbt-test-project-publi
 Executing command "dbt deps"
 Running with dbt=%s
 Warning: No packages were found in packages.yml
-Executing command "dbt run"
+Executing command "dbt build"
 Running with dbt=%s
 Partial parse save file not found. Starting full parse.
+Found 2 models, 2 tests, 0 snapshots, 0 analyses, 267 macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
+Concurrency: 1 threads (target='kbc_prod')
+1 of 4 START test source_not_null_in.c-test-bucket_test__id_ ................... [RUN]
+1 of 4 PASS source_not_null_in.c-test-bucket_test__id_ ......................... [PASS in %ss]
+2 of 4 START test source_unique_in.c-test-bucket_test__id_ ..................... [RUN]
+2 of 4 PASS source_unique_in.c-test-bucket_test__id_ ........................... [PASS in %ss]
+3 of 4 START view model WORKSPACE_875822722.stg_model .......................... [RUN]
+3 of 4 OK created view model WORKSPACE_875822722.stg_model ..................... [SUCCESS 1 in %ss]
+4 of 4 START view model WORKSPACE_875822722.fct_model .......................... [RUN]
+4 of 4 OK created view model WORKSPACE_875822722.fct_model ..................... [SUCCESS 1 in %ss]
+Finished running 2 tests, 2 view models in %s hours %s minutes and %s seconds (%ss).
+Completed successfully
+Done. PASS=4 WARN=0 ERROR=0 SKIP=0 TOTAL=4
+Executing command "dbt run"
+Running with dbt=%s
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')
 1 of 2 START view model %s.stg_model %s [RUN]

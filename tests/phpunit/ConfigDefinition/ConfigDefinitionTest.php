@@ -333,6 +333,21 @@ class ConfigDefinitionTest extends TestCase
                 ],
             ],
         ];
+
+        yield 'config without generating sources' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run'],
+                    ],
+                    'generateSources' => false,
+                ],
+            ],
+        ];
     }
 
     /**
@@ -697,6 +712,10 @@ class ConfigDefinitionTest extends TestCase
         if (array_key_exists('remoteDwh', $configData['parameters'])
             && !array_key_exists('threads', $configData['parameters']['remoteDwh'])) {
             $configData['parameters']['remoteDwh']['threads'] = 4;
+        }
+
+        if (!array_key_exists('generateSources', $configData['parameters'])) {
+            $configData['parameters']['generateSources'] = true;
         }
 
         return $configData;

@@ -48,6 +48,10 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         );
         $this->setEnvVars();
 
+        if (!$this->config->generateSources()) {
+            return;
+        }
+
         $client = new Client([
             'url' => $this->config->getStorageApiUrl(),
             'token' => $this->config->getStorageApiToken(),

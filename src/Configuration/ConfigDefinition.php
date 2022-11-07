@@ -34,6 +34,13 @@ class ConfigDefinition extends BaseConfigDefinition
             ->defaultFalse()
             ->end();
 
+        /** @noinspection NullPointerExceptionInspection */
+        $parametersNode
+            ->children()
+            ->booleanNode('generateSources')
+            ->defaultTrue()
+            ->end();
+
         // @formatter:on
         return $parametersNode;
     }

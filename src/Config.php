@@ -47,6 +47,11 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'showExecutedSqls']);
     }
 
+    public function generateSources(): bool
+    {
+        return $this->getValue(['parameters', 'generateSources']);
+    }
+
     /**
      * @return array<string>
      */

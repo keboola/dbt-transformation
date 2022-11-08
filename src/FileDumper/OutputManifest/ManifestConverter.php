@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\FileDumper\OutputManifest;
 
 use Generator;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 use Symfony\Component\Filesystem\Filesystem;
 
 class ManifestConverter
@@ -58,20 +60,29 @@ class ManifestConverter
                             'value' => $values['description'],
                         ];
                     }
-                    if (isset($values['meta']['primary-key'])) {
-                        $columnsMetadata[$columnName][] = [
-                            'key' => 'meta.primary-key',
-                            'value' => $values['meta']['primary-key'],
-                        ];
-                        if ($values['meta']['primary-key'] === true) {
-                            $primaryKey[] = $columnName;
-                        }
-                    }
                     if (isset($values['data_type'])) {
                         $columnsMetadata[$columnName][] = [
-                            'key' => 'data_type',
+                            'key' => 'dbt.data_type',
                             'value' => $values['data_type'],
                         ];
+                    }
+                    if (isset($values['meta'])) {
+                        if (isset($values['meta']['primary-key'])) {
+                            if ($values['meta']['primary-key'] === true) {
+                                $primaryKey[] = $columnName;
+                            }
+                        }
+
+                        $columnsMetadata[$columnName][] = [
+                            'key' => 'dbt.meta',
+                            'value' => json_encode($values['meta']),
+                        ];
+//                        foreach ($this->toDotNotation($values['meta']) as $key => $value) {
+//                            $columnsMetadata[$columnName][] = [
+//                                'key' => $key,
+//                                'value' => $value,
+//                            ];
+//                        }
                     }
                 }
 
@@ -84,4 +95,29 @@ class ManifestConverter
             }
         }
     }
+//    private function toDotNotation(array $meta): array
+//    {
+//        $input = [
+//            'dbt' => [
+//                'meta' => $meta,
+//            ]
+//        ];
+//
+//        $iterator = new RecursiveIteratorIterator(
+//            new RecursiveArrayIterator($input),
+//            RecursiveIteratorIterator::SELF_FIRST
+//        );
+//        $path = [];
+//        $flatArray = [];
+//
+//        foreach ($iterator as $key => $value) {
+//            $path[$iterator->getDepth()] = $key;
+//            if (!is_array($value)) {
+//                $flatKey = implode('.', array_slice($path, 0, $iterator->getDepth() + 1));
+//                $flatArray[$flatKey] = $value;
+//            }
+//        }
+//
+//        return $flatArray;
+//    }
 }

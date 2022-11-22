@@ -32,7 +32,7 @@ class ParseLogFileHelper
         }
 
         foreach ($logs as $log) {
-            if ($log && array_key_exists('sql', $log['data'])) {
+            if ($log && isset($log['data']['sql'])) {
                 yield $this->queryExcerpt(trim(preg_replace('!/\*.*?\*/!s', '', $log['data']['sql'])));
             }
         }

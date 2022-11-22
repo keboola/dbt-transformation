@@ -30,11 +30,14 @@ class ParseLogFileHelperTest extends TestCase
         $content = <<<LOG
 "some string"
 {"data":{"sql": "SELECT 1"}}
+"another string"
+{"data":{"sql": "SELECT 2"}}
 LOG;
         $fs->dumpFile($fileName, $content);
 
         $expected = [
             'SELECT 1',
+            'SELECT 2',
         ];
 
         $sqls = (new ParseLogFileHelper($fileName))->getSqls();

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Helper;
 
 use DbtTransformation\Helper\ParseLogFileHelper;
+use Keboola\Temp\Temp;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Filesystem\Filesystem;
 
 class ParseLogFileHelperTest extends TestCase
 {
@@ -17,6 +19,28 @@ class ParseLogFileHelperTest extends TestCase
         $expectedSqls = $this->getExpectedSqls();
         foreach ($sqls as $key => $sql) {
             $this->assertEquals($expectedSqls[$key], $sql);
+        }
+    }
+
+    public function testMissingLogData(): void
+    {
+        $temp = new Temp('missing-log-data');
+        $fs = new Filesystem();
+        $fileName = $temp->getTmpFolder() . '/dbt.log';
+        $content = <<<LOG
+"some string"
+{"data":{"sql": "SELECT 1"}}
+LOG;
+        $fs->dumpFile($fileName, $content);
+
+        $expected = [
+            'SELECT 1',
+        ];
+
+        $sqls = (new ParseLogFileHelper($fileName))->getSqls();
+
+        foreach ($sqls as $key => $sql) {
+            $this->assertEquals($expected[$key], $sql);
         }
     }
 

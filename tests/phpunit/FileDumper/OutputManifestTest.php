@@ -47,18 +47,6 @@ class OutputManifestTest extends TestCase
             ->willReturnOnConsecutiveCalls(
                 [
                     [
-                        'name' => 'beers_with_breweries',
-                        'database_name' => 'database',
-                        'schema_name' => 'schema',
-                    ],
-                    [
-                        'name' => 'beers',
-                        'database_name' => 'database',
-                        'schema_name' => 'schema',
-                    ],
-                ],
-                [
-                    [
                         'name' => 'brewery_id',
                         'type' => 'VARCHAR(16777216)',
                         'kind' => 'COLUMN',

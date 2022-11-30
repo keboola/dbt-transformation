@@ -7,9 +7,11 @@ namespace DbtTransformation\FileDumper;
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
 use Keboola\Component\Manifest\ManifestManager;
 use Keboola\Component\Manifest\ManifestManager\Options\OutTableManifestOptions;
+use Keboola\Component\UserException;
 use Keboola\Datatype\Definition\Common;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\SnowflakeDbAdapter\Connection;
+use Keboola\SnowflakeDbAdapter\Exception\RuntimeException;
 use Keboola\TableBackendUtils\Column\ColumnCollection;
 use Keboola\TableBackendUtils\Column\Snowflake\SnowflakeColumn;
 use Keboola\TableBackendUtils\Escaping\Snowflake\SnowflakeQuote;
@@ -41,7 +43,8 @@ class OutputManifest
     public function dump(): void
     {
         $dbtMetadata = $this->dbtManifestParser->parse();
-        $tableStructures = $this->getTables();
+        $dbtModelNames = array_keys($dbtMetadata);
+        $tableStructures = $this->getTables($dbtModelNames);
 
         foreach ($tableStructures as $tableDef) {
             $tableName = $tableDef->getTableName();
@@ -80,36 +83,33 @@ class OutputManifest
     }
 
     /**
+     * @param array<string> $sourceTables
      * @return SnowflakeTableDefinition[]
      */
-    private function getTables(): array
+    private function getTables(array $sourceTables): array
     {
         $defs = [];
         $schema = $this->databaseConfig['schema'];
-
-        $sourceTables = $this->connection->fetchAll(
-            sprintf(
-                'SHOW TABLES IN %s',
-                SnowflakeQuote::quoteSingleIdentifier($schema)
-            )
-        );
-
-        foreach ($sourceTables as $table) {
-            $tableName = $table['name'];
-
-            /** @var array<array{
-             *     name: string,
-             *     kind: string,
-             *     type: string,
-             *     default: string,
-             *     'null?': string
-             * }> $columnsMeta */
-            $columnsMeta = $this->connection->fetchAll(
-                sprintf(
-                    'DESC TABLE %s',
-                    SnowflakeQuote::createQuotedIdentifierFromParts([$schema, $tableName])
-                )
-            );
+        $missingTables = [];
+        foreach ($sourceTables as $tableName) {
+            try {
+                /** @var array<array{
+                 *     name: string,
+                 *     kind: string,
+                 *     type: string,
+                 *     default: string,
+                 *     'null?': string
+                 * }> $columnsMeta */
+                $columnsMeta = $this->connection->fetchAll(
+                    sprintf(
+                        'DESC TABLE %s',
+                        SnowflakeQuote::createQuotedIdentifierFromParts([$schema, $tableName])
+                    )
+                );
+            } catch (RuntimeException $e) {
+                $missingTables[] = $tableName;
+                continue;
+            }
 
             $columns = [];
             foreach ($columnsMeta as $col) {
@@ -124,6 +124,15 @@ class OutputManifest
                 false,
                 new ColumnCollection($columns),
                 []
+            );
+        }
+
+        if ($missingTables) {
+            throw new UserException(
+                sprintf(
+                    'Tables "%s" specified in output were not created by the transformation.',
+                    implode('", "', $missingTables)
+                )
             );
         }
 

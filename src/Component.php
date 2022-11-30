@@ -12,8 +12,8 @@ use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
-use DbtTransformation\FileDumper\OutputManifest\ManifestConverter;
-use DbtTransformation\FileDumper\OutputManifestJson;
+use DbtTransformation\FileDumper\OutputManifest;
+use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
@@ -22,10 +22,10 @@ use DbtTransformation\Service\ArtifactsService;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
 use Keboola\Component\BaseComponent;
+use Keboola\Component\Manifest\ManifestManager;
+use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Serializer\Encoder\JsonDecode;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 class Component extends BaseComponent
 {
@@ -38,7 +38,7 @@ class Component extends BaseComponent
     private StorageClient $storageClient;
     private ArtifactsService $artifacts;
     private DwhProviderFactory $dwhProviderFactory;
-    private OutputManifestJson $outputManifestDumper;
+    private OutputManifest $outputManifest;
 
     public function __construct(LoggerInterface $logger)
     {
@@ -57,7 +57,20 @@ class Component extends BaseComponent
             $this->createProfilesFileService,
             $this->getLogger()
         );
-        $this->outputManifestDumper = new OutputManifestJson($this->getDataDir());
+        $manifestManager = new ManifestManager($this->getDataDir());
+        $workspaceCredentials = $this->getConfig()->getAuthorization()['workspace'];
+        $manifestConverter = new DbtManifestParser($this->projectPath);
+        $connectionConfig = array_intersect_key(
+            $workspaceCredentials,
+            array_flip(['host', 'warehouse', 'database', 'user', 'password'])
+        );
+        $connection = new Connection($connectionConfig);
+        $this->outputManifest = new OutputManifest(
+            $workspaceCredentials,
+            $connection,
+            $manifestManager,
+            $manifestConverter
+        );
     }
 
     /**
@@ -77,15 +90,11 @@ class Component extends BaseComponent
         foreach ($executeSteps as $step) {
             $this->executeStep($step);
         }
-
-        $manifestConverter = new ManifestConverter($this->projectPath);
-        foreach ($manifestConverter->toOutputTables() as $tableName => $manifestData) {
-            $this->outputManifestDumper->dumpJson($tableName, $manifestData);
-        }
-
         if ($config->showSqls()) {
             $this->logExecutedSqls();
         }
+
+        $this->outputManifest->dump();
     }
 
     public function getConfig(): Config

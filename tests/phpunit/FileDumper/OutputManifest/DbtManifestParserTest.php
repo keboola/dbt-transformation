@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Tests\FileDumper\OutputManifest;
 
-use DbtTransformation\FileDumper\OutputManifest\ManifestConverter;
+use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
 use PHPUnit\Framework\TestCase;
 
-class ManifestConverterTest extends TestCase
+class DbtManifestParserTest extends TestCase
 {
     protected string $dataDir = __DIR__ . '/../../../../data';
     protected string $providerDataDir = __DIR__ . '/../../data';
 
-    public function testToOutputTables(): void
+    public function testParse(): void
     {
-        $converter = new ManifestConverter($this->providerDataDir);
-        $outputTables = iterator_to_array($converter->toOutputTables());
+        $converter = new DbtManifestParser($this->providerDataDir);
+        $outputTables = $converter->parse();
 
         $manifest1 = $outputTables['beers_with_breweries'];
         $manifest2 = $outputTables['beers'];

@@ -9,7 +9,7 @@ use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\Filesystem\Filesystem;
 
-class ManifestConverter
+class DbtManifestParser
 {
     public Filesystem $filesystem;
     private string $sourceManifestPath;
@@ -21,11 +21,12 @@ class ManifestConverter
     }
 
     /**
-     * @return Generator<array<string, array<int|string, mixed>>>
+     * @return array<array<string, array<int|string, mixed>>>
      * @throws \JsonException
      */
-    public function toOutputTables(): Generator
+    public function parse(): array
     {
+        $result = [];
         if (file_exists($this->sourceManifestPath)) {
             $dbtManifest = (array) json_decode(
                 (string) file_get_contents($this->sourceManifestPath),
@@ -77,16 +78,10 @@ class ManifestConverter
                             'key' => 'dbt.meta',
                             'value' => json_encode($values['meta']),
                         ];
-//                        foreach ($this->toDotNotation($values['meta']) as $key => $value) {
-//                            $columnsMetadata[$columnName][] = [
-//                                'key' => $key,
-//                                'value' => $value,
-//                            ];
-//                        }
                     }
                 }
 
-                yield $tableData['name'] => [
+                $result[$tableData['name']] = [
                     'columns' => array_keys($tableData['columns']),
                     'primary_key' => $primaryKey,
                     'metadata' => $tableMetadata,
@@ -94,30 +89,7 @@ class ManifestConverter
                 ];
             }
         }
+
+        return $result;
     }
-//    private function toDotNotation(array $meta): array
-//    {
-//        $input = [
-//            'dbt' => [
-//                'meta' => $meta,
-//            ]
-//        ];
-//
-//        $iterator = new RecursiveIteratorIterator(
-//            new RecursiveArrayIterator($input),
-//            RecursiveIteratorIterator::SELF_FIRST
-//        );
-//        $path = [];
-//        $flatArray = [];
-//
-//        foreach ($iterator as $key => $value) {
-//            $path[$iterator->getDepth()] = $key;
-//            if (!is_array($value)) {
-//                $flatKey = implode('.', array_slice($path, 0, $iterator->getDepth() + 1));
-//                $flatArray[$flatKey] = $value;
-//            }
-//        }
-//
-//        return $flatArray;
-//    }
 }

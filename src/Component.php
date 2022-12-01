@@ -57,20 +57,6 @@ class Component extends BaseComponent
             $this->createProfilesFileService,
             $this->getLogger()
         );
-        $manifestManager = new ManifestManager($this->getDataDir());
-        $workspaceCredentials = $this->getConfig()->getAuthorization()['workspace'];
-        $manifestConverter = new DbtManifestParser($this->projectPath);
-        $connectionConfig = array_intersect_key(
-            $workspaceCredentials,
-            array_flip(['host', 'warehouse', 'database', 'user', 'password'])
-        );
-        $connection = new Connection($connectionConfig);
-        $this->outputManifest = new OutputManifest(
-            $workspaceCredentials,
-            $connection,
-            $manifestManager,
-            $manifestConverter
-        );
     }
 
     /**
@@ -94,7 +80,26 @@ class Component extends BaseComponent
             $this->logExecutedSqls();
         }
 
-        $this->outputManifest->dump();
+        $this->getOutputManifest()->dump();
+    }
+
+    public function getOutputManifest(): OutputManifest
+    {
+        $manifestManager = new ManifestManager($this->getDataDir());
+        $workspaceCredentials = $this->getConfig()->getAuthorization()['workspace'];
+        $manifestConverter = new DbtManifestParser($this->projectPath);
+        $connectionConfig = array_intersect_key(
+            $workspaceCredentials,
+            array_flip(['host', 'warehouse', 'database', 'user', 'password'])
+        );
+        $connection = new Connection($connectionConfig);
+
+        return new OutputManifest(
+            $workspaceCredentials,
+            $connection,
+            $manifestManager,
+            $manifestConverter
+        );
     }
 
     public function getConfig(): Config

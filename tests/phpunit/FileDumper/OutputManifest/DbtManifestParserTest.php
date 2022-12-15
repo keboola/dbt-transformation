@@ -25,6 +25,11 @@ class DbtManifestParserTest extends TestCase
         self::assertArrayHasKey('metadata', $manifest1);
         self::assertArrayHasKey('column_metadata', $manifest1);
         self::assertEquals('brewery_id', $manifest1['columns'][0]);
+        self::assertEquals([
+            'brewery_id',
+            'beer_id',
+            'beer_name',
+        ], $manifest1['primary_key']);
 
         self::assertArrayHasKey('columns', $manifest2);
         self::assertArrayHasKey('primary_key', $manifest2);

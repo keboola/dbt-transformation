@@ -180,6 +180,13 @@ class OutputManifestTest extends TestCase
         self::assertFileExists($tableManifestPath2);
 
         $manifest1 = json_decode((string) file_get_contents($tableManifestPath1), true);
+
+        self::assertEquals([
+            'brewery_id',
+            'beer_id',
+            'beer_name',
+        ], $manifest1['primary_key']);
+
         $expectedColumns1 = [
             'brewery_id',
             'beer_id',

@@ -49,6 +49,7 @@ class OutputManifest
         foreach ($tableStructures as $tableDef) {
             $tableName = $tableDef->getTableName();
             $dbtColumnsMetadata = $dbtMetadata[$tableName]['column_metadata'] ?? [];
+            $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
 
             $columnsMetadata = (object) [];
             /** @var SnowflakeColumn $column */
@@ -76,6 +77,7 @@ class OutputManifest
                 ->setMetadata($tableMetadata)
                 ->setColumns($tableDef->getColumnsNames())
                 ->setColumnMetadata($columnsMetadata)
+                ->setPrimaryKeyColumns($dbtPrimaryKey)
             ;
 
             $this->manifestManager->writeTableManifest($tableName, $tableManifestOptions);

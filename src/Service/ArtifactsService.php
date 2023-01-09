@@ -48,6 +48,9 @@ class ArtifactsService
         $this->filesystem->mirror(sprintf('%s/target/', $projectPath), $artifactsPath);
     }
 
+    /**
+     * @throws \Keboola\Component\UserException
+     */
     public function downloadLastRun(string $componentId, string $configId, string $branchId): ?int
     {
         $query = sprintf(
@@ -86,9 +89,15 @@ class ArtifactsService
         return $file['id'];
     }
 
+    /**
+     * @throws \Keboola\Component\UserException
+     */
     public function readFromFile(string $step, string $filePath): string
     {
         $file = new SplFileInfo(sprintf('%s/%s/%s', $this->getDownloadDir(), $step, $filePath));
+        if (!$file->isFile()) {
+            throw new UserException(sprintf('Missing "%s" file in downloaded artifact', $filePath));
+        }
         return (string) file_get_contents($file->getPathname());
     }
 
@@ -109,6 +118,18 @@ class ArtifactsService
     {
         if (!$this->filesystem->exists($path)) {
             $this->filesystem->mkdir($path);
+        }
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function checkIfCorrectStepIsDownloaded(string $step)
+    {
+        $docsPath = sprintf('%s/%s', $this->getDownloadDir(), $step);
+        if (!$this->filesystem->exists($docsPath)) {
+            throw new UserException('No artifact from previous dbt docs generate found. ' .
+                'Run the component first with dbt docs generate command enabled.');
         }
     }
 }

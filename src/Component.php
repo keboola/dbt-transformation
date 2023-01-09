@@ -20,8 +20,10 @@ use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\Service\GitRepositoryService;
 use Keboola\Component\BaseComponent;
+use Keboola\Component\UserException;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class Component extends BaseComponent
 {
@@ -186,6 +188,7 @@ class Component extends BaseComponent
 
     /**
      * @return array<string, string>
+     * @throws \Keboola\Component\UserException
      */
     protected function actionDbtDocs(): array
     {
@@ -194,6 +197,7 @@ class Component extends BaseComponent
         $branchId = $this->getConfig()->getBranchId();
 
         $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+        $this->artifacts->checkIfCorrectStepIsDownloaded(DbtService::COMMAND_DOCS_GENERATE);
 
         $html = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'index.html');
         $manifest = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'manifest.json');

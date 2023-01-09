@@ -124,7 +124,7 @@ class ArtifactsService
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function checkIfCorrectStepIsDownloaded(string $step)
+    public function checkIfCorrectStepIsDownloaded(string $step): void
     {
         $docsPath = sprintf('%s/%s', $this->getDownloadDir(), $step);
         if (!$this->filesystem->exists($docsPath)) {

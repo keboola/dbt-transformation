@@ -82,7 +82,12 @@ class GitRepositoryService
         ];
         $process = new Process($args, $projectPath);
         $process->mustRun();
-        $branches = (array) explode("\n", trim($process->getOutput()));
+
+        if (trim($process->getOutput()) !== '') {
+            $branches = (array) explode("\n", trim($process->getOutput()));
+        } else {
+            return [];
+        }
 
         return array_map(function ($item) {
             [$branchRaw, $comment, $sha, $author, $email, $date] = explode(',', $item);

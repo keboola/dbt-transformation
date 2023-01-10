@@ -20,10 +20,8 @@ use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
 use DbtTransformation\Service\GitRepositoryService;
 use Keboola\Component\BaseComponent;
-use Keboola\Component\UserException;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 
 class Component extends BaseComponent
 {

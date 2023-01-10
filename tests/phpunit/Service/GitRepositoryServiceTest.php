@@ -69,6 +69,16 @@ class GitRepositoryServiceTest extends TestCase
         $this->assertTrue(true);
     }
 
+    public function testListBranchesEmptyGitProject(): void
+    {
+        $gitService = new GitRepositoryService($this->dataDir);
+        $gitService->clone('https://github.com/keboola/empty-repo-test.git');
+        $branches = $gitService->listRemoteBranches($this->dataDir . '/dbt-project');
+
+        self::assertIsArray($branches);
+        self::assertEmpty($branches);
+    }
+
     /**
      * @dataProvider privateRepositoryInvalidCredentials
      */

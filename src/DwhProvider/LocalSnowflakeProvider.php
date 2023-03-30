@@ -8,6 +8,7 @@ use DbtTransformation\Config;
 use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
 use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
 use Keboola\StorageApi\Client;
+use Keboola\StorageApi\ClientException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -21,6 +22,8 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     protected Config $config;
     protected string $projectPath;
     protected LoggerInterface $logger;
+    /** @var array<int, int> */
+    protected array $projectIds = [];
 
     public function __construct(
         DbtSourceYamlCreateService $createSourceFileService,
@@ -42,35 +45,50 @@ class LocalSnowflakeProvider implements DwhProviderInterface
      */
     public function createDbtYamlFiles(array $configurationNames = []): void
     {
-        $this->createProfilesFileService->dumpYaml(
-            $this->projectPath,
-            $this->getOutputs($configurationNames, self::getDbtParams())
-        );
-        $this->setEnvVars();
-
-        if (!$this->config->generateSources()) {
-            return;
-        }
-
-        $client = new Client([
-            'url' => $this->config->getStorageApiUrl(),
-            'token' => $this->config->getStorageApiToken(),
-        ]);
-
-        $inputTables = $this->config->getStorageInputTables();
-        $tables = $client->listTables();
         $tablesData = [];
-        foreach ($tables as $table) {
-            if (empty($inputTables) || in_array($table['id'], $inputTables)) {
-                $tablesData[(string) $table['bucket']['id']][] = $table;
+        if ($this->config->generateSources()) {
+            $client = new Client([
+                'url' => $this->config->getStorageApiUrl(),
+                'token' => $this->config->getStorageApiToken(),
+            ]);
+
+            $inputTables = $this->config->getStorageInputTables();
+            $buckets = array_merge($client->listBuckets(), $client->listSharedBuckets());
+            foreach ($buckets as $bucket) {
+                try {
+                    $tables = $client->listTables($bucket['id']);
+                } catch (ClientException $e) {
+                    if ($e->getCode() === 404) {
+                        continue; //probably it does not have ROIM enabled
+                    } else {
+                        throw $e;
+                    }
+                }
+                foreach ($tables as $table) {
+                    if (empty($inputTables) || in_array($table['id'], $inputTables)) {
+                        $tablesData[(string) $bucket['id']]['tables'][] = $table;
+                        if (isset($bucket['project']['id'])) {
+                            $this->projectIds[$bucket['project']['id']] = $bucket['project']['id'];
+                            $tablesData[(string) $bucket['id']]['projectId'] = $bucket['project']['id'];
+                        }
+                    }
+                }
             }
         }
 
-        $this->createSourceFileService->dumpYaml(
+        $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
-            $tablesData,
-            $this->config->getFreshness()
+            $this->getOutputs($configurationNames, self::getDbtParams(), $this->projectIds),
         );
+        $this->setEnvVars();
+
+        if ($this->config->generateSources()) {
+            $this->createSourceFileService->dumpYaml(
+                $this->projectPath,
+                $tablesData,
+                $this->config->getFreshness()
+            );
+        }
     }
 
     protected function setEnvVars(): void
@@ -81,6 +99,10 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
+        foreach ($this->projectIds as $projectId) {
+            $stackPrefix = strtok($workspace['database'], '_');
+            putenv(sprintf('DBT_KBC_PROD_%d_DATABASE=%s_%d', $projectId, $stackPrefix, $projectId));
+        }
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
         $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
@@ -125,13 +147,18 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     /**
      * @param array<int, string> $configurationNames
      * @param array<int, string> $dbtParams
+     * @param array<int, int> $projectIds
      * @return array<string, array<string, string>>
      */
-    public static function getOutputs(array $configurationNames, array $dbtParams): array
+    public static function getOutputs(array $configurationNames, array $dbtParams, array $projectIds = []): array
     {
         $outputs = [];
         if (empty($configurationNames)) {
             $outputs['kbc_prod'] = self::getOutputDefinition('KBC_PROD', $dbtParams);
+            foreach ($projectIds as $projectId) {
+                $configurationName = sprintf('kbc_prod_%d', $projectId);
+                $outputs[$configurationName] = self::getOutputDefinition(strtoupper($configurationName), $dbtParams);
+            }
         }
 
         foreach ($configurationNames as $configurationName) {

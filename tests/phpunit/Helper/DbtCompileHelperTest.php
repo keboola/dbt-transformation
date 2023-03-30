@@ -22,27 +22,27 @@ class DbtCompileHelperTest extends TestCase
         self::assertArrayHasKey('fct_model.sql', $compiled);
         self::assertArrayHasKey('stg_model.sql', $compiled);
 
-        self::assertStringContainsString(
-            'from "SAPI_9317"."in.c-test-bucket"."test"',
+        self::assertStringMatchesFormat(
+            '%Afrom "SAPI_%d"."in.c-test-bucket"."test"%A',
             (string) $compiled['source_not_null_in.c-test-bucket_test__id_.sql']
         );
 
-        self::assertStringContainsString(
-            '"id" as unique_field,',
+        self::assertStringMatchesFormat(
+            '%A"id" as unique_field,%A',
             (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql']
         );
-        self::assertStringContainsString(
-            'from "SAPI_9317"."in.c-test-bucket"."test"',
+        self::assertStringMatchesFormat(
+            '%Afrom "SAPI_%d"."in.c-test-bucket"."test"%A',
             (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql']
         );
 
-        self::assertStringContainsString(
-            'from "SAPI_9317"."WORKSPACE_875822722"."stg_model"',
+        self::assertStringMatchesFormat(
+            '%Afrom "SAPI_%d"."WORKSPACE_%d"."stg_model"%A',
             (string) $compiled['fct_model.sql']
         );
 
-        self::assertStringContainsString(
-            'select * from "SAPI_9317"."in.c-test-bucket"."test"',
+        self::assertStringMatchesFormat(
+            '%Aselect * from "SAPI_%d"."in.c-test-bucket"."test"%A',
             (string) $compiled['stg_model.sql']
         );
     }

@@ -26,7 +26,7 @@ sources:
                             - unique
                             - not_null
             -
-                name: table3
+                name: tableWithCompoundPrimaryKey
                 quoting:
                     database: true
                     schema: true

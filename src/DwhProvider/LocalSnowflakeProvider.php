@@ -53,23 +53,15 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             ]);
 
             $inputTables = $this->config->getStorageInputTables();
-            $buckets = array_merge($client->listBuckets(), $client->listSharedBuckets());
-            foreach ($buckets as $bucket) {
-                try {
-                    $tables = $client->listTables($bucket['id']);
-                } catch (ClientException $e) {
-                    if ($e->getCode() === 404) {
-                        continue; //probably it does not have ROIM enabled
-                    } else {
-                        throw $e;
-                    }
-                }
+            foreach ($client->listBuckets() as $bucket) {
+                $tables = $client->listTables($bucket['id']);
                 foreach ($tables as $table) {
                     if (empty($inputTables) || in_array($table['id'], $inputTables)) {
                         $tablesData[(string) $bucket['id']]['tables'][] = $table;
-                        if (isset($bucket['project']['id'])) {
-                            $this->projectIds[$bucket['project']['id']] = $bucket['project']['id'];
-                            $tablesData[(string) $bucket['id']]['projectId'] = $bucket['project']['id'];
+                        if (isset($bucket['sourceBucket']['project']['id'])) {
+                            $sourceProjectId = $bucket['sourceBucket']['project']['id'];
+                            $this->projectIds[$sourceProjectId] = $sourceProjectId;
+                            $tablesData[(string) $bucket['id']]['projectId'] = $sourceProjectId;
                         }
                     }
                 }

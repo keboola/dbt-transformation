@@ -20,9 +20,9 @@ Required dependencies:
 
 Connection:
   account: keboola
-  user: SAPI_WORKSPACE_875822722
+  user: SAPI_WORKSPACE_%s
   database: SAPI_9317
-  schema: WORKSPACE_875822722
+  schema: WORKSPACE_%s
   warehouse: KEBOOLA_PROD_SMALL
   role: None
   client_session_keep_alive: False

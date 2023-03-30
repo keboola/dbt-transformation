@@ -1,0 +1,21 @@
+version: 2
+sources:
+    -
+        name: linked-bucket
+        freshness:
+            warn_after:
+                count: 1
+                period: hour
+            error_after:
+                count: 1
+                period: day
+        database: '{{ env_var("DBT_KBC_PROD_9090_DATABASE") }}'
+        schema: linked-bucket
+        loaded_at_field: '"_timestamp"'
+        tables:
+            -
+                name: linkedTable
+                quoting:
+                    database: true
+                    schema: true
+                    identifier: true

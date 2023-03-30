@@ -56,7 +56,7 @@ class DbtSourceYamlCreateService extends DbtYamlCreateService
                 ],
             ];
 
-            if (!empty($table['primaryKey'])) {
+            if (!empty($table['primaryKey']) && count($table['primaryKey']) === 1) {
                 $tables['columns'] = array_map(
                     static function ($primaryColumn) {
                         return [

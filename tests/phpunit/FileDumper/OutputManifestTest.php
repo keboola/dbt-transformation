@@ -243,4 +243,27 @@ class OutputManifestTest extends TestCase
         ];
         self::assertEquals($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
     }
+
+    public function testGetPrimaryKeyColumnNames(): void
+    {
+        $dbtPrimaryKeys = [
+            'brewery_id',
+            'beer_id',
+        ];
+
+        $columnNames = [
+            'BREWERY_ID',
+            'BEER_ID',
+            'BEER_NAME',
+            'BREWERY_NAME',
+            'BREWERY_DB_ONLY',
+        ];
+
+        $expected = [
+            'BREWERY_ID',
+            'BEER_ID',
+        ];
+
+        self::assertEquals($expected, OutputManifest::getPrimaryKeyColumnNames($dbtPrimaryKeys, $columnNames));
+    }
 }

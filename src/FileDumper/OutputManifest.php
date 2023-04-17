@@ -77,11 +77,30 @@ class OutputManifest
                 ->setMetadata($tableMetadata)
                 ->setColumns($tableDef->getColumnsNames())
                 ->setColumnMetadata($columnsMetadata)
-                ->setPrimaryKeyColumns($dbtPrimaryKey)
+                ->setPrimaryKeyColumns($this->getPrimaryKeyColumnNames(
+                    $dbtPrimaryKey,
+                    $tableDef->getColumnsNames()
+                ))
             ;
 
             $this->manifestManager->writeTableManifest($tableName, $tableManifestOptions);
         }
+    }
+
+    /**
+     * @param array<string> $dbtPrimaryKeyColumns
+     * @param array<string> $columnNames
+     * @return array<string>
+     */
+    public static function getPrimaryKeyColumnNames(array $dbtPrimaryKeyColumns, array $columnNames): array
+    {
+        $result = [];
+        foreach ($dbtPrimaryKeyColumns as $dbtName) {
+            $key = array_search(strtolower($dbtName), array_map('strtolower', $columnNames));
+            $result[] = $columnNames[$key];
+        }
+
+        return $result;
     }
 
     /**

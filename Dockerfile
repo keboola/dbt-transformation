@@ -3,11 +3,15 @@ FROM php:7.4-cli
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG SNOWFLAKE_ODBC_VERSION=2.25.10
+ARG SNOWFLAKE_GPG_KEY=630D9F3CAB551AF3
+
+ENV LANGUAGE=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_PROCESS_TIMEOUT 3600
-
-ARG SNOWFLAKE_ODBC_VERSION=2.22.5
-ARG SNOWFLAKE_GPG_KEY=37C7086698CB005C
 
 WORKDIR /code/
 
@@ -16,11 +20,14 @@ COPY docker/composer-install.sh /tmp/composer-install.sh
 
 RUN apt-get update && apt-get install -y \
         git \
+        gpg \
+        gpg-agent \
         gnupg2 \
         locales \
         unzip \
         libpq-dev \
         debsig-verify \
+        unixodbc \
         unixodbc-dev \
         python3 \
         python3-pip \
@@ -44,10 +51,6 @@ RUN apt-get update && apt-get install -y \
 	&& locale-gen \
 	&& chmod +x /tmp/composer-install.sh \
 	&& /tmp/composer-install.sh
-
-ENV LANGUAGE=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
 
 # Snowflake ODBC
 # https://github.com/docker-library/php/issues/103#issuecomment-353674490

@@ -38,6 +38,9 @@ class DbtCompileHelper
             (string) file_get_contents($sqlFile->getPathname())
         ), $filePaths);
 
-        return (array) array_combine($filenames, $contents);
+        $combineArray = (array) array_combine($filenames, $contents);
+        ksort($combineArray);
+
+        return $combineArray;
     }
 }

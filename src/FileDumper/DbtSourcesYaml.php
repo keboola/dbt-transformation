@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Service\DbtYamlCreateService;
+namespace DbtTransformation\FileDumper;
 
 use Closure;
 use Symfony\Component\Yaml\Yaml;
 
-class DbtSourceYamlCreateService extends DbtYamlCreateService
+class DbtSourcesYaml extends FilesystemAwareDumper
 {
     /**
      * @param array<string, array{projectId?: mixed, tables: array<int, mixed>}> $tablesData

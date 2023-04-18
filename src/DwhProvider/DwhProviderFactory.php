@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\DwhProvider;
 
 use DbtTransformation\Config;
-use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\FileDumper\DbtProfilesYaml;
+use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -20,13 +20,13 @@ class DwhProviderFactory
         RemoteRedshiftProvider::DWH_PROVIDER_TYPE,
     ];
 
-    private DbtSourceYamlCreateService $createSourceFileService;
-    private DbtProfilesYamlCreateService $createProfilesFileService;
+    private DbtSourcesYaml $createSourceFileService;
+    private DbtProfilesYaml $createProfilesFileService;
     private LoggerInterface $logger;
 
     public function __construct(
-        DbtSourceYamlCreateService $createSourceFileService,
-        DbtProfilesYamlCreateService $createProfilesFileService,
+        DbtSourcesYaml $createSourceFileService,
+        DbtProfilesYaml $createProfilesFileService,
         LoggerInterface $logger
     ) {
         $this->createProfilesFileService = $createProfilesFileService;

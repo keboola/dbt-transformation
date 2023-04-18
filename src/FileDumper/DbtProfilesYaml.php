@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DbtTransformation\Service\DbtYamlCreateService;
+namespace DbtTransformation\FileDumper;
 
 use Keboola\Component\UserException;
 use Symfony\Component\Yaml\Yaml;
 
-class DbtProfilesYamlCreateService extends DbtYamlCreateService
+class DbtProfilesYaml extends FilesystemAwareDumper
 {
     /**
      * @param array<string, array<string, string>> $outputs

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
-use DbtTransformation\Service\DbtYamlCreateService\DbtProfilesYamlCreateService;
-use DbtTransformation\Service\DbtYamlCreateService\DbtSourceYamlCreateService;
+use DbtTransformation\FileDumper\DbtProfilesYaml;
+use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -35,7 +35,7 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/dbt_project.yml', $this->dataDir)
         );
 
-        $service = new DbtProfilesYamlCreateService();
+        $service = new DbtProfilesYaml();
         $service->dumpYaml(
             $this->dataDir,
             LocalSnowflakeProvider::getOutputs(
@@ -61,7 +61,7 @@ class DbtYamlCreateTest extends TestCase
         $fs = new Filesystem();
         $fs->touch(sprintf('%s/dbt_project.yml', $this->dataDir));
 
-        $service = new DbtProfilesYamlCreateService();
+        $service = new DbtProfilesYaml();
         $service->dumpYaml(
             $this->dataDir,
             LocalSnowflakeProvider::getOutputs(
@@ -76,7 +76,7 @@ class DbtYamlCreateTest extends TestCase
      */
     public function testCreateSourceYaml(): void
     {
-        $service = new DbtSourceYamlCreateService();
+        $service = new DbtSourcesYaml();
 
         $tablesData = [
             'bucket-1' => ['tables' => [['name' => 'table1', 'primaryKey' => ['id']]]],

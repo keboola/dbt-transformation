@@ -53,10 +53,20 @@ Example:
  
 Clone this repository and init the workspace with following command:
 
+### Linux
 ```shell
 git clone https://github.com/keboola/dbt-transformation.git
 cd dbt-transformation
-docker-compose build #on M1 add flag: --build-arg TARGETPLATFORM=linux/arm64
+docker-compose build 
+docker-compose run --rm app composer install --no-scripts
+```
+
+### ARM
+```
+git clone https://github.com/keboola/dbt-transformation.git
+cd dbt-transformation
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+docker-compose build --build-arg TARGETPLATFORM=linux/arm64
 docker-compose run --rm app composer install --no-scripts
 ```
 

@@ -44,6 +44,11 @@ class ArtifactsService
         $artifactsPath = sprintf('%s/out/current/%s', $this->artifactsDir, $step);
         $this->filesystem->mkdir($artifactsPath);
         $this->filesystem->mirror(sprintf('%s/target/', $projectPath), $artifactsPath);
+        // add logs
+        $logsPath = sprintf('%s/logs/', $projectPath);
+        if (file_exists($logsPath)) {
+            $this->filesystem->mirror($logsPath, $artifactsPath);
+        }
     }
 
     /**

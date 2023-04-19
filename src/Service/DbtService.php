@@ -11,34 +11,24 @@ use Symfony\Component\Process\Process;
 
 class DbtService
 {
-    public const COMMAND_BUILD = 'dbt build';
+    private const DISALLOWED_OPTIONS = [
+        '--profiles-dir',
+        '--log-format',
+        '--target',
+        '-t',
+    ];
+
     public const COMMAND_COMPILE = 'dbt compile';
     public const COMMAND_DOCS_GENERATE = 'dbt docs generate';
     public const COMMAND_DEBUG = 'dbt debug';
     public const COMMAND_RUN = 'dbt run';
-    public const COMMAND_SOURCE_FRESHNESS = 'dbt source freshness';
-    public const COMMAND_TEST = 'dbt test';
-    public const COMMAND_SEED = 'dbt seed';
     public const COMMAND_DEPS = 'dbt deps';
-
-    private const COMMANDS_TO_RUN_WITHOUT_SELECT = [
-        self::COMMAND_DEPS,
-        self::COMMAND_DEBUG,
-        self::COMMAND_SOURCE_FRESHNESS,
-    ];
 
     private string $projectPath;
 
-    /** @var array<string> */
-    private array $modelNames;
-
-    /**
-     * @param array<string> $modelNames
-     */
-    public function __construct(string $projectPath, array $modelNames = [])
+    public function __construct(string $projectPath)
     {
         $this->projectPath = $projectPath;
-        $this->modelNames = $modelNames;
     }
 
     /**
@@ -63,18 +53,7 @@ class DbtService
 
     /**
      * @return array<int, string>
-     */
-    protected function getSelectParameter(string $command): array
-    {
-        if (in_array($command, self::COMMANDS_TO_RUN_WITHOUT_SELECT) || empty($this->modelNames)) {
-            return [];
-        }
-
-        return ['--select', ...$this->modelNames];
-    }
-
-    /**
-     * @return array<int, string>
+     * @throws \Keboola\Component\UserException
      */
     protected function prepareCommand(string $command, string $target): array
     {
@@ -82,33 +61,41 @@ class DbtService
             'dbt',
             '--log-format',
             'json',
-            '--warn-error',
             '--no-use-colors',
             ...$this->getCommandWithoutDbt($command),
             '-t',
             $target,
-            ...$this->getSelectParameter($command),
             '--profiles-dir',
             $this->projectPath,
         ];
     }
 
     /**
-     * @param array<string> $modelNames
-     */
-    public function setModelNames(array $modelNames): void
-    {
-        $this->modelNames = $modelNames;
-    }
-
-    /**
      * @return array<string>
+     * @throws \Keboola\Component\UserException
      */
     protected function getCommandWithoutDbt(string $command): array
     {
         $command = explode(' ', $command);
         unset($command[0]);
+        foreach ($command as $commandPart) {
+            $foundOption = $this->findDisallowedOption($commandPart);
+            if ($foundOption !== null) {
+                throw new UserException("You cannot override option {$foundOption} in your dbt command. " .
+                    'Please remove it.');
+            }
+        }
 
         return $command;
+    }
+
+    private function findDisallowedOption(string $commandPart): ?string
+    {
+        foreach (self::DISALLOWED_OPTIONS as $option) {
+            if (strpos($commandPart, $option) !== false) {
+                return $option;
+            }
+        }
+        return null;
     }
 }

@@ -4,24 +4,13 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Configuration\NodeDefinition;
 
-use DbtTransformation\Service\DbtService;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeParentInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class DbtNode extends ArrayNodeDefinition
 {
     public const NODE_NAME = 'dbt';
-
-    private const ACCEPTED_DBT_COMMANDS = [
-        DbtService::COMMAND_BUILD,
-        DbtService::COMMAND_RUN,
-        DbtService::COMMAND_DOCS_GENERATE,
-        DbtService::COMMAND_TEST,
-        DbtService::COMMAND_SOURCE_FRESHNESS,
-        DbtService::COMMAND_DEBUG,
-        DbtService::COMMAND_COMPILE,
-        DbtService::COMMAND_SEED,
-    ];
 
     private const ACCEPTED_PERIODS = ['minute', 'hour', 'day'];
 
@@ -43,9 +32,28 @@ class DbtNode extends ArrayNodeDefinition
                 ->end()
                 ->arrayNode('executeSteps')
                     ->isRequired()
-                    ->requiresAtLeastOneElement()
-                    ->enumPrototype()
-                        ->values(self::ACCEPTED_DBT_COMMANDS)
+                    ->scalarPrototype()->end()
+                    ->validate()
+                    ->always(function ($executeSteps) {
+                        if (empty($executeSteps)) {
+                            throw new InvalidConfigurationException(
+                                'At least one execute step must be defined'
+                            );
+                        }
+                        foreach ($executeSteps as $input) {
+                            if (substr($input, 0, 4) !== 'dbt ') {
+                                throw new InvalidConfigurationException(
+                                    'Invalid execute step: Command must start with "dbt"'
+                                );
+                            }
+                            if (preg_match('/[|&]/', $input)) {
+                                throw new InvalidConfigurationException(
+                                    'Invalid execute step: Command contains disallowed metacharacters'
+                                );
+                            }
+                        }
+                        return $executeSteps;
+                    })
                     ->end()
                 ->end()
                 ->arrayNode('freshness')

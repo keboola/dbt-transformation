@@ -35,26 +35,34 @@ class DbtManifestParser
                 JSON_THROW_ON_ERROR
             );
 
-            $modelNodes = array_filter($dbtManifest['nodes'], fn ($node) => $node['resource_type'] === 'model');
+            /** @var array<string, array<string, string|array<string, array<string, array<string, mixed>>>>> $modelNodes */
+            $modelNodes = array_filter(
+                (array) $dbtManifest['nodes'],
+                function ($node) {
+                    /** @var array<string, mixed> $node */
+                    return $node['resource_type'] === 'model';
+                }
+            );
 
             foreach ($modelNodes as $tableData) {
                 $tableMetadata = [];
                 if (isset($tableData['description'])) {
                     $tableMetadata[] = [
                         'key' => 'description',
-                        'value' =>$tableData['description'],
+                        'value' => $tableData['description'],
                     ];
                 }
                 if (isset($tableData['meta']['owner'])) {
                     $tableMetadata[] = [
                         'key' => 'meta.owner',
-                        'value' =>$tableData['meta']['owner'],
+                        'value' => $tableData['meta']['owner'],
                     ];
                 }
 
                 $primaryKey = [];
                 $columnsMetadata = [];
-                foreach ($tableData['columns'] as $columnName => $values) {
+                $columns = (array) $tableData['columns'];
+                foreach ($columns as $columnName => $values) {
                     if (isset($values['description'])) {
                         $columnsMetadata[$columnName][] = [
                             'key' => 'description',
@@ -81,8 +89,9 @@ class DbtManifestParser
                     }
                 }
 
-                $result[$tableData['name']] = [
-                    'columns' => array_keys($tableData['columns']),
+                $tableName = strval($tableData['name']);
+                $result[$tableName] = [
+                    'columns' => array_keys($columns),
                     'primary_key' => $primaryKey,
                     'metadata' => $tableMetadata,
                     'column_metadata' => $columnsMetadata,

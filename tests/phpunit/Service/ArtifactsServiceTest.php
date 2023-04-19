@@ -88,13 +88,13 @@ class ArtifactsServiceTest extends TestCase
         $downloadedFileId = $artifacts->downloadLastRun(Component::COMPONENT_ID, '123', 'default');
         self::assertEquals($fileId, $downloadedFileId);
 
-        $manifest = json_decode(
+        $manifest = (array) json_decode(
             $artifacts->readFromFile('dbt docs generate', 'manifest.json'),
             true
         );
         self::assertArrayHasKey('metadata', $manifest);
 
-        $runResults = json_decode(
+        $runResults = (array) json_decode(
             $artifacts->readFromFile('dbt run', 'run_results.json'),
             true
         );

@@ -11,7 +11,8 @@
   },
   "parameters": {
     "git": {
-      "repo": "https://github.com/keboola/dbt-test-project-public.git"
+      "repo": "https://github.com/keboola/dbt-test-project-public.git",
+      "branch": "miro-table"
     },
     "dbt": {
       "executeSteps": ["dbt run"],

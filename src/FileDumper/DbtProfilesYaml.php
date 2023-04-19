@@ -19,8 +19,8 @@ class DbtProfilesYaml extends FilesystemAwareDumper
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
             throw new UserException('Missing file "dbt_project.yml" in your project root');
         }
-        $dbtProjectYaml = Yaml::parseFile($dbtProjectYamlPath);
-        if ($dbtProjectYaml === null || !array_key_exists('profile', $dbtProjectYaml)) {
+        $dbtProjectYaml = (array) Yaml::parseFile($dbtProjectYamlPath);
+        if (!array_key_exists('profile', $dbtProjectYaml)) {
             throw new UserException('Missing key "profile" in "dbt_project.yml"');
         }
         $this->filesystem->dumpFile(

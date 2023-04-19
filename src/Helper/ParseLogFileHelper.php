@@ -31,9 +31,15 @@ class ParseLogFileHelper
             $logs[] = $fgets !== false ? json_decode($fgets, true) : null;
         }
 
+        /** @var array{
+         *     'data': array<string, string>
+         * } $log
+         */
         foreach ($logs as $log) {
-            if ($log && isset($log['data']['sql'])) {
-                yield $this->queryExcerpt(trim(preg_replace('!/\*.*?\*/!s', '', $log['data']['sql'])));
+            if (!empty($log['data']['sql'])) {
+                yield $this->queryExcerpt(
+                    trim((string) preg_replace('!/\*.*?\*/!s', '', $log['data']['sql']))
+                );
             }
         }
     }

@@ -78,7 +78,7 @@ class GitRepositoryService
             'branch',
             '-r',
             '--format',
-            '"%(refname:short),%(subject),%(objectname:short),%(authorname),%(authoremail),%(authordate)"',
+            '%(refname:short),%(subject),%(objectname:short),%(authorname),%(authoremail),%(authordate)',
         ];
         $process = new Process($args, $projectPath);
         $process->mustRun();
@@ -91,7 +91,7 @@ class GitRepositoryService
 
         return array_map(function ($item) {
             [$branchRaw, $comment, $sha, $author, $email, $date] = explode(',', $item);
-            $branch = str_replace('origin/', '', trim($branchRaw, '"'));
+            $branch = str_replace('origin/', '', $branchRaw);
             return [
                 'branch' => $branch,
                 'comment' => $comment,

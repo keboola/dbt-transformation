@@ -79,9 +79,8 @@ class Component extends BaseComponent
             $this->logExecutedSqls();
         }
 
-        $workspaceCredentials = $this->getWorkspaceCredentialsFromConfig();
-        if ($workspaceCredentials) {
-            $this->getOutputManifest($workspaceCredentials)->dump();
+        if (!$config->hasRemoteDwh()) {
+            $this->getOutputManifest($config->getWorkspaceCredentials())->dump();
         }
     }
 
@@ -117,14 +116,6 @@ class Component extends BaseComponent
     protected function getConfigClass(): string
     {
         return Config::class;
-    }
-
-    /**
-     * @return array<string, string>|null
-     */
-    protected function getWorkspaceCredentialsFromConfig(): ?array
-    {
-        return $this->getConfig()->getAuthorization()['workspace'] ?? null;
     }
 
     protected function getConfigDefinitionClass(): string

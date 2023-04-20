@@ -154,4 +154,12 @@ class Config extends BaseConfig
 
         return $url;
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getWorkspaceCredentials(): array
+    {
+        return $this->getArrayValue(['authorization', 'workspace']);
+    }
 }

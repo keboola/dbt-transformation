@@ -38,7 +38,6 @@ class Component extends BaseComponent
     private StorageClient $storageClient;
     private ArtifactsService $artifacts;
     private DwhProviderFactory $dwhProviderFactory;
-    private OutputManifest $outputManifest;
 
     public function __construct(LoggerInterface $logger)
     {
@@ -80,13 +79,18 @@ class Component extends BaseComponent
             $this->logExecutedSqls();
         }
 
-        $this->getOutputManifest()->dump();
+        if (!$config->hasRemoteDwh()) {
+            $this->getOutputManifest($config->getWorkspaceCredentials())->dump();
+        }
     }
 
-    public function getOutputManifest(): OutputManifest
+    /**
+     * @param array<string, string> $workspaceCredentials
+     * @throws \Keboola\SnowflakeDbAdapter\Exception\SnowflakeDbAdapterException
+     */
+    public function getOutputManifest(array $workspaceCredentials): OutputManifest
     {
         $manifestManager = new ManifestManager($this->getDataDir());
-        $workspaceCredentials = $this->getConfig()->getAuthorization()['workspace'];
         $manifestConverter = new DbtManifestParser($this->projectPath);
         $connectionConfig = array_intersect_key(
             $workspaceCredentials,
@@ -245,6 +249,7 @@ class Component extends BaseComponent
         $manifestJson = $this->artifacts->readFromFile(DbtService::COMMAND_RUN, 'manifest.json');
         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
         $runResultsJson = $this->artifacts->readFromFile(DbtService::COMMAND_RUN, 'run_results.json');
+        /** @var array<string, array<string, mixed>> $runResults */
         $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
 
         return [

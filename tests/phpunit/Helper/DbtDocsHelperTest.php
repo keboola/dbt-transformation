@@ -36,6 +36,7 @@ class DbtDocsHelperTest extends TestCase
         $runResultsJson = (string) file_get_contents(__DIR__ . '/../data/model_timing/run_results.json');
 
         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
+        /** @var array<string, array<string, mixed>> $runResults */
         $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
 
         $modelTiming = DbtDocsHelper::getModelTiming($manifest, $runResults);

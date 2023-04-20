@@ -118,14 +118,23 @@ class WorkspacesManagementService
 
     /**
      * @param array<string, mixed> $tokenInfo
-     * @param array<string, mixed> $workspace
+     * @param array{
+     *     'id': string,
+     *     'connection': array<string, string>,
+     * } $workspace
      */
     protected function createSandbox(array $tokenInfo, string $configurationId, array $workspace): Sandbox
     {
+        /** @var array{
+         *     'owner': array<string, string>,
+         *     'id': string,
+         * } $tokenInfo
+         */
+
         $sandbox = new Sandbox();
         $sandbox
             ->setType('snowflake')
-            ->setProjectId((string) $tokenInfo['owner']['id'])
+            ->setProjectId($tokenInfo['owner']['id'])
             ->setConfigurationId($configurationId)
             ->setTokenId($tokenInfo['id'])
             ->setPhysicalId($workspace['id'])

@@ -20,20 +20,37 @@ class DbtDocsHelper
 
     /**
      * @param array<string, mixed> $manifest
-     * @param array<string, mixed> $runResults
+     * @param array<string, array<string, mixed>> $runResults
      * @return array<int, array<string, mixed>>
      */
     public static function getModelTiming(array $manifest, array $runResults): array
     {
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $nodes */
         $nodes = $manifest['nodes'];
         $result = [];
 
+        /** @var array{
+         *     'unique_id': string,
+         *     'timing': array<string, array<string, string>>,
+         *     'status': string,
+         *     'thread_id': string,
+         * } $run
+         */
         foreach ($runResults['results'] as $run) {
+            /** @var array{
+             *     'depends_on': array<string, array<string>>
+             * } $node
+             */
             $node = $nodes[$run['unique_id']];
 
             $executeTimings = array_filter($run['timing'], function ($item) {
                 return $item['name'] === 'execute';
             });
+            /** @var array{
+             *     'started_at': string,
+             *     'completed_at': string,
+             * } $executeTiming
+             */
             $executeTiming = array_pop($executeTimings);
 
             $idArray = explode('.', $run['unique_id']);

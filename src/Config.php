@@ -12,13 +12,13 @@ class Config extends BaseConfig
 {
     public function getGitRepositoryUrl(): string
     {
-        return $this->getValue(['parameters', 'git', 'repo']);
+        return $this->getStringValue(['parameters', 'git', 'repo']);
     }
 
     public function getGitRepositoryBranch(): ?string
     {
         try {
-            return $this->getValue(['parameters', 'git', 'branch']);
+            return $this->getStringValue(['parameters', 'git', 'branch']);
         } catch (InvalidArgumentException $e) {
             return null;
         }
@@ -27,7 +27,7 @@ class Config extends BaseConfig
     public function getGitRepositoryUsername(): ?string
     {
         try {
-            return $this->getValue(['parameters', 'git', 'username']);
+            return $this->getStringValue(['parameters', 'git', 'username']);
         } catch (InvalidArgumentException $e) {
             return null;
         }
@@ -36,7 +36,7 @@ class Config extends BaseConfig
     public function getGitRepositoryPassword(): ?string
     {
         try {
-            return $this->getValue(['parameters', 'git', '#password']);
+            return $this->getStringValue(['parameters', 'git', '#password']);
         } catch (InvalidArgumentException $e) {
             return null;
         }
@@ -44,12 +44,12 @@ class Config extends BaseConfig
 
     public function showSqls(): bool
     {
-        return $this->getValue(['parameters', 'showExecutedSqls']);
+        return (bool) $this->getValue(['parameters', 'showExecutedSqls']);
     }
 
     public function generateSources(): bool
     {
-        return $this->getValue(['parameters', 'generateSources']);
+        return (bool) $this->getValue(['parameters', 'generateSources']);
     }
 
     /**
@@ -57,7 +57,7 @@ class Config extends BaseConfig
      */
     public function getModelNames(): array
     {
-        return $this->getValue(['parameters', 'dbt', 'modelNames']);
+        return $this->getArrayValue(['parameters', 'dbt', 'modelNames']);
     }
 
     public function getThreads(): int
@@ -70,7 +70,7 @@ class Config extends BaseConfig
      */
     public function getExecuteSteps(): array
     {
-        return $this->getValue(['parameters', 'dbt', 'executeSteps']);
+        return $this->getArrayValue(['parameters', 'dbt', 'executeSteps']);
     }
 
     /**
@@ -79,7 +79,7 @@ class Config extends BaseConfig
     public function getFreshness(): array
     {
         try {
-            $freshness = $this->getValue(['parameters', 'dbt', 'freshness']);
+            $freshness = $this->getArrayValue(['parameters', 'dbt', 'freshness']);
         } catch (InvalidArgumentException $e) {
             return [];
         }
@@ -101,7 +101,7 @@ class Config extends BaseConfig
     public function getStorageInputTables(): array
     {
         try {
-            return array_column($this->getValue(['parameters', 'storage', 'input', 'tables']), 'source');
+            return array_column($this->getArrayValue(['parameters', 'storage', 'input', 'tables']), 'source');
         } catch (InvalidArgumentException $e) {
             return [];
         }
@@ -112,7 +112,7 @@ class Config extends BaseConfig
      */
     public function getRemoteDwh(): array
     {
-        return $this->getValue(['parameters', 'remoteDwh']);
+        return $this->getArrayValue(['parameters', 'remoteDwh']);
     }
 
     public function hasRemoteDwh(): bool
@@ -153,5 +153,13 @@ class Config extends BaseConfig
         }
 
         return $url;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getWorkspaceCredentials(): array
+    {
+        return $this->getArrayValue(['authorization', 'workspace']);
     }
 }

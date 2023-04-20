@@ -59,7 +59,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
                     if (empty($inputTables) || in_array($table['id'], $inputTables)) {
                         $tablesData[(string) $bucket['id']]['tables'][] = $table;
                         if (isset($bucket['sourceBucket']['project']['id'])) {
-                            $sourceProjectId = $bucket['sourceBucket']['project']['id'];
+                            $sourceProjectId = (int) $bucket['sourceBucket']['project']['id'];
                             $this->projectIds[$sourceProjectId] = $sourceProjectId;
                             $tablesData[(string) $bucket['id']]['projectId'] = $sourceProjectId;
                         }

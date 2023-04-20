@@ -697,6 +697,16 @@ class ConfigDefinitionTest extends TestCase
      */
     protected function addDefaultValues(array $configData): array
     {
+        /** @var array{
+         *      'parameters': array{
+         *          'showExecutedSqls': bool,
+         *          'generateSources': bool,
+         *          'dbt': array<string, array<string, mixed>>,
+         *          'remoteDwh': array<string, array<string, mixed>>,
+         *      },
+         * } $configData
+         */
+
         if (!array_key_exists('showExecutedSqls', $configData['parameters'])) {
             $configData['parameters']['showExecutedSqls'] = false;
         }

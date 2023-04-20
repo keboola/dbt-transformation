@@ -49,6 +49,7 @@ class OutputManifest
         foreach ($tableStructures as $tableDef) {
             $tableName = $tableDef->getTableName();
             $dbtColumnsMetadata = $dbtMetadata[$tableName]['column_metadata'] ?? [];
+            /** @var array<string> $dbtPrimaryKey */
             $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
 
             $columnsMetadata = (object) [];
@@ -57,7 +58,7 @@ class OutputManifest
                 $columnName = $column->getColumnName();
                 $columnsMetadata->{$columnName} = array_merge(
                     $column->getColumnDefinition()->toMetadata(),
-                    $dbtColumnsMetadata[$columnName] ?? []
+                    (array) ($dbtColumnsMetadata[$columnName] ?? [])
                 );
             }
 

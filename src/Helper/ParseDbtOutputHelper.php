@@ -19,8 +19,8 @@ class ParseDbtOutputHelper
             return yield $output;
         }
         foreach (reset($messages) as $messageJson) {
-            $message = json_decode($messageJson, true);
-            if ($message === null || is_numeric(array_key_first($message))) {
+            $message = (array) json_decode($messageJson, true);
+            if (empty($message) || is_numeric(array_key_first($message))) {
                 return yield $output;
             }
             if ($message['level'] === $level) {

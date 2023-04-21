@@ -134,7 +134,7 @@ class ConfigDefinitionTest extends TestCase
             ],
         ];
 
-        yield 'config with model names' => [
+        yield 'config with legacy model names' => [
             'configData' => [
                 'action' => 'run',
                 'parameters' => [
@@ -147,6 +147,23 @@ class ConfigDefinitionTest extends TestCase
                     'dbt' => [
                         'modelNames' => ['stg_model'],
                         'executeSteps' => ['dbt run'],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with select parameter' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'branch' => 'master',
+                        'username' => 'test',
+                        '#password' => 'test',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run --select stg_model'],
                     ],
                 ],
             ],
@@ -456,7 +473,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
-            'expectedError' => 'The path "root.parameters.dbt.executeSteps" should have at least 1 element(s) defined.',
+            'expectedError' => 'At least one execute step must be defined',
         ];
 
         yield 'invalid execute steps' => [
@@ -467,13 +484,26 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt do nothing'],
+                        'executeSteps' => ['ls -l'],
                     ],
                 ],
             ],
-            'expectedError' => 'The value "dbt do nothing" is not allowed for path ' .
-                '"root.parameters.dbt.executeSteps.0". Permissible values: "dbt build", "dbt run", ' .
-                '"dbt docs generate", "dbt test", "dbt source freshness"',
+            'expectedError' => 'Invalid execute step: Command must start with "dbt"',
+        ];
+
+        yield 'execute step with invalid parameters' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => ['dbt run && ls -l'],
+                    ],
+                ],
+            ],
+            'expectedError' => 'Invalid execute step: Command contains disallowed metacharacters',
         ];
 
         yield 'config with remote DWH non-supported type' => [

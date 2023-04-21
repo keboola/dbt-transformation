@@ -14,8 +14,12 @@
       "repo": "https://github.com/keboola/dbt-test-project-public.git"
     },
     "dbt": {
-      "modelNames": ["non-existing-model"],
-      "executeSteps": ["dbt --warn-error run"]
+      "modelNames": [
+        "stg_model"
+      ],
+      "executeSteps": [
+        "dbt run -t my-target"
+      ]
     }
   }
 }

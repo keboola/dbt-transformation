@@ -55,7 +55,7 @@ class Config extends BaseConfig
     /**
      * @return array<string>
      */
-    public function getModelNames(): array
+    private function getModelNames(): array
     {
         return $this->getArrayValue(['parameters', 'dbt', 'modelNames']);
     }
@@ -70,7 +70,22 @@ class Config extends BaseConfig
      */
     public function getExecuteSteps(): array
     {
-        return $this->getArrayValue(['parameters', 'dbt', 'executeSteps']);
+        $executionSteps = $this->getArrayValue(['parameters', 'dbt', 'executeSteps']);
+
+        // For backward compatibility when modelNames were in the UI
+        if (!empty($this->getModelNames())) {
+            foreach ($executionSteps as $key => $executionStep) {
+                if (strpos($executionStep, 'dbt deps') === false
+                    && strpos($executionStep, 'dbt debug') === false
+                    && strpos($executionStep, 'dbt source freshness') === false
+                    && strpos($executionStep, '--select') === false
+                ) {
+                    $executionSteps[$key] .= ' --select ' . implode(' ', $this->getModelNames());
+                }
+            }
+        }
+
+        return $executionSteps;
     }
 
     /**

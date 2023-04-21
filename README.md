@@ -10,8 +10,8 @@ The configuration `config.json` contains following properties in `parameters` ke
     - `#password` - string (optional): GitHub Private Access Token if repository is private. Both or none of couple `username` and `password` must be specified.
     - `branch` - string (optional): Specify git branch if you want to clone project from specific branch.
 - `dbt` - object (required): Configuration of DBT
-    - `executeSteps` - array of strings (required): Enum values of dbt steps you want to run. Available values are `dbt build`, `dbt run`, `dbt docs generate`, `dbt test`, `dbt source freshness`, `dbt debug`, `dbt compile` and `dbt seed`. At least one value required.
-    - `modelNames` - array of strings (optional): If you want to run DBT only with certain models, you can specify their names here. Otherwise, all models will be run.
+    - `executeSteps` - array of strings (required): dbt steps you want to run, you can also add some flags e.g. `dbt --warn-error run --select my_model` (but you cannot override some parameters such as `--profile-dir` or `--target` which are used by component itself). At least one value required.
+    - `modelNames` - **DEPRECATED: use `--select` parameter in execute step instead** *array of strings (optional): If you want to run DBT only with certain models, you can specify their names here. Otherwise, all models will be run.*
     - `threads` - integer 1 - 8, default 4 (optional): Maximum number of paths through the graph dbt may work on at once.
     - `freshness` - object (required): Configuration of freshness.
       - `warn_after` - object (optional)
@@ -33,12 +33,9 @@ Example:
   },
   "dbt": {
     "executeSteps": [
-      "dbt run"
+      "dbt run --select +final_visit_hour"
     ],
     "threads": 4,
-    "modelNames": [
-      "+final_visit_hour"
-    ],
     "freshness": {
       "warn_after": {"count": 1, "period": "minute"},
       "error_after": {"count": 1, "period": "day"}

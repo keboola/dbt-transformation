@@ -39,15 +39,39 @@ class ArtifactsService
         return $this->downloadDir;
     }
 
+    public function resolveCommandDir(string $command): ?string
+    {
+        $commands = [
+            'dbt build',
+            'dbt run',
+            'dbt docs generate',
+            'dbt test',
+            'dbt source freshness',
+            'dbt seed',
+        ];
+
+        foreach ($commands as $commandRoot) {
+            if (strpos($command, $commandRoot) === 0) {
+                return $commandRoot;
+            }
+        }
+
+        return null;
+    }
+
     public function writeResults(string $projectPath, string $step): void
     {
-        $artifactsPath = sprintf('%s/out/current/%s', $this->artifactsDir, $step);
-        $this->filesystem->mkdir($artifactsPath);
-        $this->filesystem->mirror(sprintf('%s/target/', $projectPath), $artifactsPath);
-        // add logs
-        $logsPath = sprintf('%s/logs/', $projectPath);
-        if (file_exists($logsPath)) {
-            $this->filesystem->mirror($logsPath, $artifactsPath);
+        $stepDir = $this->resolveCommandDir($step);
+
+        if ($stepDir) {
+            $artifactsPath = sprintf('%s/out/current/%s', $this->artifactsDir, $stepDir);
+            $this->filesystem->mkdir($artifactsPath);
+            $this->filesystem->mirror(sprintf('%s/target/', $projectPath), $artifactsPath);
+            // add logs
+            $logsPath = sprintf('%s/logs/', $projectPath);
+            if (file_exists($logsPath)) {
+                $this->filesystem->mirror($logsPath, $artifactsPath);
+            }
         }
     }
 

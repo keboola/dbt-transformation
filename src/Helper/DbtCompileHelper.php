@@ -33,7 +33,7 @@ class DbtCompileHelper
     }
 
     /**
-     * @return array<int|string, string|false>
+     * @return array<array-key, SplFileInfo>
      * @throws UserException
      */
     public static function getCompiledSqlPaths(string $directory): array

@@ -177,4 +177,12 @@ class Config extends BaseConfig
     {
         return $this->getArrayValue(['authorization', 'workspace']);
     }
+
+    /**
+     * @return array<string, bool>
+     */
+    public function getArtifactsOptions(): array
+    {
+        return $this->getArrayValue(['artifacts', 'options']);
+    }
 }

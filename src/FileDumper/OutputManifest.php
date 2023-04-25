@@ -24,6 +24,7 @@ class OutputManifest
     private array $databaseConfig;
     private DbtManifestParser $dbtManifestParser;
     private Connection $connection;
+    private bool $quoteIdentifier;
 
     /**
      * @param array<string, string> $databaseConfig
@@ -32,12 +33,14 @@ class OutputManifest
         array $databaseConfig,
         Connection $connection,
         ManifestManager $manifestManager,
-        DbtManifestParser $dbtManifestParser
+        DbtManifestParser $dbtManifestParser,
+        bool $quoteIdentifier = false
     ) {
         $this->manifestManager = $manifestManager;
         $this->databaseConfig = $databaseConfig;
         $this->connection = $connection;
         $this->dbtManifestParser = $dbtManifestParser;
+        $this->quoteIdentifier = $quoteIdentifier;
     }
 
     public function dump(): void
@@ -48,6 +51,8 @@ class OutputManifest
 
         foreach ($tableStructures as $tableDef) {
             $tableName = $tableDef->getTableName();
+            $realTableName = $this->quoteIdentifier ? $tableName : strtoupper($tableName);
+
             $dbtColumnsMetadata = $dbtMetadata[$tableName]['column_metadata'] ?? [];
             /** @var array<string> $dbtPrimaryKey */
             $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
@@ -65,7 +70,7 @@ class OutputManifest
             $tableMetadata = $dbtMetadata[$tableName]['metadata'] ?? [];
             $tableMetadata[] = [
                 'key' => 'KBC.name',
-                'value' => $tableName,
+                'value' => $realTableName,
             ];
             // add metadata indicating that this output is snowflake native
             $tableMetadata[] = [
@@ -84,7 +89,7 @@ class OutputManifest
                 ))
             ;
 
-            $this->manifestManager->writeTableManifest($tableName, $tableManifestOptions);
+            $this->manifestManager->writeTableManifest($realTableName, $tableManifestOptions);
         }
     }
 
@@ -114,6 +119,7 @@ class OutputManifest
         $schema = $this->databaseConfig['schema'];
         $missingTables = [];
         foreach ($sourceTables as $tableName) {
+
             try {
                 /** @var array<array{
                  *     name: string,
@@ -125,7 +131,10 @@ class OutputManifest
                 $columnsMeta = $this->connection->fetchAll(
                     sprintf(
                         'DESC TABLE %s',
-                        SnowflakeQuote::createQuotedIdentifierFromParts([$schema, $tableName])
+                        SnowflakeQuote::createQuotedIdentifierFromParts([
+                            $schema,
+                            $this->quoteIdentifier ? $tableName : strtoupper($tableName),
+                        ])
                     )
                 );
             } catch (RuntimeException $e) {

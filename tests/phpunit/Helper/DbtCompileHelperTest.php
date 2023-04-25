@@ -15,7 +15,7 @@ class DbtCompileHelperTest extends TestCase
     public function testGetCompiledSqlFiles(): void
     {
         $dataDir = new SplFileInfo(__DIR__ . '/../data/artifacts/in/dbt run');
-        $compiled = DbtCompileHelper::getCompiledSqlFiles($dataDir->getPathname());
+        $compiled = DbtCompileHelper::getCompiledSqlFilesContent($dataDir->getPathname());
 
         self::assertArrayHasKey('source_not_null_in.c-test-bucket_test__id_.sql', $compiled);
         self::assertArrayHasKey('source_unique_in.c-test-bucket_test__id_.sql', $compiled);
@@ -54,6 +54,6 @@ class DbtCompileHelperTest extends TestCase
         $this->expectException(UserException::class);
         $this->expectExceptionMessage('Compiled SQL files not found. Run the component with "dbt run" step first.');
 
-        DbtCompileHelper::getCompiledSqlFiles($temp->getTmpFolder());
+        DbtCompileHelper::getCompiledSqlFilesContent($temp->getTmpFolder());
     }
 }

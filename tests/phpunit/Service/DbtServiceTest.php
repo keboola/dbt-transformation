@@ -117,7 +117,7 @@ class DbtServiceTest extends TestCase
         );
         self::assertStringContainsString('Done.', $parsedOutput[4]);
 
-        $compiledSql = DbtCompileHelper::getCompiledSqlFiles($this->getProjectPath() . '/target');
+        $compiledSql = DbtCompileHelper::getCompiledSqlFilesContent($this->getProjectPath() . '/target');
 
         $keys = array_keys($compiledSql);
         self::assertContains('source_not_null_in.c-test-bucket_test__id_.sql', $keys);

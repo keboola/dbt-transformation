@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Service;
 
+use DbtTransformation\Helper\DbtCompileHelper;
 use Keboola\Component\UserException;
 use Keboola\StorageApi\Client as StorageClient;
 use Keboola\StorageApi\Options\ListFilesOptions;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 use Symfony\Component\Process\Process;
 use Throwable;
 
@@ -59,18 +61,59 @@ class ArtifactsService
         return null;
     }
 
-    public function writeResults(string $projectPath, string $step): void
+    public function writeResults(string $projectPath, string $step, bool $isArchive = true): void
     {
         $stepDir = $this->resolveCommandDir($step);
 
         if ($stepDir) {
-            $artifactsPath = sprintf('%s/out/current/%s', $this->artifactsDir, $stepDir);
-            $this->filesystem->mkdir($artifactsPath);
-            $this->filesystem->mirror(sprintf('%s/target/', $projectPath), $artifactsPath);
-            // add logs
-            $logsPath = sprintf('%s/logs/', $projectPath);
-            if (file_exists($logsPath)) {
-                $this->filesystem->mirror($logsPath, $artifactsPath);
+            if ($isArchive) {
+                $artifactsPath = sprintf('%s/out/current/%s', $this->artifactsDir, $stepDir);
+                $this->filesystem->mkdir($artifactsPath);
+                $this->filesystem->mirror(sprintf('%s/target/', $projectPath), $artifactsPath);
+                // add logs
+                $logsPath = sprintf('%s/logs/', $projectPath);
+                if (file_exists($logsPath)) {
+                    $this->filesystem->mirror($logsPath, $artifactsPath);
+                }
+            } else {
+                $artifactsPath = sprintf('%s/out/current/', $this->artifactsDir);
+                $this->filesystem->mkdir($artifactsPath);
+                $targetPath = sprintf('%s/target/', $projectPath);
+
+                $filesToCopy = [];
+                switch ($stepDir) {
+                    case 'dbt run':
+                        $filesToCopy = [
+                            'run_results.json',
+                            'manifest.json',
+                        ];
+                        $compiledSqlPaths = [];
+                        try {
+                            $compiledSqlPaths = DbtCompileHelper::getCompiledSqlPaths($targetPath);
+                        } catch (DirectoryNotFoundException $e) {
+                        }
+                        $compiledSqlPathsStripped = array_map(function ($path) use ($targetPath) {
+                            return str_replace($targetPath, '', $path);
+                        }, $compiledSqlPaths);
+                        if (!empty($compiledSqlPathsStripped)) {
+                            $filesToCopy = array_merge($filesToCopy, $compiledSqlPathsStripped);
+                        }
+                        break;
+                    case 'dbt docs generate':
+                        $filesToCopy = [
+                            'index.html',
+                            'catalog.json',
+                            'manifest.json',
+                        ];
+                        break;
+                }
+
+                foreach ($filesToCopy as $fileToCopy) {
+                    $this->filesystem->copy(
+                        sprintf('%s/%s', $fileToCopy, $targetPath),
+                        sprintf('%s/%s', $fileToCopy, $artifactsPath)
+                    );
+                }
             }
         }
     }

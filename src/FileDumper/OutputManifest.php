@@ -119,7 +119,6 @@ class OutputManifest
         $schema = $this->databaseConfig['schema'];
         $missingTables = [];
         foreach ($sourceTables as $tableName) {
-
             try {
                 /** @var array<array{
                  *     name: string,

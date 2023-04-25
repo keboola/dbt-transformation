@@ -33,6 +33,9 @@ class ArtifactsServiceTest extends TestCase
         self::assertEquals($expected, $artifacts->resolveCommandDir($fullCommand));
     }
 
+    /**
+     * @return array<string, array<array-key, ?string>> iterable
+     */
     public function commandsProvider(): iterable
     {
         yield 'no params' => [

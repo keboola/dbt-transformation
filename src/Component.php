@@ -276,7 +276,7 @@ class Component extends BaseComponent
         $runArtifactPath = $this->artifacts->getDownloadDir() . '/' . DbtService::COMMAND_RUN;
 
         return [
-            'compiled' => DbtCompileHelper::getCompiledSqlFiles($runArtifactPath),
+            'compiled' => DbtCompileHelper::getCompiledSqlFilesContent($runArtifactPath),
         ];
     }
 

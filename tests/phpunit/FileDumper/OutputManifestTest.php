@@ -217,7 +217,7 @@ class OutputManifestTest extends TestCase
         self::assertEquals($expectedColumns1, $manifest1['columns']);
         $expectedTableMetadata1 = [
             [
-                'key' => 'description',
+                'key' => 'KBC.description',
                 'value' => 'Beers joined with their breweries',
             ],
             [
@@ -253,7 +253,7 @@ class OutputManifestTest extends TestCase
                 'value' => '16777216',
             ],
             [
-                'key' => 'description',
+                'key' => 'KBC.description',
                 'value' => 'Name of the brewery',
             ],
             [
@@ -318,7 +318,7 @@ class OutputManifestTest extends TestCase
         self::assertEquals($expectedColumns1, $manifest1['columns']);
         $expectedTableMetadata1 = [
             [
-                'key' => 'description',
+                'key' => 'KBC.description',
                 'value' => 'Beers joined with their breweries',
             ],
             [
@@ -354,7 +354,7 @@ class OutputManifestTest extends TestCase
                 'value' => '16777216',
             ],
             [
-                'key' => 'description',
+                'key' => 'KBC.description',
                 'value' => 'Name of the brewery',
             ],
             [

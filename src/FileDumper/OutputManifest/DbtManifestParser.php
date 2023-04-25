@@ -48,7 +48,7 @@ class DbtManifestParser
                 $tableMetadata = [];
                 if (isset($tableData['description'])) {
                     $tableMetadata[] = [
-                        'key' => 'description',
+                        'key' => 'KBC.description',
                         'value' => $tableData['description'],
                     ];
                 }
@@ -65,7 +65,7 @@ class DbtManifestParser
                 foreach ($columns as $columnName => $values) {
                     if (isset($values['description'])) {
                         $columnsMetadata[$columnName][] = [
-                            'key' => 'description',
+                            'key' => 'KBC.description',
                             'value' => $values['description'],
                         ];
                     }

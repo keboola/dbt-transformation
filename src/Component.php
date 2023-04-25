@@ -99,6 +99,7 @@ class Component extends BaseComponent
         );
         $connection = new Connection($connectionConfig);
 
+        /** @var array<string, array<string, bool>> $dbtProjectYaml */
         $dbtProjectYaml = Yaml::parseFile(sprintf('%s/dbt_project.yml', $this->projectPath));
         $quoteIdentifier = $dbtProjectYaml['quoting']['identifier'] ?? false;
 

@@ -6,7 +6,7 @@ Installing dbt-labs/dbt_utils
 %A
 Executing command "dbt run"
 Running with dbt=%s
-Partial parse save file not found. Starting full parse.
+%s Starting full parse.
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 4 threads (target='kbc_prod')
 1 of 2 START %Sview model %s.stg_model %s [RUN]

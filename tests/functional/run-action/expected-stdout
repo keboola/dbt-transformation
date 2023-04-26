@@ -4,7 +4,7 @@ Running with dbt=%s
 Warning: No packages were found in packages.yml
 Executing command "dbt run"
 Running with dbt=%s
-Partial parse save file not found. Starting full parse.
+%s Starting full parse.
 Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
 Concurrency: 1 threads (target='kbc_prod')
 1 of 2 START %Sview model %s.stg_model %s [RUN]

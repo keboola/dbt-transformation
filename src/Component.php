@@ -26,6 +26,7 @@ use Keboola\Component\Manifest\ManifestManager;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Yaml\Yaml;
 
 class Component extends BaseComponent
 {
@@ -98,11 +99,16 @@ class Component extends BaseComponent
         );
         $connection = new Connection($connectionConfig);
 
+        /** @var array<string, array<string, bool>> $dbtProjectYaml */
+        $dbtProjectYaml = Yaml::parseFile(sprintf('%s/dbt_project.yml', $this->projectPath));
+        $quoteIdentifier = $dbtProjectYaml['quoting']['identifier'] ?? false;
+
         return new OutputManifest(
             $workspaceCredentials,
             $connection,
             $manifestManager,
-            $manifestConverter
+            $manifestConverter,
+            $quoteIdentifier
         );
     }
 

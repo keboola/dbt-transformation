@@ -8,9 +8,11 @@ use DbtTransformation\FileDumper\OutputManifest;
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
 use Keboola\Component\Manifest\ManifestManager;
 use Keboola\SnowflakeDbAdapter\Connection;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Yaml;
 
 class OutputManifestTest extends TestCase
 {
@@ -24,18 +26,8 @@ class OutputManifestTest extends TestCase
         $fs->remove($finder->in($this->dataDir));
     }
 
-    public function testDumpJson(): void
+    private function getConnectionMock(): Connection
     {
-        $workspaceConfig = [
-            'host' => 'host',
-            'port' => 'port',
-            'warehouse' => 'warehouse',
-            'database' => 'database',
-            'schema' => 'schema',
-            'user' => 'user',
-            'password' => 'password',
-        ];
-
         $connectionMock = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['fetchAll'])
@@ -168,9 +160,30 @@ class OutputManifestTest extends TestCase
                 ]
             );
 
+        return $connectionMock;
+    }
+
+    public function testDumpJson(): void
+    {
+        $workspaceConfig = [
+            'host' => 'host',
+            'port' => 'port',
+            'warehouse' => 'warehouse',
+            'database' => 'database',
+            'schema' => 'schema',
+            'user' => 'user',
+            'password' => 'password',
+        ];
+
         $manifestManager = new ManifestManager($this->dataDir);
         $dbtManifestParser = new DbtManifestParser($this->providerDataDir);
-        $outputManifest = new OutputManifest($workspaceConfig, $connectionMock, $manifestManager, $dbtManifestParser);
+        $outputManifest = new OutputManifest(
+            $workspaceConfig,
+            $this->getConnectionMock(),
+            $manifestManager,
+            $dbtManifestParser,
+            true
+        );
 
         $outputManifest->dump();
 
@@ -204,7 +217,7 @@ class OutputManifestTest extends TestCase
         self::assertEquals($expectedColumns1, $manifest1['columns']);
         $expectedTableMetadata1 = [
             [
-                'key' => 'description',
+                'key' => 'KBC.description',
                 'value' => 'Beers joined with their breweries',
             ],
             [
@@ -240,7 +253,108 @@ class OutputManifestTest extends TestCase
                 'value' => '16777216',
             ],
             [
-                'key' => 'description',
+                'key' => 'KBC.description',
+                'value' => 'Name of the brewery',
+            ],
+            [
+                'key' => 'dbt.meta',
+                'value' => '[]',
+            ],
+        ];
+        self::assertEquals($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
+    }
+
+    public function testDumpJsonNoQuotes(): void
+    {
+        $workspaceConfig = [
+            'host' => 'host',
+            'port' => 'port',
+            'warehouse' => 'warehouse',
+            'database' => 'database',
+            'schema' => 'schema',
+            'user' => 'user',
+            'password' => 'password',
+        ];
+
+        $manifestManager = new ManifestManager($this->dataDir);
+        $dbtManifestParser = new DbtManifestParser($this->providerDataDir);
+        $outputManifest = new OutputManifest(
+            $workspaceConfig,
+            $this->getConnectionMock(),
+            $manifestManager,
+            $dbtManifestParser,
+            false
+        );
+
+        $outputManifest->dump();
+
+        $tableManifestPath1 = $this->dataDir . '/out/tables/BEERS_WITH_BREWERIES.manifest';
+        $tableManifestPath2 = $this->dataDir . '/out/tables/BEERS.manifest';
+        self::assertFileExists($tableManifestPath1);
+        self::assertFileExists($tableManifestPath2);
+
+        /** @var array{
+         *     'primary_key': array<string>,
+         *     'columns': array<string>,
+         *     'metadata': array<int, array<string, string>>,
+         *     'column_metadata': array<string, array<string, string>>,
+         * } $manifest1
+         */
+        $manifest1 = (array) json_decode((string) file_get_contents($tableManifestPath1), true);
+
+        self::assertEquals([
+            'brewery_id',
+            'beer_id',
+            'beer_name',
+        ], $manifest1['primary_key']);
+
+        $expectedColumns1 = [
+            'brewery_id',
+            'beer_id',
+            'beer_name',
+            'brewery_name',
+            'brewery_db_only',
+        ];
+        self::assertEquals($expectedColumns1, $manifest1['columns']);
+        $expectedTableMetadata1 = [
+            [
+                'key' => 'KBC.description',
+                'value' => 'Beers joined with their breweries',
+            ],
+            [
+                'key' => 'meta.owner',
+                'value' => 'fisa@keboola.com',
+            ],
+            [
+                'key' => 'KBC.name',
+                'value' => 'BEERS_WITH_BREWERIES',
+            ],
+            [
+                'key' => 'KBC.datatype.backend',
+                'value' => 'snowflake',
+            ],
+        ];
+        self::assertEquals($expectedTableMetadata1, $manifest1['metadata']);
+
+        $expectedColumnMetadata1 = [
+            [
+                'key' => 'KBC.datatype.type',
+                'value' => 'VARCHAR',
+            ],
+            [
+                'key' => 'KBC.datatype.nullable',
+                'value' => true,
+            ],
+            [
+                'key' => 'KBC.datatype.basetype',
+                'value' => 'STRING',
+            ],
+            [
+                'key' => 'KBC.datatype.length',
+                'value' => '16777216',
+            ],
+            [
+                'key' => 'KBC.description',
                 'value' => 'Name of the brewery',
             ],
             [

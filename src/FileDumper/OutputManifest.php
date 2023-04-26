@@ -47,6 +47,7 @@ class OutputManifest
     {
         $dbtMetadata = $this->dbtManifestParser->parse();
         $dbtModelNames = array_keys($dbtMetadata);
+
         $tableStructures = $this->getTables($dbtModelNames);
 
         foreach ($tableStructures as $tableDef) {

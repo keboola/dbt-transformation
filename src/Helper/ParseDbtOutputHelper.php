@@ -23,8 +23,15 @@ class ParseDbtOutputHelper
             if (empty($message) || is_numeric(array_key_first($message))) {
                 return yield $output;
             }
-            if ($message['level'] === $level) {
-                yield preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $message['msg']);
+            if (isset($message['level'])) { //dbt-core < 1.4
+                if ($message['level'] === $level) {
+                    yield $message['msg'];
+                }
+            } else { //dbt-core >= 1.4
+                if (isset($message[$level])) {
+                    /** @var array<string, array<string, string>> $message */
+                    yield $message[$level]['msg'];
+                }
             }
         }
     }

@@ -105,7 +105,7 @@ class DbtServiceTest extends TestCase
         $parsedOutput = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
 
         self::assertStringContainsString(
-            'Partial parse save file not found. Starting full parse.',
+            'Starting full parse.',
             $parsedOutput[1]
         );
         self::assertStringContainsString(

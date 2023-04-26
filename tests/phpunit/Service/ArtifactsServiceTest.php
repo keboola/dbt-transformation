@@ -24,6 +24,46 @@ class ArtifactsServiceTest extends TestCase
         ]);
     }
 
+    /** @dataProvider commandsProvider */
+    public function testResolveCommandDir(string $fullCommand, ?string $expected): void
+    {
+        $temp = new Temp();
+        $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
+
+        self::assertEquals($expected, $artifacts->resolveCommandDir($fullCommand));
+    }
+
+    /**
+     * @return array<string, array<array-key, ?string>> iterable
+     */
+    public function commandsProvider(): iterable
+    {
+        yield 'no params' => [
+            'dbt run',
+            'dbt run',
+        ];
+
+        yield 'with flag' => [
+            'dbt run --full-refresh',
+            'dbt run',
+        ];
+
+        yield 'with argument' => [
+            'dbt test --project-dir some/dir',
+            'dbt test',
+        ];
+
+        yield 'unsupported command' => [
+            'dbt rocks --hard',
+            null,
+        ];
+
+        yield 'unsupported command 2' => [
+            'dbt deps',
+            null,
+        ];
+    }
+
     public function testDownloadLastRun(): void
     {
         $fileId = $this->uploadTestArtifact();

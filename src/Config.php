@@ -183,6 +183,6 @@ class Config extends BaseConfig
      */
     public function getArtifactsOptions(): array
     {
-        return $this->getArrayValue(['artifacts', 'options']);
+        return $this->getArrayValue(['artifacts', 'options'], []);
     }
 }

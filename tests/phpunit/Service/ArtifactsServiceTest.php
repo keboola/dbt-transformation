@@ -125,6 +125,7 @@ class ArtifactsServiceTest extends TestCase
         self::assertFileExists($tmpFolder . '/artifacts/out/current/compiled_sql.json');
         self::assertFileExists($tmpFolder . '/artifacts/out/current/manifest.json');
         self::assertFileExists($tmpFolder . '/artifacts/out/current/run_results.json');
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/model_timing.json');
         self::assertFileExists($tmpFolder . '/artifacts/out/current/dbt.log');
     }
 

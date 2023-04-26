@@ -195,7 +195,7 @@ class OutputManifestTest extends TestCase
                     ],
                     'metadata' => [
                         [
-                            'key' => 'description',
+                            'key' => 'KBC.description',
                             'value' => 'Beers joined with their breweries',
                         ],
                         [
@@ -207,7 +207,7 @@ class OutputManifestTest extends TestCase
                         [
                             'brewery_id' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'The unique identifier for the brewery',
                                 ],
                                 [
@@ -218,7 +218,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'beer_id' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'The unique identifier for the beer',
                                 ],
                                 [
@@ -228,7 +228,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'beer_name' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'The name of the beer',
                                 ],
                                 [
@@ -238,7 +238,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'beer_style' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'Style of the beer (IPA, Porter, etc)',
                                 ],
                                 [
@@ -249,7 +249,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'abv' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'Alcohol percentage in the beer',
                                 ],
                                 [
@@ -259,7 +259,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'ibu' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'The bitterness of the beer in IBUs',
                                 ],
                                 [
@@ -269,7 +269,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'bitterness' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'The bitterness category of the beer (based on IBUs)',
                                 ],
                                 [
@@ -279,7 +279,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'ounces' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'The volume of the beer',
                                 ],
                                 [
@@ -289,7 +289,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'brewery_name' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'Name of the brewery',
                                 ],
                                 [
@@ -299,7 +299,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'brewery_city' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'City of the brewery',
                                 ],
                                 [
@@ -309,7 +309,7 @@ class OutputManifestTest extends TestCase
                             ],
                             'brewery_state' => [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'State of the brewery',
                                 ],
                                 [
@@ -335,7 +335,7 @@ class OutputManifestTest extends TestCase
                     ],
                     'metadata' => [
                         [
-                            'key' => 'description',
+                            'key' => 'KBC.description',
                             'value' => 'Beer List',
                         ],
                         [
@@ -346,7 +346,7 @@ class OutputManifestTest extends TestCase
                     'column_metadata' => [
                         'beer_id' => [
                             [
-                                'key' => 'description',
+                                'key' => 'KBC.description',
                                 'value' => 'The unique indentifier of the beer',
                             ],
                             [
@@ -357,7 +357,7 @@ class OutputManifestTest extends TestCase
                         ],
                         'beer_name' => [
                             [
-                                'key' => 'description',
+                                'key' => 'KBC.description',
                                 'value' => 'The name of the beer as on the label',
                             ],
                             [
@@ -367,7 +367,7 @@ class OutputManifestTest extends TestCase
                         ],
                         'beer_style' => [
                             [
-                                'key' => 'description',
+                                'key' => 'KBC.description',
                                 'value' => 'The style of the beer (IPA, Porter, etc)',
                             ],
                             [
@@ -380,7 +380,7 @@ class OutputManifestTest extends TestCase
                         'abv' =>
                             [
                                 [
-                                    'key' => 'description',
+                                    'key' => 'KBC.description',
                                     'value' => 'Alcohol by volume',
                                 ],
                                 [
@@ -391,7 +391,7 @@ class OutputManifestTest extends TestCase
                             ],
                         'ibu' => [
                             [
-                                'key' => 'description',
+                                'key' => 'KBC.description',
                                 'value' => 'Bitterness in International Bitterness Units',
                             ],
                             [
@@ -402,7 +402,7 @@ class OutputManifestTest extends TestCase
                         ],
                         'bitterness' => [
                             [
-                                'key' => 'description',
+                                'key' => 'KBC.description',
                                 'value' => 'The bitterness category of the beer (based on IBUs)',
                             ],
                             [
@@ -413,7 +413,7 @@ class OutputManifestTest extends TestCase
                         ],
                         'brewery_id' => [
                             [
-                                'key' => 'description',
+                                'key' => 'KBC.description',
                                 'value' => 'The unique indentifier of the brewery',
                             ],
                             [
@@ -423,7 +423,7 @@ class OutputManifestTest extends TestCase
                         ],
                         'ounces' => [
                             [
-                                'key' => 'description',
+                                'key' => 'KBC.description',
                                 'value' => 'Volume of a single unit',
                             ],
                             [

@@ -88,7 +88,6 @@ class ArtifactsService
                 $this->filesystem->mkdir($artifactsPath);
                 $targetPath = sprintf('%s/target', $projectPath);
 
-                $filesToCopy = [];
                 switch ($stepDir) {
                     case 'dbt run':
                         $compiledSqlContent = DbtCompileHelper::getCompiledSqlFilesContent($targetPath);
@@ -102,11 +101,24 @@ class ArtifactsService
                         $modelTimingJson = DbtDocsHelper::getModelTiming($manifest, $runResults);
                         file_put_contents($artifactsPath . '/model_timing.json', json_encode($modelTimingJson));
 
+                        // add logs
+                        $logsPath = sprintf('%s/logs/', $projectPath);
+                        if (file_exists($logsPath)) {
+                            $this->filesystem->mirror($logsPath, $artifactsPath);
+                        }
+
                         $filesToCopy = [
                             'run_results.json',
                             'manifest.json',
-                            'dbt.log',
                         ];
+
+                        foreach ($filesToCopy as $fileToCopy) {
+                            $this->filesystem->copy(
+                                sprintf('%s/%s', $targetPath, $fileToCopy),
+                                sprintf('%s/%s', $artifactsPath, $fileToCopy)
+                            );
+                        }
+
                         break;
                     case 'dbt docs generate':
                         $html = (string) file_get_contents($targetPath . '/index.html');
@@ -116,13 +128,6 @@ class ArtifactsService
                         file_put_contents($artifactsPath . '/index.html', $finalHtml);
 
                         break;
-                }
-
-                foreach ($filesToCopy as $fileToCopy) {
-                    $this->filesystem->copy(
-                        sprintf('%s/%s', $targetPath, $fileToCopy),
-                        sprintf('%s/%s', $artifactsPath, $fileToCopy)
-                    );
                 }
             }
         }

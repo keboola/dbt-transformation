@@ -63,7 +63,7 @@ class DbtManifestParser
                 $columnsMetadata = [];
                 $columns = (array) $tableData['columns'];
                 foreach ($columns as $columnName => $values) {
-                    $columnNameLC = strtolower($columnName);
+                    $columnNameLC = strtolower((string) $columnName);
                     if (isset($values['description'])) {
                         $columnsMetadata[$columnNameLC][] = [
                             'key' => 'KBC.description',

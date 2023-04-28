@@ -653,12 +653,11 @@ class OutputManifestTest extends TestCase
         ];
 
         $manifestManager = new ManifestManager($this->dataDir);
-        $dbtManifestParser = new DbtManifestParser($this->providerDataDir);
         $outputManifest = new OutputManifest(
             $workspaceConfig,
             $this->getConnectionMock(true),
             $manifestManager,
-            $dbtManifestParser,
+            $this->getDbtManifestParserMock(),
             false
         );
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\FileDumper\OutputManifest;
 
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
+use Keboola\Temp\Temp;
 use PHPUnit\Framework\TestCase;
 
 class DbtManifestParserTest extends TestCase
@@ -43,5 +44,39 @@ class DbtManifestParserTest extends TestCase
             'The unique identifier for the brewery',
             $columnMetadata['brewery_id'][0]['value']
         );
+    }
+
+    public function testParseUnifyCase(): void
+    {
+        $temp = new Temp();
+        $tmpFolder = $temp->getTmpFolder();
+
+        $manifest = [
+            'nodes' => [
+                'model.beer_analytics.beers_with_breweries' => [
+                    'resource_type' => 'model',
+                    'name' => 'beers_with_breweries',
+                    'columns' => [
+                        'BREWERY_ID' => [
+                            'name' => 'BREWERY_ID',
+                            'description' => 'The unique identifier for the brewery',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        mkdir(sprintf('%s/target', $tmpFolder));
+        file_put_contents(sprintf('%s/target/manifest.json', $tmpFolder), json_encode($manifest));
+
+        $converter = new DbtManifestParser($tmpFolder);
+        $outputTables = $converter->parse();
+        /** @var array<string, array<array-key, array<string, string>>> $columnsMetadata */
+        $columnsMetadata = $outputTables['beers_with_breweries']['column_metadata'];
+
+        self::assertSame(['brewery_id'], array_keys($columnsMetadata));
+        $metadata = (array) array_shift($columnsMetadata['brewery_id']);
+        self::assertSame('KBC.description', $metadata['key']);
+        self::assertSame('The unique identifier for the brewery', $metadata['value']);
     }
 }

@@ -63,7 +63,7 @@ class OutputManifest
                 $columnName = $column->getColumnName();
                 $columnsMetadata->{$columnName} = array_merge(
                     $column->getColumnDefinition()->toMetadata(),
-                    (array) ($dbtColumnsMetadata[$columnName] ?? [])
+                    (array) ($dbtColumnsMetadata[strtolower($columnName)] ?? [])
                 );
             }
 

@@ -63,14 +63,15 @@ class DbtManifestParser
                 $columnsMetadata = [];
                 $columns = (array) $tableData['columns'];
                 foreach ($columns as $columnName => $values) {
+                    $columnNameLC = strtolower((string) $columnName);
                     if (isset($values['description'])) {
-                        $columnsMetadata[$columnName][] = [
+                        $columnsMetadata[$columnNameLC][] = [
                             'key' => 'KBC.description',
                             'value' => $values['description'],
                         ];
                     }
                     if (isset($values['data_type'])) {
-                        $columnsMetadata[$columnName][] = [
+                        $columnsMetadata[$columnNameLC][] = [
                             'key' => 'dbt.data_type',
                             'value' => $values['data_type'],
                         ];
@@ -82,7 +83,7 @@ class DbtManifestParser
                             }
                         }
 
-                        $columnsMetadata[$columnName][] = [
+                        $columnsMetadata[$columnNameLC][] = [
                             'key' => 'dbt.meta',
                             'value' => json_encode($values['meta']),
                         ];

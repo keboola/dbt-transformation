@@ -28,8 +28,8 @@ class ParseDbtOutputHelper
                     yield $message['msg'];
                 }
             } else { //dbt-core >= 1.4
+                /** @var array<string, array<string, string>> $message */
                 if (isset($message['info']['level']) && $message['info']['level'] === $level) {
-                    /** @var array<string, array<string, string>> $message */
                     yield $message['info']['msg'];
                 }
             }

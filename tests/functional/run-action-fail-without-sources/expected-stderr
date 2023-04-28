@@ -1,1 +1,1 @@
-Encountered an error: Compilation Error in model stg_model (models/example/stg_model.sql)   Model 'model.my_new_project.stg_model' (models/example/stg_model.sql) depends on a source named 'in.c-test-bucket.test' which was not found%A
+Encountered an error: Compilation Error %s Model 'model.my_new_project.stg_model' (models/example/stg_model.sql) depends on a source named 'in.c-test-bucket.test' which was not found%A

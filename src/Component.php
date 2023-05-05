@@ -50,7 +50,11 @@ class Component extends BaseComponent
             'url' => $this->getConfig()->getStorageApiUrl(),
             'token' => $this->getConfig()->getStorageApiToken(),
         ]);
-        $this->artifacts = new ArtifactsService($this->storageClient, $this->getDataDir());
+        $this->artifacts = new ArtifactsService(
+            $this->storageClient,
+            $this->getDataDir(),
+            $this->getConfig()->getArtifactsOptions()
+        );
         $this->setProjectPath($this->getDataDir());
         $this->dwhProviderFactory = new DwhProviderFactory(
             $this->createSourceFileService,
@@ -225,19 +229,29 @@ class Component extends BaseComponent
      */
     protected function actionDbtDocs(): array
     {
-        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
+        $artifactsOptions = $this->getConfig()->getArtifactsOptions();
+        $isArchive = $artifactsOptions['zip'] ?? true;
+
+        $componentId = (string) (getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID);
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 
-        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
-        $this->artifacts->checkIfCorrectStepIsDownloaded(DbtService::COMMAND_DOCS_GENERATE);
+        if ($isArchive) {
+            $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+            $this->artifacts->checkIfCorrectStepIsDownloaded(DbtService::COMMAND_DOCS_GENERATE);
 
-        $html = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'index.html');
-        $manifest = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'manifest.json');
-        $catalog = $this->artifacts->readFromFile(DbtService::COMMAND_DOCS_GENERATE, 'catalog.json');
+            $html = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'index.html');
+            $manifest = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'manifest.json');
+            $catalog = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'catalog.json');
+
+            $finalHtml = DbtDocsHelper::mergeHtml($html, $catalog, $manifest);
+        } else {
+            $this->artifacts->downloadByName('index.html', $componentId, $configId, $branchId);
+            $finalHtml = $this->artifacts->readFromFile('index.html');
+        }
 
         return [
-            'html' => DbtDocsHelper::mergeHtml($html, $catalog, $manifest),
+            'html' => $finalHtml,
         ];
     }
 
@@ -246,20 +260,31 @@ class Component extends BaseComponent
      */
     protected function actionDbtRunResults(): array
     {
+        $artifactsOptions = $this->getConfig()->getArtifactsOptions();
+        $isArchive = $artifactsOptions['zip'] ?? true;
+
         $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
 
-        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+        if ($isArchive) {
+            $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
 
-        $manifestJson = $this->artifacts->readFromFile(DbtService::COMMAND_RUN, 'manifest.json');
-        $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
-        $runResultsJson = $this->artifacts->readFromFile(DbtService::COMMAND_RUN, 'run_results.json');
-        /** @var array<string, array<string, mixed>> $runResults */
-        $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
+            $manifestJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'manifest.json');
+            $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
+            $runResultsJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'run_results.json');
+            /** @var array<string, array<string, mixed>> $runResults */
+            $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
+            $modelTimingFinal = DbtDocsHelper::getModelTiming($manifest, $runResults);
+        } else {
+            $this->artifacts->downloadByName('model_timing.json', $componentId, $configId, $branchId);
+            $modelTimingFinalJson = $this->artifacts->readFromFile('model_timing.json');
+            /** @var array<int, array<string, mixed>> $modelTimingFinal */
+            $modelTimingFinal = (array) json_decode($modelTimingFinalJson, true, 512, JSON_THROW_ON_ERROR);
+        }
 
         return [
-            'modelTiming' => DbtDocsHelper::getModelTiming($manifest, $runResults),
+            'modelTiming' => $modelTimingFinal,
         ];
     }
 
@@ -269,14 +294,26 @@ class Component extends BaseComponent
      */
     protected function actionDbtCompile(): array
     {
+        $artifactsOptions = $this->getConfig()->getArtifactsOptions();
+        $isArchive = $artifactsOptions['zip'] ?? true;
+
         $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getBranchId();
-        $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
-        $runArtifactPath = $this->artifacts->getDownloadDir() . '/' . DbtService::COMMAND_RUN;
+
+        if ($isArchive) {
+            $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+            $runArtifactPath = $this->artifacts->getDownloadDir() . '/' . DbtService::COMMAND_RUN;
+            $compiledFinal = DbtCompileHelper::getCompiledSqlFilesContent($runArtifactPath);
+        } else {
+            $this->artifacts->downloadByName('compiled_sql.json', $componentId, $configId, $branchId);
+            $compiledSqlJson = $this->artifacts->readFromFile('compiled_sql.json');
+            /** @var array<int|string, string|false> $compiledFinal */
+            $compiledFinal = (array) json_decode($compiledSqlJson, true, 512, JSON_THROW_ON_ERROR);
+        }
 
         return [
-            'compiled' => DbtCompileHelper::getCompiledSqlFiles($runArtifactPath),
+            'compiled' => $compiledFinal,
         ];
     }
 

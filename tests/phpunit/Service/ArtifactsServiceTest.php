@@ -112,10 +112,21 @@ class ArtifactsServiceTest extends TestCase
         $artifacts->downloadLastRun(Component::COMPONENT_ID, '456', 'default');
     }
 
-    public function testUploadResults(): void
+    public function testWriteResultsNoZip(): void
     {
-        //@todo
-        self::assertTrue(true);
+        $temp = new Temp();
+        $tmpFolder = $temp->getTmpFolder();
+        $artifacts = new ArtifactsService($this->storageClient, $tmpFolder, [
+            'zip' => false,
+        ]);
+
+        $artifacts->writeResults($this->getProjectPath(), 'dbt run');
+
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/compiled_sql.json');
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/manifest.json');
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/run_results.json');
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/model_timing.json');
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/dbt.log');
     }
 
     public function testReadFromFile(): void
@@ -129,13 +140,13 @@ class ArtifactsServiceTest extends TestCase
         self::assertEquals($fileId, $downloadedFileId);
 
         $manifest = (array) json_decode(
-            $artifacts->readFromFile('dbt docs generate', 'manifest.json'),
+            $artifacts->readFromFileInStep('dbt docs generate', 'manifest.json'),
             true
         );
         self::assertArrayHasKey('metadata', $manifest);
 
         $runResults = (array) json_decode(
-            $artifacts->readFromFile('dbt run', 'run_results.json'),
+            $artifacts->readFromFileInStep('dbt run', 'run_results.json'),
             true
         );
         self::assertArrayHasKey('results', $runResults);
@@ -158,5 +169,10 @@ class ArtifactsServiceTest extends TestCase
     protected function getArtifactArchivePath(): string
     {
         return __DIR__ . '/../data/artifacts.tar.gz';
+    }
+
+    protected function getProjectPath(): string
+    {
+        return __DIR__ . '/../data';
     }
 }

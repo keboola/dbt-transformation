@@ -163,6 +163,282 @@ class OutputManifestTest extends TestCase
         return $connectionMock;
     }
 
+    public function getDbtManifestParserMock(): DbtManifestParser
+    {
+        $parserMock = $this->getMockBuilder(DbtManifestParser::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['parse'])
+            ->getMock();
+
+        $parserMock
+            ->expects(self::any())
+            ->method('parse')
+            ->willReturn([
+                'beers_with_breweries' => [
+                    'columns' => [
+                        'brewery_id',
+                        'beer_id',
+                        'beer_name',
+                        'beer_style',
+                        'abv',
+                        'ibu',
+                        'bitterness',
+                        'ounces',
+                        'brewery_name',
+                        'brewery_city',
+                        'brewery_state',
+                    ],
+                    'primary_key' => [
+                        'brewery_id',
+                        'beer_id',
+                        'beer_name',
+                    ],
+                    'metadata' => [
+                        [
+                            'key' => 'KBC.description',
+                            'value' => 'Beers joined with their breweries',
+                        ],
+                        [
+                            'key' => 'meta.owner',
+                            'value' => 'fisa@keboola.com',
+                        ],
+                    ],
+                    'column_metadata' =>
+                        [
+                            'brewery_id' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'The unique identifier for the brewery',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '{"primary-key":true,"dimension":{"sql":"${TABLE}.brewery_id"},
+                                    "meta":null,"metrics":{"num_unique_breweries":{"type":"count_distinct"}}}',
+                                ],
+                            ],
+                            'beer_id' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'The unique identifier for the beer',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '{"primary-key":true,"dimension":{"sql":"${TABLE}.beer_id"}}',
+                                ],
+                            ],
+                            'beer_name' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'The name of the beer',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '{"primary-key":true}',
+                                ],
+                            ],
+                            'beer_style' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'Style of the beer (IPA, Porter, etc)',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '{"dimension":{"sql":"${TABLE}.beer_style"},"metrics":
+                                    {"num_unique_beer_styles":{"type":"count_distinct"}}}',
+                                ],
+                            ],
+                            'abv' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'Alcohol percentage in the beer',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '[]',
+                                ],
+                            ],
+                            'ibu' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'The bitterness of the beer in IBUs',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '[]',
+                                ],
+                            ],
+                            'bitterness' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'The bitterness category of the beer (based on IBUs)',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '[]',
+                                ],
+                            ],
+                            'ounces' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'The volume of the beer',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '[]',
+                                ],
+                            ],
+                            'brewery_name' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'Name of the brewery',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '[]',
+                                ],
+                            ],
+                            'brewery_city' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'City of the brewery',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '[]',
+                                ],
+                            ],
+                            'brewery_state' => [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'State of the brewery',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '[]',
+                                ],
+                            ],
+                        ],
+                ],
+                'beers' => [
+                    'columns' => [
+                        'beer_id',
+                        'beer_name',
+                        'beer_style',
+                        'abv',
+                        'ibu',
+                        'bitterness',
+                        'brewery_id',
+                        'ounces',
+                    ],
+                    'primary_key' => [
+                        'beer_id',
+                    ],
+                    'metadata' => [
+                        [
+                            'key' => 'KBC.description',
+                            'value' => 'Beer List',
+                        ],
+                        [
+                            'key' => 'meta.owner',
+                            'value' => 'fisa@keboola.com',
+                        ],
+                    ],
+                    'column_metadata' => [
+                        'beer_id' => [
+                            [
+                                'key' => 'KBC.description',
+                                'value' => 'The unique indentifier of the beer',
+                            ],
+                            [
+                                'key' => 'dbt.meta',
+                                'value' => '{"primary-key":true,"dimension":{"sql":"${TABLE}.beer_id"},
+                                "metrics":{"num_unique_beers":{"type":"count_distinct"}}}',
+                            ],
+                        ],
+                        'beer_name' => [
+                            [
+                                'key' => 'KBC.description',
+                                'value' => 'The name of the beer as on the label',
+                            ],
+                            [
+                                'key' => 'dbt.meta',
+                                'value' => '{"dimension":{"sql":"${TABLE}.beer_name"}}',
+                            ],
+                        ],
+                        'beer_style' => [
+                            [
+                                'key' => 'KBC.description',
+                                'value' => 'The style of the beer (IPA, Porter, etc)',
+                            ],
+                            [
+                                'key' => 'dbt.meta',
+                                'value' => '{"dimension":{"sql":"${TABLE}.beer_style"},"metrics":
+                                {"num_unique_beer_styles":
+                                {"type":"count_distinct","description":"Distinct Beer Styles"}}}',
+                            ],
+                        ],
+                        'abv' =>
+                            [
+                                [
+                                    'key' => 'KBC.description',
+                                    'value' => 'Alcohol by volume',
+                                ],
+                                [
+                                    'key' => 'dbt.meta',
+                                    'value' => '{"metrics":{"avg_abv":{"type":"average","description":
+                                    "Average Alcohol by volume"}}}',
+                                ],
+                            ],
+                        'ibu' => [
+                            [
+                                'key' => 'KBC.description',
+                                'value' => 'Bitterness in International Bitterness Units',
+                            ],
+                            [
+                                'key' => 'dbt.meta',
+                                'value' => '{"metrics":{"avg_ibu":{"type":"average","description":
+                                "Average Bitterness in International Bitterness Units"}}}',
+                            ],
+                        ],
+                        'bitterness' => [
+                            [
+                                'key' => 'KBC.description',
+                                'value' => 'The bitterness category of the beer (based on IBUs)',
+                            ],
+                            [
+                                'key' => 'dbt.meta',
+                                'value' => '{"dimension":{"sql":"${TABLE}.bitterness",
+                                "description":"Bitterness Types"}}',
+                            ],
+                        ],
+                        'brewery_id' => [
+                            [
+                                'key' => 'KBC.description',
+                                'value' => 'The unique indentifier of the brewery',
+                            ],
+                            [
+                                'key' => 'dbt.meta',
+                                'value' => '[]',
+                            ],
+                        ],
+                        'ounces' => [
+                            [
+                                'key' => 'KBC.description',
+                                'value' => 'Volume of a single unit',
+                            ],
+                            [
+                                'key' => 'dbt.meta',
+                                'value' => '{"metrics":{"avg_ounces":{"type":"average",
+                                "description":"Average Volume of a single unit"}}}',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        return $parserMock;
+    }
+
     public function testDumpJson(): void
     {
         $workspaceConfig = [
@@ -176,12 +452,12 @@ class OutputManifestTest extends TestCase
         ];
 
         $manifestManager = new ManifestManager($this->dataDir);
-        $dbtManifestParser = new DbtManifestParser($this->providerDataDir);
+
         $outputManifest = new OutputManifest(
             $workspaceConfig,
             $this->getConnectionMock(),
             $manifestManager,
-            $dbtManifestParser,
+            $this->getDbtManifestParserMock(),
             true
         );
 
@@ -277,12 +553,11 @@ class OutputManifestTest extends TestCase
         ];
 
         $manifestManager = new ManifestManager($this->dataDir);
-        $dbtManifestParser = new DbtManifestParser($this->providerDataDir);
         $outputManifest = new OutputManifest(
             $workspaceConfig,
             $this->getConnectionMock(),
             $manifestManager,
-            $dbtManifestParser,
+            $this->getDbtManifestParserMock(),
             false
         );
 
@@ -378,12 +653,11 @@ class OutputManifestTest extends TestCase
         ];
 
         $manifestManager = new ManifestManager($this->dataDir);
-        $dbtManifestParser = new DbtManifestParser($this->providerDataDir);
         $outputManifest = new OutputManifest(
             $workspaceConfig,
             $this->getConnectionMock(true),
             $manifestManager,
-            $dbtManifestParser,
+            $this->getDbtManifestParserMock(),
             false
         );
 

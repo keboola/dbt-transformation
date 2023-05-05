@@ -15,21 +15,9 @@ class DbtCompileHelper
      * @return array<int|string, string|false>
      * @throws UserException
      */
-    public static function getCompiledSqlFiles(string $directory): array
+    public static function getCompiledSqlFilesContent(string $directory): array
     {
-        $compiledDirInfo = new SplFileInfo(
-            sprintf('%s/%s', $directory, 'compiled')
-        );
-
-        try {
-            $finder = new Finder();
-            $filePaths = iterator_to_array($finder
-                ->files()
-                ->in($compiledDirInfo->getPathname())
-                ->name('*.sql'));
-        } catch (DirectoryNotFoundException $e) {
-            throw new UserException('Compiled SQL files not found. Run the component with "dbt run" step first.');
-        }
+        $filePaths = self::getCompiledSqlPaths($directory);
 
         $filenames = array_map(fn($sqlFile) => (string) $sqlFile->getFilename(), $filePaths);
         reset($filePaths);
@@ -42,5 +30,26 @@ class DbtCompileHelper
         ksort($combineArray);
 
         return $combineArray;
+    }
+
+    /**
+     * @return array<array-key, SplFileInfo>
+     * @throws UserException
+     */
+    public static function getCompiledSqlPaths(string $directory): array
+    {
+        $compiledDirInfo = new SplFileInfo(
+            sprintf('%s/%s', $directory, 'compiled')
+        );
+
+        try {
+            $finder = new Finder();
+            return iterator_to_array($finder
+                ->files()
+                ->in($compiledDirInfo->getPathname())
+                ->name('*.sql'));
+        } catch (DirectoryNotFoundException $e) {
+            throw new UserException('Compiled SQL files not found. Run the component with "dbt run" step first.');
+        }
     }
 }

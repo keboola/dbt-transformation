@@ -48,7 +48,8 @@
             "@tests-phpunit",
             "@tests-datadir",
             "@tests-datadir-remote-dwh",
-            "@tests-datadir-sync-actions"
+            "@tests-datadir-sync-actions",
+            "@tests-datadir-sync-actions-no-zip"
         ],
 
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",

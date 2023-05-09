@@ -50,7 +50,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                 ],
             ],
@@ -64,7 +64,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'threads' => 1,
                     ],
                 ],
@@ -80,7 +80,7 @@ class ConfigDefinitionTest extends TestCase
                         'branch' => 'master',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                 ],
             ],
@@ -96,7 +96,7 @@ class ConfigDefinitionTest extends TestCase
                         '#password' => 'test',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                 ],
             ],
@@ -113,7 +113,7 @@ class ConfigDefinitionTest extends TestCase
                         '#password' => 'test',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                 ],
             ],
@@ -127,7 +127,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                     'showExecutedSqls' => true,
                 ],
@@ -146,7 +146,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                     'dbt' => [
                         'modelNames' => ['stg_model'],
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                 ],
             ],
@@ -163,7 +163,7 @@ class ConfigDefinitionTest extends TestCase
                         '#password' => 'test',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run --select stg_model'],
+                        'executeSteps' => [['step' => 'dbt run --select stg_model', 'active' => true]],
                     ],
                 ],
             ],
@@ -177,7 +177,11 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run', 'dbt docs generate'],
+                        'executeSteps' => [
+                            ['step' => 'dbt run', 'active' => true],
+                            ['step' => 'dbt docs generate', 'active' => true],
+                            ['step' => 'dbt build', 'active' => false],
+                        ],
                     ],
                 ],
             ],
@@ -191,7 +195,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                     'remoteDwh' => [
                         'type' => 'postgres',
@@ -214,7 +218,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                     'remoteDwh' => [
                         'type' => 'bigquery',
@@ -237,7 +241,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -255,7 +259,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                         ],
@@ -272,7 +276,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' =>[
                             'error_after' => ['active' => true, 'count' => 30, 'period' => 'minute'],
                         ],
@@ -289,7 +293,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -312,7 +316,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -333,7 +337,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -359,7 +363,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                     'generateSources' => false,
                 ],
@@ -484,7 +488,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['ls -l'],
+                        'executeSteps' => [['step' => 'ls -l', 'active' => true]],
                     ],
                 ],
             ],
@@ -499,7 +503,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run && ls -l'],
+                        'executeSteps' => [['step' => 'dbt run && ls -l', 'active' => true]],
                     ],
                 ],
             ],
@@ -557,7 +561,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => ['warn_after' => ['active' => true]],
                     ],
                 ],
@@ -574,7 +578,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => ['warn_after' => ['active' => true, 'period' => 'day']],
                     ],
                 ],
@@ -591,7 +595,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => ['warn_after' => ['active' => true, 'period' => 'year', 'count' => 1]],
                     ],
                 ],
@@ -608,7 +612,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => ['warn_after' => ['active' => true, 'period' => 'month', 'count' => 'one']],
                     ],
                 ],
@@ -625,7 +629,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -645,7 +649,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -665,7 +669,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -686,7 +690,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],
@@ -707,7 +711,7 @@ class ConfigDefinitionTest extends TestCase
                         'repo' => 'https://github.com/my-repo',
                     ],
                     'dbt' => [
-                        'executeSteps' => ['dbt run'],
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'freshness' => [
                             'warn_after' => ['active' => true, 'count' => 1, 'period' => 'hour'],
                             'error_after' => ['active' => true, 'count' => 1, 'period' => 'day'],

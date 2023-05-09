@@ -6,6 +6,7 @@ namespace DbtTransformation\Tests\Service;
 
 use DbtTransformation\Config;
 use DbtTransformation\Configuration\ConfigDefinition;
+use DbtTransformation\Configuration\SyncAction\DbtCompileDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
@@ -72,7 +73,7 @@ class DbtServiceTest extends TestCase
                 ],
                 'dbt' => [
                     'executeSteps' => [
-                        $executeStep,
+                        ['step' => $executeStep, 'active' => true],
                     ],
                 ],
             ],

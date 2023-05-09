@@ -66,11 +66,12 @@ class Config extends BaseConfig
     }
 
     /**
-     * @return array<string>
+     * @return array<int, string>
      */
     public function getExecuteSteps(): array
     {
         $executionSteps = $this->getArrayValue(['parameters', 'dbt', 'executeSteps']);
+        $executionSteps = $this->filterActiveSteps($executionSteps);
 
         // For backward compatibility when modelNames were in the UI
         if (!empty($this->getModelNames())) {
@@ -184,5 +185,18 @@ class Config extends BaseConfig
     public function getArtifactsOptions(): array
     {
         return $this->getArrayValue(['artifacts', 'options'], []);
+    }
+
+    /**
+     * @param array<int, array{'step': string, 'active': bool}> $executionSteps
+     * @return array<int, string>
+     */
+    protected function filterActiveSteps(array $executionSteps): array
+    {
+        return array_map(function ($step) {
+            return $step['step'];
+        }, array_filter($executionSteps, function ($step) {
+            return $step['active'];
+        }));
     }
 }

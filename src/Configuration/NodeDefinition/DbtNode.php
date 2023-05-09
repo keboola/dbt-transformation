@@ -32,7 +32,16 @@ class DbtNode extends ArrayNodeDefinition
                 ->end()
                 ->arrayNode('executeSteps')
                     ->isRequired()
-                    ->scalarPrototype()->end()
+                        ->arrayPrototype()
+                            ->children()
+                            ->scalarNode('step')
+                                ->isRequired()->cannotBeEmpty()
+                            ->end()
+                            ->booleanNode('active')
+                                ->isRequired()
+                            ->end()
+                        ->end()
+                    ->end()
                     ->validate()
                     ->always(function ($executeSteps) {
                         if (empty($executeSteps)) {
@@ -41,12 +50,12 @@ class DbtNode extends ArrayNodeDefinition
                             );
                         }
                         foreach ($executeSteps as $input) {
-                            if (substr($input, 0, 4) !== 'dbt ') {
+                            if (substr($input['step'], 0, 4) !== 'dbt ') {
                                 throw new InvalidConfigurationException(
                                     'Invalid execute step: Command must start with "dbt"'
                                 );
                             }
-                            if (preg_match('/[|&]/', $input)) {
+                            if (preg_match('/[|&]/', $input['step'])) {
                                 throw new InvalidConfigurationException(
                                     'Invalid execute step: Command contains disallowed metacharacters'
                                 );

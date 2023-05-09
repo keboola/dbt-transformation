@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Service;
 
 use DbtTransformation\Component;
+use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Service\ArtifactsService;
 use Keboola\Component\UserException;
 use Keboola\StorageApi\Client as StorageClient;
@@ -129,7 +130,7 @@ class ArtifactsServiceTest extends TestCase
         self::assertFileExists($tmpFolder . '/artifacts/out/current/dbt.log');
     }
 
-    public function testReadFromFile(): void
+    public function testReadFromFileInStep(): void
     {
         $fileId = $this->uploadTestArtifact();
         sleep(1);
@@ -152,6 +153,54 @@ class ArtifactsServiceTest extends TestCase
         self::assertArrayHasKey('results', $runResults);
     }
 
+    public function testReadFromFileNoZip(): void
+    {
+        $temp = new Temp();
+        $tmpFolder = $temp->getTmpFolder();
+
+        $this->uploadTestArtifactsNoZip($tmpFolder);
+
+        $artifacts = new ArtifactsService($this->storageClient, $tmpFolder, [
+            'zip' => false,
+        ]);
+
+        $artifacts->downloadByName(
+            'manifest.json',
+            Component::COMPONENT_ID,
+            '123',
+            'default',
+        );
+        $manifestRaw = $artifacts->readFromFile('manifest.json');
+        /** @var array<string, array<string, string>> $manifestJson */
+        $manifestJson = json_decode($manifestRaw, true);
+        self::assertEquals(
+            'https://schemas.getdbt.com/dbt/manifest/v6.json',
+            $manifestJson['metadata']['dbt_schema_version']
+        );
+
+        $artifacts->downloadByName(
+            'run_results.json',
+            Component::COMPONENT_ID,
+            '123',
+            'default',
+        );
+        $runResultsRaw = $artifacts->readFromFile('run_results.json');
+        /** @var array<string, array<string, string>> $runResultsJson */
+        $runResultsJson = json_decode($runResultsRaw, true);
+        self::assertNotEmpty($runResultsJson['results']);
+
+        $artifacts->downloadByName(
+            'model_timing.json',
+            Component::COMPONENT_ID,
+            '123',
+            'default',
+        );
+        $modelTimingRaw = $artifacts->readFromFile('model_timing.json');
+        /** @var array<array-key, array<string, string>> $modelTimingJson */
+        $modelTimingJson = json_decode($modelTimingRaw, true);
+        self::assertEquals('model.beer_analytics.breweries', $modelTimingJson[0]['id']);
+    }
+
     protected function uploadTestArtifact(): int
     {
         $options = new FileUploadOptions();
@@ -164,6 +213,52 @@ class ArtifactsServiceTest extends TestCase
         ]);
 
         return (int) $this->storageClient->uploadFile($this->getArtifactArchivePath(), $options);
+    }
+
+    /**
+     * @return array<string, int>
+     * @throws \JsonException
+     * @throws \Keboola\StorageApi\ClientException
+     */
+    protected function uploadTestArtifactsNoZip(string $tmpFolder): array
+    {
+        $artifacts = new ArtifactsService($this->storageClient, $tmpFolder, [
+            'zip' => false,
+        ]);
+
+        $artifacts->writeResults($this->getProjectPath(), 'dbt run');
+
+        $options = new FileUploadOptions();
+        $options->setTags([
+            'artifact',
+            'branchId-default',
+            'componentId-' . Component::COMPONENT_ID,
+            'configId-123',
+            'jobId-123',
+        ]);
+
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/manifest.json');
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/run_results.json');
+        self::assertFileExists($tmpFolder . '/artifacts/out/current/model_timing.json');
+
+        $manifestFileIdId = $this->storageClient->uploadFile(
+            $tmpFolder . '/artifacts/out/current/manifest.json',
+            $options
+        );
+        $runResultsFileId = $this->storageClient->uploadFile(
+            $tmpFolder . '/artifacts/out/current/run_results.json',
+            $options
+        );
+        $modelTimingFileId = $this->storageClient->uploadFile(
+            $tmpFolder . '/artifacts/out/current/model_timing.json',
+            $options
+        );
+
+        return [
+            'manifest' => $manifestFileIdId,
+            'run_results' => $runResultsFileId,
+            'model_timing' => $modelTimingFileId,
+        ];
     }
 
     protected function getArtifactArchivePath(): string

@@ -1,0 +1,12 @@
+{
+  "componentId": "keboola.dbt-transformation",
+  "action": "dbtRunResults",
+  "artifacts": {
+    "options": {
+      "zip": false
+    }
+  },
+  "parameters": {
+    "configId": "12345"
+  }
+}

@@ -198,9 +198,10 @@ class ArtifactsService
 
         $file = array_shift($files);
         try {
-            $this->filesystem->mkdir($this->artifactsDir . '/tmp');
-            $tmpPath = $this->artifactsDir . '/tmp/' . $file['id'];
-            $this->storageClient->downloadFile($file['id'], $tmpPath);
+            $this->storageClient->downloadFile(
+                $file['id'],
+                $this->downloadDir . '/' . $file['name'],
+            );
         } catch (Throwable $e) {
             throw new UserException(sprintf(
                 'Error downloading artifact file id "%s": %s',

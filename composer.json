@@ -34,7 +34,8 @@
             "DbtTransformation\\Tests\\": "tests/phpunit/",
             "DbtTransformation\\FunctionalTests\\": "tests/functional/",
             "DbtTransformation\\FunctionalRemoteDwhTests\\": "tests/functionalRemoteDWH/",
-            "DbtTransformation\\FunctionalSyncActionsTests\\": "tests/functionalSyncActions/"
+            "DbtTransformation\\FunctionalSyncActionsTests\\": "tests/functionalSyncActions/",
+            "DbtTransformation\\FunctionalSyncActionsTestsNoZip\\": "tests/functionalSyncActionsNoZip/"
         }
     },
     "scripts": {
@@ -42,11 +43,13 @@
         "tests-datadir": "phpunit tests/functional",
         "tests-datadir-remote-dwh": "phpunit tests/functionalRemoteDWH",
         "tests-datadir-sync-actions": "phpunit tests/functionalSyncActions",
+        "tests-datadir-sync-actions-no-zip": "phpunit tests/functionalSyncActionsNoZip",
         "tests": [
             "@tests-phpunit",
             "@tests-datadir",
             "@tests-datadir-remote-dwh",
-            "@tests-datadir-sync-actions"
+            "@tests-datadir-sync-actions",
+            "@tests-datadir-sync-actions-no-zip"
         ],
 
         "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",

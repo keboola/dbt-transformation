@@ -50,18 +50,18 @@ class ArtifactsService
 
     public function resolveCommandDir(string $command): ?string
     {
-        $commands = [
-            'dbt build',
-            'dbt run',
-            'dbt docs generate',
-            'dbt test',
-            'dbt source freshness',
-            'dbt seed',
+        $commandMap = [
+            'build' => 'dbt build',
+            'run' => 'dbt run',
+            'docs' => 'dbt docs generate',
+            'test' => 'dbt test',
+            'source' => 'dbt source freshness',
+            'seed' => 'dbt seed',
         ];
 
-        foreach ($commands as $commandRoot) {
-            if (strpos($command, $commandRoot) === 0) {
-                return $commandRoot;
+        foreach ($commandMap as $commandRoot => $dir) {
+            if (strpos($command, $commandRoot) !== false) {
+                return $dir;
             }
         }
 

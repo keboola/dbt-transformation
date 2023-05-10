@@ -49,6 +49,11 @@ class ArtifactsServiceTest extends TestCase
             'dbt run',
         ];
 
+        yield 'with flag 2' => [
+            'dbt --something run --full-refresh',
+            'dbt run',
+        ];
+
         yield 'with argument' => [
             'dbt test --project-dir some/dir',
             'dbt test',

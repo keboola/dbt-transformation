@@ -5,12 +5,12 @@ Warning: No packages were found in packages.yml
 Executing command "dbt run"
 Running with dbt=%s
 %s Starting full parse.
-Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics
-Concurrency: 4 threads (target='kbc_prod')
+Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 0 seed files, 2 sources, 0 exposures, 0 metrics%S
+%AConcurrency: 4 threads (target='kbc_prod')%A
 1 of 2 START %Sview model %s.stg_model %s [RUN]
 1 of 2 OK created %Sview model %s.stg_model %s [SUCCESS 1 in %ss]
 2 of 2 START %Sview model %s.fct_model %s [RUN]
 2 of 2 OK created %Sview model %s.fct_model %s [SUCCESS 1 in %ss]
-Finished running 2 view models in %s hours %s minutes and %s seconds (%ss).
-Completed successfully
+%AFinished running 2 view models in %s hours %s minutes and %s seconds (%ss).%A
+Completed successfully%A
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2

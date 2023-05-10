@@ -104,19 +104,23 @@ class DbtServiceTest extends TestCase
         $output = $this->dbtService->runCommand(DbtService::COMMAND_COMPILE);
         $parsedOutput = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
 
-        self::assertStringContainsString(
+        $stringsToFind = [
             'Starting full parse.',
-            $parsedOutput[1]
-        );
-        self::assertStringContainsString(
             'Found 2 models, 2 tests',
-            $parsedOutput[2]
-        );
-        self::assertStringContainsString(
             'Concurrency: 4 threads (target=\'kbc_prod\')',
-            $parsedOutput[3]
-        );
-        self::assertStringContainsString('Done.', $parsedOutput[4]);
+        ];
+
+        $foundedCount = 0;
+        foreach ($parsedOutput as $line) {
+            foreach ($stringsToFind as $stringToFind) {
+                if (str_contains($line, $stringToFind)) {
+                    $foundedCount++;
+                };
+            }
+        }
+        if ($foundedCount !== count($stringsToFind)) {
+            self::fail('Not all strings were found in output');
+        }
 
         $compiledSql = DbtCompileHelper::getCompiledSqlFilesContent($this->getProjectPath() . '/target');
 

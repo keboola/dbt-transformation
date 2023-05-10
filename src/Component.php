@@ -22,10 +22,13 @@ use DbtTransformation\Service\ArtifactsService;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
 use Keboola\Component\BaseComponent;
+use Keboola\Component\Config\BaseConfig;
 use Keboola\Component\Manifest\ManifestManager;
+use Keboola\Component\UserException;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Yaml\Yaml;
 
 class Component extends BaseComponent
@@ -65,6 +68,7 @@ class Component extends BaseComponent
 
     /**
      * @throws \Keboola\Component\UserException
+     * @throws \Keboola\SnowflakeDbAdapter\Exception\SnowflakeDbAdapterException
      */
     protected function run(): void
     {
@@ -340,5 +344,61 @@ class Component extends BaseComponent
                 'branches' => $branches,
             ],
         ];
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    protected function loadConfig(): void
+    {
+        $configClass = $this->getConfigClass();
+        $configDefinitionClass = $this->getConfigDefinitionClass();
+        $rawConfig = $this->getRawConfig();
+
+        if ($configDefinitionClass === ConfigDefinition::class) {
+            if ($this->isLegacyStepsStructure($rawConfig)) {
+                $rawConfig = $this->changeLegacyStepsStructure($this->getRawConfig());
+            }
+        }
+
+        try {
+            /** @var BaseConfig $config */
+            $config = new $configClass(
+                $rawConfig,
+                new $configDefinitionClass()
+            );
+            $this->config = $config;
+        } catch (InvalidConfigurationException $e) {
+            throw new UserException($e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * @param array<string, array<string, array<string, array<int, string>>>> $rawConfig
+     * @return array<string, array<string, array<string, array<int, array{step: string, active: true}|string>>>>
+     */
+    private function changeLegacyStepsStructure(array $rawConfig): array
+    {
+        foreach ($rawConfig['parameters']['dbt']['executeSteps'] as $key => $step) {
+            /** @var string $step */
+            $rawConfig['parameters']['dbt']['executeSteps'][$key] = [
+                'step' => $step,
+                'active' => true,
+            ];
+        }
+
+        return $rawConfig;
+    }
+
+    /**
+     * @param array<
+     *     string, array<string, array<string, array<int, string|array{'step': string, 'active': bool}>>>
+     * > $rawConfig
+     */
+    private function isLegacyStepsStructure(array $rawConfig): bool
+    {
+        return (isset($rawConfig['parameters']['dbt']['executeSteps'])
+            && !empty($rawConfig['parameters']['dbt']['executeSteps'])
+            && !is_array($rawConfig['parameters']['dbt']['executeSteps'][0]));
     }
 }

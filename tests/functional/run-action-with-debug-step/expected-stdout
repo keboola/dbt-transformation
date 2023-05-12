@@ -9,15 +9,12 @@ python version: 3.9.2
 python path: /usr/bin/python3
 os info: %s
 Using profiles.yml file at /tmp/%s/dbt-project/profiles.yml
-Using dbt_project.yml file at /tmp/%s/dbt-project/dbt_project.yml
-
+Using dbt_project.yml file at /tmp/%s/dbt-project/dbt_project.yml%A
 Configuration:
   profiles.yml file [OK found and valid]
-  dbt_project.yml file [OK found and valid]
-
+  dbt_project.yml file [OK found and valid]%A
 Required dependencies:
- - git [OK found]
-
+ - git [OK found]%A
 Connection:
   account: keboola
   user: SAPI_WORKSPACE_%s
@@ -25,7 +22,6 @@ Connection:
   schema: WORKSPACE_%s
   warehouse: KEBOOLA_PROD_SMALL
   role: None
-  client_session_keep_alive: False
-  Connection test: [OK connection ok]
-
-All checks passed!
+  client_session_keep_alive: False%A
+  Connection test: [OK connection ok]%A
+All checks passed!%A

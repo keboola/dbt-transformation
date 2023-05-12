@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 class ArtifactsServiceTest extends TestCase
 {
     private StorageClient $storageClient;
+    private string $runId;
 
     public function setUp(): void
     {
@@ -23,6 +24,8 @@ class ArtifactsServiceTest extends TestCase
             'url' => (string) getenv('KBC_URL'),
             'token' => (string) getenv('KBC_TOKEN'),
         ]);
+
+        $this->runId = (string) rand(10000, 99999);
     }
 
     /** @dataProvider commandsProvider */
@@ -77,7 +80,7 @@ class ArtifactsServiceTest extends TestCase
 
         $temp = new Temp();
         $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
-        $downloadedFileId = $artifacts->downloadLastRun(Component::COMPONENT_ID, '123', 'default');
+        $downloadedFileId = $artifacts->downloadLastRun(Component::COMPONENT_ID, $this->runId, 'default');
         self::assertEquals($fileId, $downloadedFileId);
 
         $expectedPaths = [
@@ -142,7 +145,7 @@ class ArtifactsServiceTest extends TestCase
 
         $temp = new Temp();
         $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
-        $downloadedFileId = $artifacts->downloadLastRun(Component::COMPONENT_ID, '123', 'default');
+        $downloadedFileId = $artifacts->downloadLastRun(Component::COMPONENT_ID, $this->runId, 'default');
         self::assertEquals($fileId, $downloadedFileId);
 
         $manifest = (array) json_decode(
@@ -213,7 +216,7 @@ class ArtifactsServiceTest extends TestCase
             'artifact',
             'branchId-default',
             'componentId-' . Component::COMPONENT_ID,
-            'configId-123',
+            sprintf('configId-%s', $this->runId),
             'jobId-123',
         ]);
 

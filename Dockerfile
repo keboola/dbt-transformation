@@ -1,5 +1,7 @@
 FROM php:7.4-cli
 
+ARG DBT_VERSION=1.4.6
+
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -34,11 +36,12 @@ RUN apt-get update && apt-get install -y \
         wget \
     && pip3 install --upgrade pip cffi \
     && pip3 install \
+         dbt-core==$DBT_VERSION \
          dbt-snowflake \
          dbt-postgres \
          dbt-redshift \
          dbt-bigquery \
-         dbt-sqlserver==v1.2.0b2 \
+         dbt-sqlserver \
     && wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1_amd64.deb\
     && apt-get install ./multiarch-support_2.27-3ubuntu1_amd64.deb \
     && apt-get update \

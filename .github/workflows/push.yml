@@ -66,6 +66,7 @@ jobs:
                     - keboola.dbt-transformation-remote-mssql
                     - keboola.dbt-transformation-remote-bigquery
                     - keboola.dbt-transformation-remote-redshift
+                dbt_version: [ 1.5.0, 1.4.6, 1.3.4, 1.2.6 ]
         steps:
             -
                 name: 'Check out the repo'
@@ -79,7 +80,7 @@ jobs:
                 run: 'docker login --username "$DOCKERHUB_USER" --password "$DOCKERHUB_TOKEN"'
             -
                 name: 'Build image'
-                run: 'docker build -t $APP_IMAGE .'
+                run: 'docker build --build-arg DBT_VERSION=${{ matrix.dbt_version }} -t $APP_IMAGE .'
             -
                 name: 'Set image tag'
                 id: tag
@@ -97,12 +98,17 @@ jobs:
                     app_id: '${{ matrix.APP_ID }}'
                     username: '${{ env.KBC_DEVELOPERPORTAL_USERNAME }}'
                     password: '${{ env.KBC_DEVELOPERPORTAL_PASSWORD }}'
-                    tag: '${{ steps.tag.outputs.app_image_tag }}'
+                    tag: '${{ steps.tag.outputs.app_image_tag }}-${{ matrix.dbt_version }}'
                     push_latest: '${{ steps.tag.outputs.is_semantic_tag }}'
                     source_image: '${{ env.APP_IMAGE }}'
     tests:
         needs: build
         runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            max-parallel: 1
+            matrix:
+                dbt_version: [ 1.5.0, 1.4.6, 1.3.4, 1.2.6 ]
         steps:
             -
                 name: 'Check out the repo'
@@ -115,7 +121,7 @@ jobs:
                     app_id: '${{ env.KBC_DEVELOPERPORTAL_APP }}'
                     username: '${{ env.KBC_DEVELOPERPORTAL_USERNAME }}'
                     password: '${{ env.KBC_DEVELOPERPORTAL_PASSWORD }}'
-                    tag: '${{ needs.build.outputs.app_image_tag }}'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-${{ matrix.dbt_version }}'
                     target_image: '${{ env.APP_IMAGE}}'
                     tag_as_latest: true
             -
@@ -163,7 +169,7 @@ jobs:
                 with:
                     token: '${{ env.KBC_STORAGE_TOKEN }}'
                     componentId: '${{ env.KBC_DEVELOPERPORTAL_APP }}'
-                    tag: '${{ needs.build.outputs.app_image_tag }}'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-${{ matrix.dbt_version[0] }}'
                     configs: '${{ env.KBC_TEST_PROJECT_CONFIGS }}'
     deploy:
         needs:
@@ -183,11 +189,11 @@ jobs:
                     - keboola.dbt-transformation-remote-redshift
         steps:
             -
-                name: 'Set tag in the Deloper Portal'
+                name: 'Set tag in the Developer Portal'
                 uses: keboola/action-set-tag-developer-portal@master
                 with:
                     vendor: '${{ env.KBC_DEVELOPERPORTAL_VENDOR }}'
                     app_id: '${{ matrix.APP_ID }}'
                     username: '${{ env.KBC_DEVELOPERPORTAL_USERNAME }}'
                     password: '${{ env.KBC_DEVELOPERPORTAL_PASSWORD }}'
-                    tag: '${{ needs.build.outputs.app_image_tag }}'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-${{ matrix.dbt_version[0] }}'

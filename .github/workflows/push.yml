@@ -169,7 +169,7 @@ jobs:
                 with:
                     token: '${{ env.KBC_STORAGE_TOKEN }}'
                     componentId: '${{ env.KBC_DEVELOPERPORTAL_APP }}'
-                    tag: '${{ needs.build.outputs.app_image_tag }}-${{ matrix.dbt_version[0] }}'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-1.5.0'
                     configs: '${{ env.KBC_TEST_PROJECT_CONFIGS }}'
     deploy:
         needs:
@@ -196,4 +196,4 @@ jobs:
                     app_id: '${{ matrix.APP_ID }}'
                     username: '${{ env.KBC_DEVELOPERPORTAL_USERNAME }}'
                     password: '${{ env.KBC_DEVELOPERPORTAL_PASSWORD }}'
-                    tag: '${{ needs.build.outputs.app_image_tag }}-${{ matrix.dbt_version[0] }}'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-1.5.0'

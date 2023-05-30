@@ -1,4 +1,4 @@
-FROM php:7.4-cli
+FROM php:8.1-cli
 
 ARG DBT_VERSION=1.4.6
 

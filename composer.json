@@ -3,7 +3,7 @@
     "description": "DBT transformation POC component",
     "license": "MIT",
     "require": {
-        "php": "^7.4",
+        "php": "^8.1",
         "ext-json": "*",
         "ext-odbc": "*",
         "keboola/db-adapter-snowflake": "^1.1",

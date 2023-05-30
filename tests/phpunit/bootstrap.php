@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use Dotenv\Dotenv;
+
 require __DIR__ . '/../../vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createUnsafeMutable(__DIR__ . '/../../');
+$dotenv = Dotenv::createUnsafeMutable(__DIR__ . '/../../');
 $dotenv->safeLoad();
 
 $environments = [

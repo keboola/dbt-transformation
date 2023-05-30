@@ -90,6 +90,7 @@ class DbtManifestParser
                     }
                 }
 
+                /** @phpstan-ignore-next-line */
                 $tableName = strval($tableData['name']);
                 $result[$tableName] = [
                     'columns' => array_keys($columns),

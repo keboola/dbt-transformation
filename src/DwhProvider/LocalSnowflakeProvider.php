@@ -179,6 +179,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         }, $dbtParams);
 
         $outputDefinition = array_combine($dbtParams, $values);
+        /** @phpstan-ignore-next-line */
         if ($outputDefinition === false) {
             throw new RuntimeException('Failed to get output definition');
         }

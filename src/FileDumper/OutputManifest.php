@@ -118,7 +118,7 @@ class OutputManifest
     {
         $defs = [];
         $schema = $this->databaseConfig['schema'];
-        $missingTables = [];
+
         foreach ($sourceTables as $tableName) {
             try {
                 /** @var array<array{
@@ -138,7 +138,7 @@ class OutputManifest
                     )
                 );
             } catch (RuntimeException $e) {
-                $missingTables[] = $tableName;
+                // do nothing for models/tables not existing in the DB
                 continue;
             }
 
@@ -155,15 +155,6 @@ class OutputManifest
                 false,
                 new ColumnCollection($columns),
                 []
-            );
-        }
-
-        if ($missingTables) {
-            throw new UserException(
-                sprintf(
-                    'Tables "%s" specified in output were not created by the transformation.',
-                    implode('", "', $missingTables)
-                )
             );
         }
 

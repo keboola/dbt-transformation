@@ -7,7 +7,6 @@ namespace DbtTransformation\FileDumper;
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
 use Keboola\Component\Manifest\ManifestManager;
 use Keboola\Component\Manifest\ManifestManager\Options\OutTableManifestOptions;
-use Keboola\Component\UserException;
 use Keboola\Datatype\Definition\Common;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\SnowflakeDbAdapter\Connection;
@@ -16,6 +15,7 @@ use Keboola\TableBackendUtils\Column\ColumnCollection;
 use Keboola\TableBackendUtils\Column\Snowflake\SnowflakeColumn;
 use Keboola\TableBackendUtils\Escaping\Snowflake\SnowflakeQuote;
 use Keboola\TableBackendUtils\Table\Snowflake\SnowflakeTableDefinition;
+use Psr\Log\LoggerInterface;
 
 class OutputManifest
 {
@@ -24,6 +24,7 @@ class OutputManifest
     private array $databaseConfig;
     private DbtManifestParser $dbtManifestParser;
     private Connection $connection;
+    private LoggerInterface $logger;
     private bool $quoteIdentifier;
 
     /**
@@ -34,6 +35,7 @@ class OutputManifest
         Connection $connection,
         ManifestManager $manifestManager,
         DbtManifestParser $dbtManifestParser,
+        LoggerInterface $logger,
         bool $quoteIdentifier = false
     ) {
         $this->manifestManager = $manifestManager;
@@ -41,6 +43,7 @@ class OutputManifest
         $this->connection = $connection;
         $this->dbtManifestParser = $dbtManifestParser;
         $this->quoteIdentifier = $quoteIdentifier;
+        $this->logger = $logger;
     }
 
     public function dump(): void
@@ -118,7 +121,7 @@ class OutputManifest
     {
         $defs = [];
         $schema = $this->databaseConfig['schema'];
-        $missingTables = [];
+
         foreach ($sourceTables as $tableName) {
             try {
                 /** @var array<array{
@@ -138,7 +141,10 @@ class OutputManifest
                     )
                 );
             } catch (RuntimeException $e) {
-                $missingTables[] = $tableName;
+                // do nothing for models/tables not existing in the DB
+                $this->logger->warning(
+                    'Table "%s" specified in dbt manifest was not found in the database.'
+                );
                 continue;
             }
 
@@ -155,15 +161,6 @@ class OutputManifest
                 false,
                 new ColumnCollection($columns),
                 []
-            );
-        }
-
-        if ($missingTables) {
-            throw new UserException(
-                sprintf(
-                    'Tables "%s" specified in output were not created by the transformation.',
-                    implode('", "', $missingTables)
-                )
             );
         }
 

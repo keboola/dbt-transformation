@@ -116,6 +116,7 @@ class Component extends BaseComponent
             $connection,
             $manifestManager,
             $manifestConverter,
+            $this->getLogger(),
             $quoteIdentifier
         );
     }

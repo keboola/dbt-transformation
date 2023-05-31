@@ -10,6 +10,7 @@ use Keboola\Component\Manifest\ManifestManager;
 use Keboola\SnowflakeDbAdapter\Connection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\Test\TestLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
@@ -458,6 +459,7 @@ class OutputManifestTest extends TestCase
             $this->getConnectionMock(),
             $manifestManager,
             $this->getDbtManifestParserMock(),
+            new TestLogger(),
             true
         );
 
@@ -558,6 +560,7 @@ class OutputManifestTest extends TestCase
             $this->getConnectionMock(),
             $manifestManager,
             $this->getDbtManifestParserMock(),
+            new TestLogger(),
             false
         );
 
@@ -658,6 +661,7 @@ class OutputManifestTest extends TestCase
             $this->getConnectionMock(true),
             $manifestManager,
             $this->getDbtManifestParserMock(),
+            new TestLogger(),
             false
         );
 

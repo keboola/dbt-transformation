@@ -43,6 +43,11 @@ RUN apt-get update && apt-get install -y \
         dbt-bigquery \
         dbt-sqlserver
 
+# install git v 2.30
+RUN echo deb http://deb.debian.org/debian buster-backports main | tee /etc/apt/sources.list.d/buster-backports.list \
+    && apt-get update \
+    && apt-get -t buster-backports install -y git
+
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
     && apt-get update \

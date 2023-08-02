@@ -1,4 +1,4 @@
-FROM php:8.1-cli
+FROM --platform=linux/amd64 php:8.1-cli-buster
 
 ARG DBT_VERSION=1.4.6
 
@@ -34,21 +34,19 @@ RUN apt-get update && apt-get install -y \
         python3 \
         python3-pip \
         wget \
-    && pip3 install --upgrade pip cffi \
+    && python3 -m pip install --user --upgrade pip \
     && pip3 install \
-         dbt-core==$DBT_VERSION \
-         dbt-snowflake \
-         dbt-postgres \
-         dbt-redshift \
-         dbt-bigquery \
-         dbt-sqlserver \
-    && wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1_amd64.deb\
-    && apt-get install ./multiarch-support_2.27-3ubuntu1_amd64.deb \
+        dbt-core==$DBT_VERSION \
+        dbt-snowflake \
+        dbt-postgres \
+        dbt-redshift \
+        dbt-bigquery \
+        dbt-sqlserver
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
     && apt-get update \
-    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-        && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-        && apt-get update -q && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
-            msodbcsql17 \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
     && rm -r /var/lib/apt/lists/* \
 	&& sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
 	&& locale-gen \

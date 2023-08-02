@@ -239,7 +239,7 @@ class Component extends BaseComponent
 
         $componentId = (string) (getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID);
         $configId = $this->getConfig()->getConfigId();
-        $branchId = $this->getConfig()->getBranchId();
+        $branchId = $this->getConfig()->getEnvKbcBranchId();
 
         if ($isArchive) {
             $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
@@ -268,9 +268,9 @@ class Component extends BaseComponent
         $artifactsOptions = $this->getConfig()->getArtifactsOptions();
         $isArchive = $artifactsOptions['zip'] ?? true;
 
-        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
+        $componentId = (string) getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
         $configId = $this->getConfig()->getConfigId();
-        $branchId = $this->getConfig()->getBranchId();
+        $branchId = $this->getConfig()->getEnvKbcBranchId();
 
         if ($isArchive) {
             $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
@@ -302,9 +302,9 @@ class Component extends BaseComponent
         $artifactsOptions = $this->getConfig()->getArtifactsOptions();
         $isArchive = $artifactsOptions['zip'] ?? true;
 
-        $componentId = getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
+        $componentId = (string) getenv('KBC_COMPONENTID') ?: self::COMPONENT_ID;
         $configId = $this->getConfig()->getConfigId();
-        $branchId = $this->getConfig()->getBranchId();
+        $branchId = $this->getConfig()->getEnvKbcBranchId();
 
         if ($isArchive) {
             $this->artifacts->downloadLastRun($componentId, $configId, $branchId);

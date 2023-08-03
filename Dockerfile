@@ -1,4 +1,4 @@
-FROM php:8.1-cli
+FROM --platform=linux/amd64 php:8.1-cli-buster
 
 ARG DBT_VERSION=1.4.6
 
@@ -20,35 +20,68 @@ WORKDIR /code/
 COPY docker/php-prod.ini /usr/local/etc/php/php.ini
 COPY docker/composer-install.sh /tmp/composer-install.sh
 
-RUN apt-get update && apt-get install -y \
-        git \
-        gpg \
-        gpg-agent \
-        gnupg2 \
-        locales \
-        unzip \
-        libpq-dev \
-        debsig-verify \
-        unixodbc \
-        unixodbc-dev \
-        python3 \
-        python3-pip \
-        wget \
-    && pip3 install --upgrade pip cffi \
-    && pip3 install \
-         dbt-core==$DBT_VERSION \
-         dbt-snowflake \
-         dbt-postgres \
-         dbt-redshift \
-         dbt-bigquery \
-         dbt-sqlserver \
-    && wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1_amd64.deb\
-    && apt-get install ./multiarch-support_2.27-3ubuntu1_amd64.deb \
+RUN apt-get update && \
+    apt-get install -y \
+            wget \
+            build-essential \
+            libssl-dev \
+            zlib1g-dev \
+            libbz2-dev \
+            libreadline-dev \
+            libsqlite3-dev \
+            llvm \
+            libncurses5-dev \
+            libncursesw5-dev \
+            xz-utils \
+            tk-dev \
+            libffi-dev \
+            liblzma-dev \
+            python3-openssl \
+            git \
+            gpg-agent \
+            gnupg2 \
+            locales \
+            unzip \
+            libpq-dev \
+            debsig-verify \
+            unixodbc \
+            unixodbc-dev \
+    && apt-get clean
+
+# Compile and install Python 3.8 from source
+RUN wget https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz && \
+    tar -xvf Python-3.8.12.tgz && \
+    cd Python-3.8.12 && \
+    ./configure --enable-optimizations && \
+    make -j$(nproc) && \
+    make altinstall && \
+    cd .. && rm -rf Python-3.8.12 && rm Python-3.8.12.tgz
+
+# Set Python 3.8 as the default Python version
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.8 1
+
+# Install pip for the new Python version
+RUN wget https://bootstrap.pypa.io/get-pip.py && \
+    python3.8 get-pip.py && rm get-pip.py
+
+# Now, you can install dbt or any other packages using pip
+RUN pip3 install \
+    dbt-core==$DBT_VERSION \
+    dbt-snowflake \
+    dbt-postgres \
+    dbt-redshift \
+    dbt-bigquery \
+    dbt-sqlserver
+
+# install git v 2.30
+RUN echo deb http://deb.debian.org/debian buster-backports main | tee /etc/apt/sources.list.d/buster-backports.list \
     && apt-get update \
-    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-        && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-        && apt-get update -q && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
-            msodbcsql17 \
+    && apt-get -t buster-backports install -y git
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
     && rm -r /var/lib/apt/lists/* \
 	&& sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
 	&& locale-gen \

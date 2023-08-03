@@ -5,8 +5,8 @@ Warning: No packages were found in packages.yml
 Executing command "dbt debug"
 Running with dbt=%s
 dbt version: %s
-python version: 3.9.2
-python path: /usr/bin/python3
+python version: 3.8.12
+python path: /usr/local/bin/python3.8
 os info: %s
 Using profiles.yml file at /tmp/%s/dbt-project/profiles.yml
 Using dbt_project.yml file at /tmp/%s/dbt-project/dbt_project.yml%A

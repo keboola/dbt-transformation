@@ -13,7 +13,7 @@ class RemoteMssqlProvider extends RemoteSnowflakeProvider implements DwhProvider
         $workspace = $this->config->getRemoteDwh();
 
         putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
-        putenv(sprintf('DBT_KBC_PROD_DRIVER=%s', 'ODBC Driver 17 for SQL Server'));
+        putenv(sprintf('DBT_KBC_PROD_DRIVER=%s', 'ODBC Driver 18 for SQL Server'));
         putenv(sprintf('DBT_KBC_PROD_TRUST_CERT=%s', 'True'));
         putenv(sprintf('DBT_KBC_PROD_SERVER=%s', $workspace['server']));
         putenv(sprintf('DBT_KBC_PROD_PORT=%s', $workspace['port']));

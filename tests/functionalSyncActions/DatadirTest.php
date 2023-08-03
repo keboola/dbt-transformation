@@ -17,10 +17,12 @@ class DatadirTest extends DatadirTestCase
     {
         parent::setUp();
 
+        putenv('KBC_BRANCHID=12345');
+
         $options = new FileUploadOptions();
         $options->setTags([
             'artifact',
-            'branchId-default',
+            'branchId-12345',
             'componentId-' . Component::COMPONENT_ID,
             'configId-12345',
             'jobId-123',

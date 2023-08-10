@@ -21,6 +21,7 @@ use DbtTransformation\Helper\ParseLogFileHelper;
 use DbtTransformation\Service\ArtifactsService;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
+use ErrorException;
 use Keboola\Component\BaseComponent;
 use Keboola\Component\Config\BaseConfig;
 use Keboola\Component\Manifest\ManifestManager;
@@ -401,5 +402,20 @@ class Component extends BaseComponent
         return (isset($rawConfig['parameters']['dbt']['executeSteps'])
             && !empty($rawConfig['parameters']['dbt']['executeSteps'])
             && !is_array($rawConfig['parameters']['dbt']['executeSteps'][0]));
+    }
+
+    public static function setEnvironment(): void
+    {
+        error_reporting(E_ALL & ~E_DEPRECATED);
+
+        set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline): bool {
+            if (!(error_reporting() & $errno)) {
+                // respect error_reporting() level
+                // libraries used in custom components may emit notices that cannot be fixed
+                return false;
+            }
+
+            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        });
     }
 }

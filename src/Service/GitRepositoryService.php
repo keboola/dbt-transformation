@@ -59,11 +59,10 @@ class GitRepositoryService
             $process = new Process(['git', 'clone', ...$branchArgument, $url, 'dbt-project'], $this->dataDir);
             $process->mustRun();
         } catch (ProcessFailedException $e) {
-            $match = preg_match('/remote: (.*)/', $e->getProcess()->getErrorOutput(), $matches);
             throw new UserException(sprintf(
-                'Failed to clone your repository "%s"%s',
+                'Failed to clone your repository "%s": %s',
                 $repositoryUrl,
-                !$match ? '' : (': ' . $matches[1])
+                $e->getProcess()->getErrorOutput()
             ));
         }
     }

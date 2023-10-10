@@ -80,6 +80,27 @@ class GitRepositoryServiceTest extends TestCase
     }
 
     /**
+     * @dataProvider getUrlValidParameters
+     */
+    public function testGetRepositoryUrl(
+        string $url,
+        ?string $username,
+        ?string $password,
+        string $expectedUrl
+    ): void {
+        $gitService = new GitRepositoryService($this->dataDir);
+        self::assertSame($expectedUrl, $gitService->getUrl($url, $username, $password));
+    }
+
+    public function testGetInvalidRepositoryUrl(): void
+    {
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Wrong URL format "invalid url"');
+        $gitService = new GitRepositoryService($this->dataDir);
+        $gitService->getUrl('invalid url');
+    }
+
+    /**
      * @dataProvider privateRepositoryInvalidCredentials
      */
     public function testClonePrivateRepositoryInvalid(
@@ -154,6 +175,35 @@ class GitRepositoryServiceTest extends TestCase
             'username' => '',
             'password' => '',
             'errorMsg' => 'Wrong URL format "some random string"',
+        ];
+    }
+
+    public function getUrlValidParameters(): Generator
+    {
+        yield 'public repository' => [
+            'url' => 'https://github.com/keboola/dbt-test-project-public',
+            'username' => null,
+            'password' => null,
+            'expectedUrl' => 'https://github.com/keboola/dbt-test-project-public',
+        ];
+
+        yield 'private repository' => [
+            'url' => 'https://github.com/keboola/dbt-test-project.git',
+            'username' => getenv('GITHUB_USERNAME') ?: '',
+            'password' => getenv('GITHUB_PASSWORD') ?: '',
+            'expectedUrl' => sprintf(
+                'https://%s:%s@%s',
+                getenv('GITHUB_USERNAME') ?: '',
+                getenv('GITHUB_PASSWORD') ?: '',
+                'github.com/keboola/dbt-test-project.git',
+            ),
+        ];
+
+        yield 'private repository with special chars' => [
+            'url' => 'https://github.com/keboola/dbt-test-project.git',
+            'username' => 'user@company.com',
+            'password' => '/some@password!',
+            'expectedUrl' => 'https://user%40company.com:%2Fsome%40password%21@github.com/keboola/dbt-test-project.git',
         ];
     }
 }

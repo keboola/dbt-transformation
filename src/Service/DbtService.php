@@ -47,6 +47,9 @@ class DbtService
                 throw new UserException($e->getProcess()->getErrorOutput());
             }
             $logs = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output, 'error'));
+            if (empty($logs)) {
+                $logs = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
+            }
             throw new UserException(implode(PHP_EOL, $logs));
         }
     }

@@ -40,20 +40,7 @@ class GitRepositoryService
             $branchArgument = ['-b', $branch];
         }
 
-        $parsedUrl = parse_url($repositoryUrl);
-        if (!$parsedUrl || !array_key_exists('host', $parsedUrl)) {
-            throw new UserException(sprintf('Wrong URL format "%s"', $repositoryUrl));
-        }
-        if ($username && $password) {
-            $url = str_replace($parsedUrl['host'], sprintf(
-                '%s:%s@%s',
-                $username,
-                $password,
-                $parsedUrl['host']
-            ), $repositoryUrl);
-        } else {
-            $url = $repositoryUrl;
-        }
+        $url = $this->getUrl($repositoryUrl, $username, $password);
 
         try {
             $process = new Process(['git', 'clone', ...$branchArgument, $url, 'dbt-project'], $this->dataDir);
@@ -120,5 +107,28 @@ class GitRepositoryService
             'name' => $branch,
             'ref' => trim($process->getOutput()),
         ];
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function getUrl(string $repositoryUrl, ?string $username = null, ?string $password = null): string
+    {
+        $parsedUrl = parse_url($repositoryUrl);
+        if (!$parsedUrl || !array_key_exists('host', $parsedUrl)) {
+            throw new UserException(sprintf('Wrong URL format "%s"', $repositoryUrl));
+        }
+        if ($username && $password) {
+            $url = (string) str_replace($parsedUrl['host'], sprintf(
+                '%s:%s@%s',
+                urlencode($username),
+                urlencode($password),
+                $parsedUrl['host']
+            ), $repositoryUrl);
+        } else {
+            $url = $repositoryUrl;
+        }
+
+        return $url;
     }
 }

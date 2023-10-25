@@ -30,6 +30,7 @@ use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
 class Component extends BaseComponent
@@ -78,6 +79,13 @@ class Component extends BaseComponent
 
         $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
         $provider->createDbtYamlFiles();
+        foreach ((new Finder())->files()->in(sprintf('%s/models/_sources/', $this->projectPath)) as $sourceFile) {
+            $this->getLogger()->info(sprintf(
+                "Created source file \"%s\" with content: \n\n %s",
+                $sourceFile->getRealPath(),
+                $sourceFile->getContents()
+            ));
+        }
 
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');

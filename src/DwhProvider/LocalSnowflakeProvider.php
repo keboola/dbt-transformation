@@ -54,7 +54,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
 
             $inputTables = $this->config->getStorageInputTables();
             foreach ($client->listBuckets() as $bucket) {
-                $tables = $client->listTables($bucket['id']);
+                $tables = $client->listTables($bucket['sourceBucket']['id'] ?? $bucket['id']);
                 foreach ($tables as $table) {
                     if (empty($inputTables) || in_array($table['id'], $inputTables)) {
                         $tablesData[(string) $bucket['id']]['tables'][] = $table;

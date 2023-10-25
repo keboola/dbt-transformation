@@ -94,6 +94,9 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         foreach ($this->projectIds as $projectId) {
             $stackPrefix = strtok($workspace['database'], '_');
             putenv(sprintf('DBT_KBC_PROD_%d_DATABASE=%s_%d', $projectId, $stackPrefix, $projectId));
+            $this->logger->info(
+                sprintf('Setting env var DBT_KBC_PROD_%d_DATABASE=%s_%d', $projectId, $stackPrefix, $projectId)
+            );
         }
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
         $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);

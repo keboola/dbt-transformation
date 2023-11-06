@@ -129,7 +129,7 @@ class OutputManifest
                  *     kind: string,
                  *     type: string,
                  *     default: string,
-                 *     'null?': string
+                 *     "null?": string
                  * }> $columnsMeta */
                 $columnsMeta = $this->connection->fetchAll(
                     sprintf(

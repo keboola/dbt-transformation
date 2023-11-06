@@ -56,7 +56,7 @@ class DbtYamlCreateTest extends TestCase
     public function testCreateProfileYamlMissingDbtProjectFile(): void
     {
         $this->expectException(UserException::class);
-        $this->expectErrorMessage('Missing key "profile" in "dbt_project.yml"');
+        $this->expectExceptionMessage('Missing key "profile" in "dbt_project.yml"');
 
         $fs = new Filesystem();
         $fs->touch(sprintf('%s/dbt_project.yml', $this->dataDir));

@@ -52,15 +52,15 @@ class DatadirTest extends DatadirTestCase
 
         $storageClient->uploadFile(
             $tmpFolder . '/artifacts/out/current/manifest.json',
-            $options
+            $options,
         );
         $storageClient->uploadFile(
             $tmpFolder . '/artifacts/out/current/run_results.json',
-            $options
+            $options,
         );
         $storageClient->uploadFile(
             $tmpFolder . '/artifacts/out/current/model_timing.json',
-            $options
+            $options,
         );
 
         sleep(1);
@@ -74,7 +74,7 @@ class DatadirTest extends DatadirTestCase
         if (!$fs->exists($script)) {
             throw new DatadirTestsException(sprintf(
                 'Cannot open script file "%s"',
-                $script
+                $script,
             ));
         }
 

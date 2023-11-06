@@ -32,7 +32,7 @@ class DbtManifestParser
                 (string) file_get_contents($this->sourceManifestPath),
                 true,
                 512,
-                JSON_THROW_ON_ERROR
+                JSON_THROW_ON_ERROR,
             );
 
             /** @var array<string, array<string, string|array<string, array<string, array<string, mixed>>>>> $modelNodes */
@@ -41,7 +41,7 @@ class DbtManifestParser
                 function ($node) {
                     /** @var array<string, mixed> $node */
                     return $node['resource_type'] === 'model';
-                }
+                },
             );
 
             foreach ($modelNodes as $tableData) {

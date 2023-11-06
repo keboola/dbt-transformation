@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Service;
 
 use Keboola\Component\UserException;
-use Psr\Log\LoggerInterface;
+use Retry\RetryProxy;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -14,11 +14,13 @@ class GitRepositoryService
 {
     private string $dataDir;
     private string $projectPath;
+    private ?RetryProxy $retryProxy;
 
-    public function __construct(string $dataDir)
+    public function __construct(string $dataDir, ?RetryProxy $retryProxy = null)
     {
         $this->dataDir = $dataDir;
         $this->projectPath = sprintf('%s/dbt-project/', $dataDir);
+        $this->retryProxy = $retryProxy;
     }
 
     /**
@@ -28,7 +30,7 @@ class GitRepositoryService
         string $repositoryUrl,
         ?string $branch = null,
         ?string $username = null,
-        ?string $password = null
+        ?string $password = null,
     ): void {
         $fs = new Filesystem();
         if ($fs->exists($this->projectPath)) {
@@ -41,18 +43,8 @@ class GitRepositoryService
         }
 
         $url = $this->getUrl($repositoryUrl, $username, $password);
-
-        try {
-            $process = new Process(['git', 'clone', ...$branchArgument, $url, 'dbt-project'], $this->dataDir);
-            $process->mustRun();
-        } catch (ProcessFailedException $e) {
-            $match = preg_match('/remote: (.*)/', $e->getProcess()->getErrorOutput(), $matches);
-            throw new UserException(sprintf(
-                'Failed to clone your repository "%s"%s',
-                $repositoryUrl,
-                !$match ? '' : (': ' . $matches[1])
-            ));
-        }
+        $process = new Process(['git', 'clone', ...$branchArgument, $url, 'dbt-project'], $this->dataDir);
+        $this->runGitCloneProcess($process, $repositoryUrl);
     }
 
     /**
@@ -123,12 +115,35 @@ class GitRepositoryService
                 '%s:%s@%s',
                 urlencode($username),
                 urlencode($password),
-                $parsedUrl['host']
+                $parsedUrl['host'],
             ), $repositoryUrl);
         } else {
             $url = $repositoryUrl;
         }
 
         return $url;
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function runGitCloneProcess(Process $process, string $repositoryUrl): void
+    {
+        try {
+            if ($this->retryProxy) {
+                $this->retryProxy->call(function () use ($process): void {
+                    $process->mustRun();
+                });
+            } else {
+                $process->mustRun();
+            }
+        } catch (ProcessFailedException $e) {
+            $match = preg_match('/remote: (.*)/', $e->getProcess()->getErrorOutput(), $matches);
+            throw new UserException(sprintf(
+                'Failed to clone your repository "%s"%s',
+                $repositoryUrl,
+                !$match ? '' : (': ' . $matches[1]),
+            ));
+        }
     }
 }

@@ -158,7 +158,7 @@ class OutputManifestTest extends TestCase
                         'comment' => null,
                         'policy_name' => null,
                     ],
-                ]
+                ],
             );
 
         return $connectionMock;
@@ -460,7 +460,7 @@ class OutputManifestTest extends TestCase
             $manifestManager,
             $this->getDbtManifestParserMock(),
             new TestLogger(),
-            true
+            true,
         );
 
         $outputManifest->dump();
@@ -561,7 +561,7 @@ class OutputManifestTest extends TestCase
             $manifestManager,
             $this->getDbtManifestParserMock(),
             new TestLogger(),
-            false
+            false,
         );
 
         $outputManifest->dump();
@@ -662,7 +662,7 @@ class OutputManifestTest extends TestCase
             $manifestManager,
             $this->getDbtManifestParserMock(),
             new TestLogger(),
-            false
+            false,
         );
 
         $outputManifest->dump();

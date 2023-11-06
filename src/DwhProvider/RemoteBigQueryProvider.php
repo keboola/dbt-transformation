@@ -21,14 +21,14 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
         DbtProfilesYaml $createProfilesFileService,
         LoggerInterface $logger,
         Config $config,
-        string $projectPath
+        string $projectPath,
     ) {
         parent::__construct(
             $createSourceFileService,
             $createProfilesFileService,
             $logger,
             $config,
-            $projectPath
+            $projectPath,
         );
 
         $this->temp = new Temp('dbt-big-query');

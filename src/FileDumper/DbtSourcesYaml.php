@@ -16,7 +16,7 @@ class DbtSourcesYaml extends FilesystemAwareDumper
     public function dumpYaml(
         string $projectPath,
         array $tablesData,
-        array $freshness
+        array $freshness,
     ): void {
         $modelFolderPath = sprintf('%s/models/_sources/', $projectPath);
         $this->createFolderIfNotExist($modelFolderPath);
@@ -32,14 +32,14 @@ class DbtSourcesYaml extends FilesystemAwareDumper
                             'freshness' => $freshness,
                             'database' => sprintf(
                                 '{{ env_var("DBT_KBC_PROD%s_DATABASE") }}',
-                                isset($tables['projectId']) ? ('_' . $tables['projectId']) : ''
+                                isset($tables['projectId']) ? ('_' . $tables['projectId']) : '',
                             ),
                             'schema' => $bucket,
                             'loaded_at_field' => '"_timestamp"',
                             'tables' => array_map($this->formatTableSources(), $tables['tables']),
                         ],
                     ],
-                ], 8)
+                ], 8),
             );
         }
     }
@@ -64,7 +64,7 @@ class DbtSourcesYaml extends FilesystemAwareDumper
                             'tests' => ['unique', 'not_null'],
                         ];
                     },
-                    $table['primaryKey']
+                    $table['primaryKey'],
                 );
             }
 

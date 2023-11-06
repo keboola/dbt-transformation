@@ -38,7 +38,7 @@ class ParseLogFileHelper
         foreach ($logs as $log) {
             if (!empty($log['data']['sql'])) {
                 yield $this->queryExcerpt(
-                    trim((string) preg_replace('!/\*.*?\*/!s', '', $log['data']['sql']))
+                    trim((string) preg_replace('!/\*.*?\*/!s', '', $log['data']['sql'])),
                 );
             }
         }

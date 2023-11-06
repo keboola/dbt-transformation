@@ -29,7 +29,7 @@ class ArtifactsService
     public function __construct(
         StorageClient $storageClient,
         string $dataDir,
-        array $options = []
+        array $options = [],
     ) {
         $this->storageClient = $storageClient;
         $this->filesystem = new Filesystem();
@@ -115,7 +115,7 @@ class ArtifactsService
                         foreach ($filesToCopy as $fileToCopy) {
                             $this->filesystem->copy(
                                 sprintf('%s/%s', $targetPath, $fileToCopy),
-                                sprintf('%s/%s', $artifactsPath, $fileToCopy)
+                                sprintf('%s/%s', $artifactsPath, $fileToCopy),
                             );
                         }
 
@@ -142,18 +142,18 @@ class ArtifactsService
             'tags:(artifact AND branchId-%s AND componentId-%s AND configId-%s NOT shared)',
             $branchId,
             $componentId,
-            $configId
+            $configId,
         );
 
         $files = $this->storageClient->listFiles(
             (new ListFilesOptions())
                 ->setQuery($query)
-                ->setLimit(1)
+                ->setLimit(1),
         );
 
         if (empty($files)) {
             throw new UserException(
-                'No artifact from previous run found. Run the component first.'
+                'No artifact from previous run found. Run the component first.',
             );
         }
 
@@ -167,7 +167,7 @@ class ArtifactsService
             throw new UserException(sprintf(
                 'Error downloading artifact file id "%s": %s',
                 $file['id'],
-                $e->getMessage()
+                $e->getMessage(),
             ));
         }
 
@@ -181,18 +181,18 @@ class ArtifactsService
             $name,
             $branchId,
             $componentId,
-            $configId
+            $configId,
         );
 
         $files = $this->storageClient->listFiles(
             (new ListFilesOptions())
                 ->setQuery($query)
-                ->setLimit(1)
+                ->setLimit(1),
         );
 
         if (empty($files)) {
             throw new UserException(
-                'No artifact from previous run found. Run the component first.'
+                'No artifact from previous run found. Run the component first.',
             );
         }
 
@@ -206,7 +206,7 @@ class ArtifactsService
             throw new UserException(sprintf(
                 'Error downloading artifact file id "%s": %s',
                 $file['id'],
-                $e->getMessage()
+                $e->getMessage(),
             ));
         }
 

@@ -31,7 +31,7 @@ class DbtProfilesYaml extends FilesystemAwareDumper
                     'target' => 'dev',
                     'outputs' => $outputs,
                 ],
-            ], 5)
+            ], 5),
         );
     }
 }

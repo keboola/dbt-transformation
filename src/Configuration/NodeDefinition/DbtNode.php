@@ -46,18 +46,18 @@ class DbtNode extends ArrayNodeDefinition
                     ->always(function ($executeSteps) {
                         if (empty($executeSteps)) {
                             throw new InvalidConfigurationException(
-                                'At least one execute step must be defined'
+                                'At least one execute step must be defined',
                             );
                         }
                         foreach ($executeSteps as $input) {
                             if (substr($input['step'], 0, 4) !== 'dbt ') {
                                 throw new InvalidConfigurationException(
-                                    'Invalid execute step: Command must start with "dbt"'
+                                    'Invalid execute step: Command must start with "dbt"',
                                 );
                             }
                             if (preg_match('/[|&]/', $input['step'])) {
                                 throw new InvalidConfigurationException(
-                                    'Invalid execute step: Command contains disallowed metacharacters'
+                                    'Invalid execute step: Command contains disallowed metacharacters',
                                 );
                             }
                         }

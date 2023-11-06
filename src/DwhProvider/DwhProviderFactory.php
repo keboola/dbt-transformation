@@ -27,7 +27,7 @@ class DwhProviderFactory
     public function __construct(
         DbtSourcesYaml $createSourceFileService,
         DbtProfilesYaml $createProfilesFileService,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         $this->createProfilesFileService = $createProfilesFileService;
         $this->createSourceFileService = $createSourceFileService;
@@ -72,7 +72,7 @@ class DwhProviderFactory
             $this->createProfilesFileService,
             $this->logger,
             $config,
-            $projectPath
+            $projectPath,
         );
     }
 }

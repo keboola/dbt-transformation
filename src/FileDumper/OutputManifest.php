@@ -36,7 +36,7 @@ class OutputManifest
         ManifestManager $manifestManager,
         DbtManifestParser $dbtManifestParser,
         LoggerInterface $logger,
-        bool $quoteIdentifier = false
+        bool $quoteIdentifier = false,
     ) {
         $this->manifestManager = $manifestManager;
         $this->databaseConfig = $databaseConfig;
@@ -67,7 +67,7 @@ class OutputManifest
                 $columnName = $column->getColumnName();
                 $columnsMetadata->{$columnName} = array_merge(
                     $column->getColumnDefinition()->toMetadata(),
-                    (array) ($dbtColumnsMetadata[strtolower($columnName)] ?? [])
+                    (array) ($dbtColumnsMetadata[strtolower($columnName)] ?? []),
                 );
             }
 
@@ -89,7 +89,7 @@ class OutputManifest
                 ->setColumnMetadata($columnsMetadata)
                 ->setPrimaryKeyColumns($this->getPrimaryKeyColumnNames(
                     $dbtPrimaryKey,
-                    $tableDef->getColumnsNames()
+                    $tableDef->getColumnsNames(),
                 ))
             ;
 
@@ -129,7 +129,7 @@ class OutputManifest
                  *     kind: string,
                  *     type: string,
                  *     default: string,
-                 *     'null?': string
+                 *     "null?": string
                  * }> $columnsMeta */
                 $columnsMeta = $this->connection->fetchAll(
                     sprintf(
@@ -137,13 +137,13 @@ class OutputManifest
                         SnowflakeQuote::createQuotedIdentifierFromParts([
                             $schema,
                             $this->quoteIdentifier ? $tableName : strtoupper($tableName),
-                        ])
-                    )
+                        ]),
+                    ),
                 );
             } catch (RuntimeException $e) {
                 // do nothing for models/tables not existing in the DB
                 $this->logger->warning(
-                    'Table "%s" specified in dbt manifest was not found in the database.'
+                    'Table "%s" specified in dbt manifest was not found in the database.',
                 );
                 continue;
             }
@@ -160,7 +160,7 @@ class OutputManifest
                 $tableName,
                 false,
                 new ColumnCollection($columns),
-                []
+                [],
             );
         }
 

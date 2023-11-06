@@ -12,7 +12,7 @@ class DbtDocsHelper
         $newStr = sprintf(
             'o=[{label: \'manifest\', data: %s},{label: \'catalog\', data: %s}]',
             $manifestJson,
-            $catalogJson
+            $catalogJson,
         );
 
         return (string) str_replace($searchStr, $newStr, $html);

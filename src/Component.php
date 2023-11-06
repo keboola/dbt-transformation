@@ -29,7 +29,10 @@ use Keboola\Component\UserException;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
+use Retry\Policy\CallableRetryPolicy;
+use Retry\RetryProxy;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Yaml\Yaml;
 
 class Component extends BaseComponent
@@ -47,9 +50,14 @@ class Component extends BaseComponent
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
+
+        $retryProxy = new RetryProxy(new CallableRetryPolicy(function (ProcessFailedException $e) {
+            return str_contains($e->getMessage(), 'shallow file has changed since we read it');
+        }));
+
         $this->createProfilesFileService = new DbtProfilesYaml;
         $this->createSourceFileService = new DbtSourcesYaml;
-        $this->gitRepositoryService = new GitRepositoryService($this->getDataDir());
+        $this->gitRepositoryService = new GitRepositoryService($this->getDataDir(), $retryProxy);
         $this->storageClient = new StorageClient([
             'url' => $this->getConfig()->getStorageApiUrl(),
             'token' => $this->getConfig()->getStorageApiToken(),
@@ -57,13 +65,13 @@ class Component extends BaseComponent
         $this->artifacts = new ArtifactsService(
             $this->storageClient,
             $this->getDataDir(),
-            $this->getConfig()->getArtifactsOptions()
+            $this->getConfig()->getArtifactsOptions(),
         );
         $this->setProjectPath($this->getDataDir());
         $this->dwhProviderFactory = new DwhProviderFactory(
             $this->createSourceFileService,
             $this->createProfilesFileService,
-            $this->getLogger()
+            $this->getLogger(),
         );
     }
 
@@ -104,7 +112,7 @@ class Component extends BaseComponent
         $manifestConverter = new DbtManifestParser($this->projectPath);
         $connectionConfig = array_intersect_key(
             $workspaceCredentials,
-            array_flip(['host', 'warehouse', 'database', 'user', 'password'])
+            array_flip(['host', 'warehouse', 'database', 'user', 'password']),
         );
         $connection = new Connection($connectionConfig);
 
@@ -118,7 +126,7 @@ class Component extends BaseComponent
             $manifestManager,
             $manifestConverter,
             $this->getLogger(),
-            $quoteIdentifier
+            $quoteIdentifier,
         );
     }
 
@@ -168,7 +176,7 @@ class Component extends BaseComponent
             $config->getGitRepositoryUrl(),
             $config->getGitRepositoryBranch(),
             $config->getGitRepositoryUsername(),
-            $config->getGitRepositoryPassword()
+            $config->getGitRepositoryPassword(),
         );
 
         $branch = $this->gitRepositoryService->getCurrentBranch($this->projectPath);
@@ -177,7 +185,7 @@ class Component extends BaseComponent
             'Successfully cloned repository %s from branch %s (%s)',
             $config->getGitRepositoryUrl(),
             $branch['name'],
-            $branch['ref']
+            $branch['ref'],
         ));
     }
 
@@ -335,7 +343,7 @@ class Component extends BaseComponent
             $config->getGitRepositoryUrl(),
             $config->getGitRepositoryBranch(),
             $config->getGitRepositoryUsername(),
-            $config->getGitRepositoryPassword()
+            $config->getGitRepositoryPassword(),
         );
 
         $branches = $this->gitRepositoryService->listRemoteBranches($this->projectPath);
@@ -367,7 +375,7 @@ class Component extends BaseComponent
             /** @var BaseConfig $config */
             $config = new $configClass(
                 $rawConfig,
-                new $configDefinitionClass()
+                new $configDefinitionClass(),
             );
             $this->config = $config;
         } catch (InvalidConfigurationException $e) {

@@ -23,7 +23,7 @@ class DbtCompileHelper
         reset($filePaths);
 
         $contents = array_map(fn($sqlFile) => trim(
-            (string) file_get_contents($sqlFile->getPathname())
+            (string) file_get_contents($sqlFile->getPathname()),
         ), $filePaths);
 
         $combineArray = (array) array_combine($filenames, $contents);
@@ -39,7 +39,7 @@ class DbtCompileHelper
     public static function getCompiledSqlPaths(string $directory): array
     {
         $compiledDirInfo = new SplFileInfo(
-            sprintf('%s/%s', $directory, 'compiled')
+            sprintf('%s/%s', $directory, 'compiled'),
         );
 
         try {

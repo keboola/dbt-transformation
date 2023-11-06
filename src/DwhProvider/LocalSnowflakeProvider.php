@@ -30,7 +30,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
         DbtProfilesYaml $createProfilesFileService,
         LoggerInterface $logger,
         Config $config,
-        string $projectPath
+        string $projectPath,
     ) {
         $this->createProfilesFileService = $createProfilesFileService;
         $this->createSourceFileService = $createSourceFileService;
@@ -79,7 +79,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             $this->createSourceFileService->dumpYaml(
                 $this->projectPath,
                 $tablesData,
-                $this->config->getFreshness()
+                $this->config->getFreshness(),
             );
         }
     }

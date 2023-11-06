@@ -24,26 +24,26 @@ class DbtCompileHelperTest extends TestCase
 
         self::assertStringMatchesFormat(
             '%Afrom "SAPI_%d"."in.c-test-bucket"."test"%A',
-            (string) $compiled['source_not_null_in.c-test-bucket_test__id_.sql']
+            (string) $compiled['source_not_null_in.c-test-bucket_test__id_.sql'],
         );
 
         self::assertStringMatchesFormat(
             '%A"id" as unique_field,%A',
-            (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql']
+            (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql'],
         );
         self::assertStringMatchesFormat(
             '%Afrom "SAPI_%d"."in.c-test-bucket"."test"%A',
-            (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql']
+            (string) $compiled['source_unique_in.c-test-bucket_test__id_.sql'],
         );
 
         self::assertStringMatchesFormat(
             '%Afrom "SAPI_%d"."WORKSPACE_%d"."stg_model"%A',
-            (string) $compiled['fct_model.sql']
+            (string) $compiled['fct_model.sql'],
         );
 
         self::assertStringMatchesFormat(
             '%Aselect * from "SAPI_%d"."in.c-test-bucket"."test"%A',
-            (string) $compiled['stg_model.sql']
+            (string) $compiled['stg_model.sql'],
         );
     }
 

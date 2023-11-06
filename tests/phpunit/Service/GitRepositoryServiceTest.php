@@ -7,9 +7,16 @@ namespace DbtTransformation\Tests\Service;
 use DbtTransformation\Service\GitRepositoryService;
 use Generator;
 use Keboola\Component\UserException;
+use Monolog\Handler\TestHandler;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\Test\TestLogger;
+use Retry\BackOff\NoBackOffPolicy;
+use Retry\Policy\CallableRetryPolicy;
+use Retry\RetryProxy;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 class GitRepositoryServiceTest extends TestCase
@@ -21,6 +28,54 @@ class GitRepositoryServiceTest extends TestCase
         $fs = new Filesystem();
         $finder = new Finder();
         $fs->remove($finder->in($this->dataDir));
+    }
+
+    public function testRetryProxy(): void
+    {
+        $testLogger = new TestLogger();
+        $gitService = new GitRepositoryService(
+            $this->dataDir,
+            new RetryProxy(
+                new CallableRetryPolicy(function (ProcessFailedException $e) {
+                    return str_contains($e->getMessage(), 'shallow file has changed since we read it');
+                }),
+                new NoBackOffPolicy(), //no need to make tests slower
+                $testLogger,
+            )
+        );
+        $processMock = $this->getMockBuilder(Process::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['mustRun', 'getOutput', 'getErrorOutput', 'isStarted'])
+            ->getMock();
+
+        $processMock->method('isStarted')->willReturn(true);
+        $processMock->method('getOutput')->willReturn('Cloning into \'dbt-project\'...');
+        $processMock->method('getErrorOutput')->willReturn('Encountered an error: Internal Error ' .
+         'Error checking out spec=\'0.0.2\' for repo https://github.com/keboola/dbt-test-project-public.git' .
+         'fatal: shallow file has changed since we read it');
+
+        $exception = new ProcessFailedException($processMock);
+
+        $processMock->method('mustRun')->willThrowException($exception);
+
+        try {
+            $gitService->runGitCloneProcess(
+                $processMock,
+                'https://github.com/keboola/dbt-test-project-public.git'
+            );
+        } catch (Throwable $e) {
+            self::assertSame(UserException::class, get_class($e));
+            self::assertEquals(
+                'Failed to clone your repository "https://github.com/keboola/dbt-test-project-public.git"',
+                $e->getMessage()
+            );
+        }
+
+        for ($i = 1; $i < CallableRetryPolicy::DEFAULT_MAX_ATTEMPTS; $i++) {
+            self::assertTrue($testLogger->hasInfoThatContains(
+                sprintf('shallow file has changed since we read it. Retrying... [%dx]', $i)
+            ));
+        }
     }
 
     public function testListBranches(): void
@@ -37,7 +92,7 @@ class GitRepositoryServiceTest extends TestCase
         self::assertContains('branch-with-redshift-sources', $branchNames);
         self::assertContains('branch-with-bigquery-sources', $branchNames);
 
-        $mainBranches = array_filter($branches, fn ($item) => $item['branch'] === 'main');
+        $mainBranches = array_filter($branches, fn($item) => $item['branch'] === 'main');
         $mainBranch = (array) array_shift($mainBranches);
 
         self::assertArrayHasKey('comment', $mainBranch);
@@ -165,7 +220,7 @@ class GitRepositoryServiceTest extends TestCase
         yield 'bitbucket private repository wrong username' => [
             'url' => 'https://bitbucket.org/dbt-test-project-user/dbt-test-project.git',
             'username' => 'dbt-invalid-user',
-            'password' =>  getenv('BITBUCKET_PASSWORD') ?: '',
+            'password' => getenv('BITBUCKET_PASSWORD') ?: '',
             'errorMsg' => 'Failed to clone your repository "https://bitbucket.org/dbt-test-project-user/'
                 . 'dbt-test-project.git": Invalid credentials',
         ];

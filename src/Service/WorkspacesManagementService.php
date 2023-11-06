@@ -75,7 +75,7 @@ class WorkspacesManagementService
         }
         $configuration = $components->getConfiguration(
             self::SANDBOXES_COMPONENT_ID,
-            $configurationId
+            $configurationId,
         );
         if (!empty($configuration['configuration']['parameters']['id'])) {
             try {
@@ -99,7 +99,7 @@ class WorkspacesManagementService
         $workspace = $components->createConfigurationWorkspace(
             self::SANDBOXES_COMPONENT_ID,
             $configurationId,
-            ['backend' => 'snowflake']
+            ['backend' => 'snowflake'],
         );
 
         $sandbox = $this->createSandbox($this->getTokenInfo(), $configurationId, $workspace);

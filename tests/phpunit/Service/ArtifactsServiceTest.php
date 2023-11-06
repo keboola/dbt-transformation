@@ -150,13 +150,13 @@ class ArtifactsServiceTest extends TestCase
 
         $manifest = (array) json_decode(
             $artifacts->readFromFileInStep('dbt docs generate', 'manifest.json'),
-            true
+            true,
         );
         self::assertArrayHasKey('metadata', $manifest);
 
         $runResults = (array) json_decode(
             $artifacts->readFromFileInStep('dbt run', 'run_results.json'),
-            true
+            true,
         );
         self::assertArrayHasKey('results', $runResults);
     }
@@ -183,7 +183,7 @@ class ArtifactsServiceTest extends TestCase
         $manifestJson = json_decode($manifestRaw, true);
         self::assertEquals(
             'https://schemas.getdbt.com/dbt/manifest/v6.json',
-            $manifestJson['metadata']['dbt_schema_version']
+            $manifestJson['metadata']['dbt_schema_version'],
         );
 
         $artifacts->downloadByName(
@@ -251,15 +251,15 @@ class ArtifactsServiceTest extends TestCase
 
         $manifestFileIdId = $this->storageClient->uploadFile(
             $tmpFolder . '/artifacts/out/current/manifest.json',
-            $options
+            $options,
         );
         $runResultsFileId = $this->storageClient->uploadFile(
             $tmpFolder . '/artifacts/out/current/run_results.json',
-            $options
+            $options,
         );
         $modelTimingFileId = $this->storageClient->uploadFile(
             $tmpFolder . '/artifacts/out/current/model_timing.json',
-            $options
+            $options,
         );
 
         return [

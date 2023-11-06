@@ -65,13 +65,13 @@ class Component extends BaseComponent
         $this->artifacts = new ArtifactsService(
             $this->storageClient,
             $this->getDataDir(),
-            $this->getConfig()->getArtifactsOptions()
+            $this->getConfig()->getArtifactsOptions(),
         );
         $this->setProjectPath($this->getDataDir());
         $this->dwhProviderFactory = new DwhProviderFactory(
             $this->createSourceFileService,
             $this->createProfilesFileService,
-            $this->getLogger()
+            $this->getLogger(),
         );
     }
 
@@ -112,7 +112,7 @@ class Component extends BaseComponent
         $manifestConverter = new DbtManifestParser($this->projectPath);
         $connectionConfig = array_intersect_key(
             $workspaceCredentials,
-            array_flip(['host', 'warehouse', 'database', 'user', 'password'])
+            array_flip(['host', 'warehouse', 'database', 'user', 'password']),
         );
         $connection = new Connection($connectionConfig);
 
@@ -126,7 +126,7 @@ class Component extends BaseComponent
             $manifestManager,
             $manifestConverter,
             $this->getLogger(),
-            $quoteIdentifier
+            $quoteIdentifier,
         );
     }
 
@@ -176,7 +176,7 @@ class Component extends BaseComponent
             $config->getGitRepositoryUrl(),
             $config->getGitRepositoryBranch(),
             $config->getGitRepositoryUsername(),
-            $config->getGitRepositoryPassword()
+            $config->getGitRepositoryPassword(),
         );
 
         $branch = $this->gitRepositoryService->getCurrentBranch($this->projectPath);
@@ -185,7 +185,7 @@ class Component extends BaseComponent
             'Successfully cloned repository %s from branch %s (%s)',
             $config->getGitRepositoryUrl(),
             $branch['name'],
-            $branch['ref']
+            $branch['ref'],
         ));
     }
 
@@ -343,7 +343,7 @@ class Component extends BaseComponent
             $config->getGitRepositoryUrl(),
             $config->getGitRepositoryBranch(),
             $config->getGitRepositoryUsername(),
-            $config->getGitRepositoryPassword()
+            $config->getGitRepositoryPassword(),
         );
 
         $branches = $this->gitRepositoryService->listRemoteBranches($this->projectPath);
@@ -375,7 +375,7 @@ class Component extends BaseComponent
             /** @var BaseConfig $config */
             $config = new $configClass(
                 $rawConfig,
-                new $configDefinitionClass()
+                new $configDefinitionClass(),
             );
             $this->config = $config;
         } catch (InvalidConfigurationException $e) {

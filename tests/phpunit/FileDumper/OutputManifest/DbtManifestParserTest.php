@@ -42,7 +42,7 @@ class DbtManifestParserTest extends TestCase
         self::assertEquals('KBC.description', $columnMetadata['brewery_id'][0]['key']);
         self::assertEquals(
             'The unique identifier for the brewery',
-            $columnMetadata['brewery_id'][0]['value']
+            $columnMetadata['brewery_id'][0]['value'],
         );
     }
 

@@ -32,7 +32,7 @@ class DbtYamlCreateTest extends TestCase
         $fs = new Filesystem();
         $fs->copy(
             sprintf('%s/dbt_project.yml', $this->providerDataDir),
-            sprintf('%s/dbt_project.yml', $this->dataDir)
+            sprintf('%s/dbt_project.yml', $this->dataDir),
         );
 
         $service = new DbtProfilesYaml();
@@ -40,13 +40,13 @@ class DbtYamlCreateTest extends TestCase
             $this->dataDir,
             LocalSnowflakeProvider::getOutputs(
                 ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
-                LocalSnowflakeProvider::getDbtParams()
-            )
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
         );
 
         self::assertFileEquals(
             sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
-            sprintf('%s/profiles.yml', $this->dataDir)
+            sprintf('%s/profiles.yml', $this->dataDir),
         );
     }
 
@@ -66,8 +66,8 @@ class DbtYamlCreateTest extends TestCase
             $this->dataDir,
             LocalSnowflakeProvider::getOutputs(
                 ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
-                LocalSnowflakeProvider::getDbtParams()
-            )
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
         );
     }
 
@@ -97,13 +97,13 @@ class DbtYamlCreateTest extends TestCase
         $service->dumpYaml(
             $this->dataDir,
             $tablesData,
-            $freshness
+            $freshness,
         );
 
         foreach ($tablesData as $bucket => $tables) {
             self::assertFileEquals(
                 sprintf('%s/models/_sources/%s.yml', $this->providerDataDir, $bucket),
-                sprintf('%s/models/_sources/%s.yml', $this->dataDir, $bucket)
+                sprintf('%s/models/_sources/%s.yml', $this->dataDir, $bucket),
             );
         }
     }

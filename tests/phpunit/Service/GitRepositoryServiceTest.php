@@ -41,7 +41,7 @@ class GitRepositoryServiceTest extends TestCase
                 }),
                 new NoBackOffPolicy(), //no need to make tests slower
                 $testLogger,
-            )
+            ),
         );
         $processMock = $this->getMockBuilder(Process::class)
             ->disableOriginalConstructor()
@@ -61,19 +61,19 @@ class GitRepositoryServiceTest extends TestCase
         try {
             $gitService->runGitCloneProcess(
                 $processMock,
-                'https://github.com/keboola/dbt-test-project-public.git'
+                'https://github.com/keboola/dbt-test-project-public.git',
             );
         } catch (Throwable $e) {
             self::assertSame(UserException::class, get_class($e));
             self::assertEquals(
                 'Failed to clone your repository "https://github.com/keboola/dbt-test-project-public.git"',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
 
         for ($i = 1; $i < CallableRetryPolicy::DEFAULT_MAX_ATTEMPTS; $i++) {
             self::assertTrue($testLogger->hasInfoThatContains(
-                sprintf('shallow file has changed since we read it. Retrying... [%dx]', $i)
+                sprintf('shallow file has changed since we read it. Retrying... [%dx]', $i),
             ));
         }
     }
@@ -141,7 +141,7 @@ class GitRepositoryServiceTest extends TestCase
         string $url,
         ?string $username,
         ?string $password,
-        string $expectedUrl
+        string $expectedUrl,
     ): void {
         $gitService = new GitRepositoryService($this->dataDir);
         self::assertSame($expectedUrl, $gitService->getUrl($url, $username, $password));
@@ -162,7 +162,7 @@ class GitRepositoryServiceTest extends TestCase
         string $url,
         string $username,
         string $password,
-        string $errorMsg
+        string $errorMsg,
     ): void {
         $this->expectException(UserException::class);
         $this->expectExceptionMessage($errorMsg);

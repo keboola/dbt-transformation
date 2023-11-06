@@ -30,7 +30,7 @@ class GitRepositoryService
         string $repositoryUrl,
         ?string $branch = null,
         ?string $username = null,
-        ?string $password = null
+        ?string $password = null,
     ): void {
         $fs = new Filesystem();
         if ($fs->exists($this->projectPath)) {
@@ -115,7 +115,7 @@ class GitRepositoryService
                 '%s:%s@%s',
                 urlencode($username),
                 urlencode($password),
-                $parsedUrl['host']
+                $parsedUrl['host'],
             ), $repositoryUrl);
         } else {
             $url = $repositoryUrl;
@@ -142,7 +142,7 @@ class GitRepositoryService
             throw new UserException(sprintf(
                 'Failed to clone your repository "%s"%s',
                 $repositoryUrl,
-                !$match ? '' : (': ' . $matches[1])
+                !$match ? '' : (': ' . $matches[1]),
             ));
         }
     }

@@ -47,7 +47,7 @@ class DatadirTest extends DatadirTestCase
         if (!$fs->exists($script)) {
             throw new DatadirTestsException(sprintf(
                 'Cannot open script file "%s"',
-                $script
+                $script,
             ));
         }
 

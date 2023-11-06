@@ -38,7 +38,7 @@ class DbtServiceTest extends TestCase
         $this->dwhProviderFactory = new DwhProviderFactory(
             $createSourceFileService,
             $createProfilesFileService,
-            $this->logger
+            $this->logger,
         );
     }
 
@@ -132,12 +132,12 @@ class DbtServiceTest extends TestCase
 
         self::assertStringContainsString(
             'select "id"' . PHP_EOL . 'from "SAPI_9317"."in.c-test-bucket"."test"',
-            (string) $compiledSql['source_not_null_in.c-test-bucket_test__id_.sql']
+            (string) $compiledSql['source_not_null_in.c-test-bucket_test__id_.sql'],
         );
         self::assertStringContainsString('with source as (', (string) $compiledSql['stg_model.sql']);
         self::assertStringContainsString(
             'select * from "SAPI_9317"."in.c-test-bucket"."test"',
-            (string) $compiledSql['stg_model.sql']
+            (string) $compiledSql['stg_model.sql'],
         );
     }
 }

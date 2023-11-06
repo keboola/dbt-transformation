@@ -203,7 +203,7 @@ class GitRepositoryServiceTest extends TestCase
             'url' => 'https://github.com/keboola/not-exist-repo.git',
             'username' => getenv('GITHUB_USERNAME') ?: '',
             'password' => getenv('GITHUB_PASSWORD') ?: '',
-            'errorMsg' => 'Failed to clone your repository "***github.com/keboola/not-exist-repo.git":'
+            'errorMsg' => 'Failed to clone your repository "https://github.com/keboola/not-exist-repo.git":'
                 . ' Repository not found.',
         ];
 
@@ -211,7 +211,7 @@ class GitRepositoryServiceTest extends TestCase
             'url' => 'https://gitlab.com/keboola/dbt-test-project.git',
             'username' => getenv('GITLAB_USERNAME') ?: '',
             'password' => 'invalid',
-            'errorMsg' => 'Failed to clone your repository "***gitlab.com/keboola/dbt-test-project.git":'
+            'errorMsg' => 'Failed to clone your repository "https://gitlab.com/keboola/dbt-test-project.git":'
                 . ' HTTP Basic: Access denied. The provided password or token is incorrect or your account has'
                 . ' 2FA enabled and you must use a personal access token instead of a password. See https://git'
                 . 'lab.com/help/topics/git/troubleshooting_git#error-on-git-fetch-http-basic-access-denied',
@@ -221,7 +221,7 @@ class GitRepositoryServiceTest extends TestCase
             'url' => 'https://bitbucket.org/dbt-test-project-user/dbt-test-project.git',
             'username' => 'dbt-invalid-user',
             'password' => getenv('BITBUCKET_PASSWORD') ?: '',
-            'errorMsg' => 'Failed to clone your repository "***bitbucket.org/dbt-test-project-user/'
+            'errorMsg' => 'Failed to clone your repository "https://bitbucket.org/dbt-test-project-user/'
                 . 'dbt-test-project.git": Invalid credentials',
         ];
 

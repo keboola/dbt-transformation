@@ -44,7 +44,7 @@ class GitRepositoryService
 
         $url = $this->getUrl($repositoryUrl, $username, $password);
         $process = new Process(['git', 'clone', ...$branchArgument, $url, 'dbt-project'], $this->dataDir);
-        $this->runGitCloneProcess($process, $url);
+        $this->runGitCloneProcess($process, $repositoryUrl);
     }
 
     /**

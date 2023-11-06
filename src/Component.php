@@ -29,7 +29,10 @@ use Keboola\Component\UserException;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\StorageApi\Client as StorageClient;
 use Psr\Log\LoggerInterface;
+use Retry\Policy\CallableRetryPolicy;
+use Retry\RetryProxy;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Yaml\Yaml;
 
 class Component extends BaseComponent
@@ -47,9 +50,14 @@ class Component extends BaseComponent
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
+
+        $retryProxy = new RetryProxy(new CallableRetryPolicy(function (ProcessFailedException $e) {
+            return str_contains($e->getMessage(), 'shallow file has changed since we read it');
+        }));
+
         $this->createProfilesFileService = new DbtProfilesYaml;
         $this->createSourceFileService = new DbtSourcesYaml;
-        $this->gitRepositoryService = new GitRepositoryService($this->getDataDir());
+        $this->gitRepositoryService = new GitRepositoryService($this->getDataDir(), $retryProxy);
         $this->storageClient = new StorageClient([
             'url' => $this->getConfig()->getStorageApiUrl(),
             'token' => $this->getConfig()->getStorageApiToken(),

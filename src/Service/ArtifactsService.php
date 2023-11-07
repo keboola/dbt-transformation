@@ -90,7 +90,7 @@ class ArtifactsService
 
                 switch ($stepDir) {
                     case 'dbt run':
-                        $compiledSqlContent = DbtCompileHelper::getCompiledSqlFilesContent($targetPath);
+                        $compiledSqlContent = json_encode(DbtCompileHelper::getCompiledSqlFilesContent($targetPath));
                         file_put_contents($artifactsPath . '/compiled_sql.json', $compiledSqlContent);
 
                         $manifestJson = (string) file_get_contents($targetPath . '/manifest.json');

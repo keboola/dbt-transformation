@@ -7,6 +7,7 @@ namespace DbtTransformation\FunctionalSyncActionsTestsNoZip;
 use DbtTransformation\Component;
 use DbtTransformation\Service\ArtifactsService;
 use Keboola\DatadirTests\DatadirTestCase;
+use Keboola\DatadirTests\DatadirTestSpecificationInterface;
 use Keboola\DatadirTests\Exception\DatadirTestsException;
 use Keboola\StorageApi\Client as StorageClient;
 use Keboola\StorageApi\Options\FileUploadOptions;
@@ -14,6 +15,7 @@ use Keboola\Temp\Temp;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 class DatadirTest extends DatadirTestCase
 {
@@ -46,22 +48,13 @@ class DatadirTest extends DatadirTestCase
         $projectPath = __DIR__ . '/../phpunit/data';
         $artifacts->writeResults($projectPath, 'dbt run');
 
-        self::assertFileExists($tmpFolder . '/artifacts/out/current/manifest.json');
-        self::assertFileExists($tmpFolder . '/artifacts/out/current/run_results.json');
-        self::assertFileExists($tmpFolder . '/artifacts/out/current/model_timing.json');
+        $files = ['manifest.json', 'run_results.json', 'model_timing.json', 'compiled_sql.json'];
 
-        $storageClient->uploadFile(
-            $tmpFolder . '/artifacts/out/current/manifest.json',
-            $options,
-        );
-        $storageClient->uploadFile(
-            $tmpFolder . '/artifacts/out/current/run_results.json',
-            $options,
-        );
-        $storageClient->uploadFile(
-            $tmpFolder . '/artifacts/out/current/model_timing.json',
-            $options,
-        );
+        foreach ($files as $file) {
+            $filePath = sprintf('%s/artifacts/out/current/%s', $tmpFolder, $file);
+            self::assertFileExists($filePath);
+            $storageClient->uploadFile($filePath, $options);
+        }
 
         sleep(1);
     }
@@ -99,5 +92,50 @@ class DatadirTest extends DatadirTestCase
         $fs = new Filesystem();
         $finder = new Finder();
         $fs->remove($finder->in(__DIR__ . '/../../data'));
+    }
+
+    protected function assertMatchesSpecification(
+        DatadirTestSpecificationInterface $specification,
+        Process $runProcess,
+        string $tempDatadir,
+    ): void {
+        if ($specification->getExpectedReturnCode() !== null) {
+            $this->assertProcessReturnCode($specification->getExpectedReturnCode(), $runProcess);
+        } else {
+            $this->assertNotSame(0, $runProcess->getExitCode(), 'Exit code should have been non-zero');
+        }
+        if ($specification->getExpectedStdout() !== null) {
+            try {
+                $this->assertStringMatchesFormat(
+                    trim($specification->getExpectedStdout()),
+                    trim($runProcess->getOutput()),
+                    'Failed asserting stdout output',
+                );
+            } catch (Throwable $e) {
+                //dbt-compile output json is too large to be compared with assertStringMatchesFormat
+                if (str_contains($e->getMessage(), 'regular expression is too large')) {
+                    self::assertEquals(
+                        trim($specification->getExpectedStdout()),
+                        trim($runProcess->getOutput()),
+                        'Failed asserting stdout output',
+                    );
+                } else {
+                    throw $e;
+                }
+            }
+        }
+        if ($specification->getExpectedStderr() !== null) {
+            $this->assertStringMatchesFormat(
+                trim($specification->getExpectedStderr()),
+                trim($runProcess->getErrorOutput()),
+                'Failed asserting stderr output',
+            );
+        }
+        if ($specification->getExpectedOutDirectory() !== null) {
+            $this->assertDirectoryContentsSame(
+                $specification->getExpectedOutDirectory(),
+                $tempDatadir . '/out',
+            );
+        }
     }
 }

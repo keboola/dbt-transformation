@@ -19,14 +19,14 @@ class DbtCompileHelper
     {
         $filePaths = self::getCompiledSqlPaths($directory);
 
-        $filenames = array_map(fn($sqlFile) => (string) $sqlFile->getFilename(), $filePaths);
+        $filenames = array_map(fn($sqlFile) => $sqlFile->getFilename(), $filePaths);
         reset($filePaths);
 
         $contents = array_map(fn($sqlFile) => trim(
             (string) file_get_contents($sqlFile->getPathname()),
         ), $filePaths);
 
-        $combineArray = (array) array_combine($filenames, $contents);
+        $combineArray = array_combine($filenames, $contents);
         ksort($combineArray);
 
         return $combineArray;

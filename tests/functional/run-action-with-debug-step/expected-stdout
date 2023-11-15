@@ -1,15 +1,13 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch main (%s)
 Executing command "dbt deps"
-Running with dbt=%s
+Running with dbt=%A
 Warning: No packages were found in packages.yml
 Executing command "dbt debug"
-Running with dbt=%s
+Running with dbt=%A
 dbt version: %s
 python version: 3.8.12
 python path: /usr/local/bin/python3.8
-os info: %s
-Using profiles.yml file at /tmp/%s/dbt-project/profiles.yml
-Using dbt_project.yml file at /tmp/%s/dbt-project/dbt_project.yml%A
+os info: %A
 Configuration:
   profiles.yml file [OK found and valid]
   dbt_project.yml file [OK found and valid]%A
@@ -18,10 +16,5 @@ Required dependencies:
 Connection:
   account: keboola
   user: SAPI_WORKSPACE_%s
-  database: SAPI_9317
-  schema: WORKSPACE_%s
-  warehouse: KEBOOLA_PROD_SMALL
-  role: None
-  client_session_keep_alive: False%A
-  Connection test: [OK connection ok]%A
+  database: SAPI_9317%A
 All checks passed!%A

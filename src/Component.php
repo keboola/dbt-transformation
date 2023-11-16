@@ -32,8 +32,8 @@ use Psr\Log\LoggerInterface;
 use Retry\Policy\CallableRetryPolicy;
 use Retry\RetryProxy;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Yaml\Yaml;
+use Throwable;
 
 class Component extends BaseComponent
 {
@@ -46,18 +46,19 @@ class Component extends BaseComponent
     private StorageClient $storageClient;
     private ArtifactsService $artifacts;
     private DwhProviderFactory $dwhProviderFactory;
+    private RetryProxy $gitRetryProxy;
 
     public function __construct(LoggerInterface $logger)
     {
         parent::__construct($logger);
 
-        $retryProxy = new RetryProxy(new CallableRetryPolicy(function (ProcessFailedException $e) {
+        $this->gitRetryProxy = new RetryProxy(new CallableRetryPolicy(function (Throwable $e) {
             return str_contains($e->getMessage(), 'shallow file has changed since we read it');
         }));
 
         $this->createProfilesFileService = new DbtProfilesYaml;
         $this->createSourceFileService = new DbtSourcesYaml;
-        $this->gitRepositoryService = new GitRepositoryService($this->getDataDir(), $retryProxy);
+        $this->gitRepositoryService = new GitRepositoryService($this->getDataDir(), $this->gitRetryProxy);
         $this->storageClient = new StorageClient([
             'url' => $this->getConfig()->getStorageApiUrl(),
             'token' => $this->getConfig()->getStorageApiToken(),
@@ -205,7 +206,15 @@ class Component extends BaseComponent
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
         $dbtService = new DbtService($this->projectPath);
-        $output = $dbtService->runCommand($step);
+        if ($step === DbtService::COMMAND_DEPS) {
+            //some deps could be installed from git, so retry for "shallow file has changed" is needed
+            /** @var string $output */
+            $output = $this->gitRetryProxy->call(function () use ($dbtService, $step): string {
+                 return $dbtService->runCommand($step);
+            });
+        } else {
+            $output = $dbtService->runCommand($step);
+        }
 
         foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {
             $this->getLogger()->info($log);

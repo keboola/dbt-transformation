@@ -1,6 +1,7 @@
 FROM --platform=linux/amd64 php:8.1-cli-buster
 
 ARG DBT_VERSION=1.7.1
+ENV DBT_VERSION=${DBT_VERSION}
 
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive

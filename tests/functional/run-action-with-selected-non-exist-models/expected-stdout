@@ -1,5 +1,5 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch main (%s)
 Executing command "dbt deps"
-Running with dbt=%s
+Running with dbt=%A
 Warning: No packages were found in packages.yml
 Executing command "dbt --warn-error run --select non-existing-model"

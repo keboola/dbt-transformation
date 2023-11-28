@@ -1,11 +1,11 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-seed (%s)
 Executing command "dbt deps"
-Running with dbt=%s
+Running with dbt=%A
 Warning: No packages were found in packages.yml
 Executing command "dbt seed"
-Running with dbt=%s
+Running with dbt=%A
 %s Starting full parse.
-Found 2 models, 2 tests, 0 snapshots, 0 analyses, %s macros, 0 operations, 1 seed file, 2 sources, 0 exposures, 0 metrics%S
+Found 2 models%S
 %AConcurrency: 4 threads (target='kbc_prod')%A
 1 of 1 START seed file %s.countries ........................... [RUN]
 1 of 1 OK loaded seed file %s.countries ....................... [INSERT %s in %ss]

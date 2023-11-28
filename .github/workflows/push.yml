@@ -200,6 +200,7 @@ jobs:
                       echo "DEPLOY_TAG=${{ needs.build.outputs.app_image_tag }}-1.5.9" >> $GITHUB_ENV
                   else
                       echo "DEPLOY_TAG=${{ needs.build.outputs.app_image_tag }}-1.7.1" >> $GITHUB_ENV
+                  fi
             - name: 'Set tag in the Developer Portal'
               uses: keboola/action-set-tag-developer-portal@master
               with:

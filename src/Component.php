@@ -10,6 +10,7 @@ use DbtTransformation\Configuration\SyncAction\DbtDocsDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
 use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
+use DbtTransformation\Exception\ArtifactNotFoundException;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
 use DbtTransformation\FileDumper\OutputManifest;
@@ -259,18 +260,25 @@ class Component extends BaseComponent
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getEnvKbcBranchId();
 
-        if ($isArchive) {
-            $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
-            $this->artifacts->checkIfCorrectStepIsDownloaded(DbtService::COMMAND_DOCS_GENERATE);
+        try {
+            if ($isArchive) {
+                $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+                $this->artifacts->checkIfCorrectStepIsDownloaded(DbtService::COMMAND_DOCS_GENERATE);
 
-            $html = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'index.html');
-            $manifest = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'manifest.json');
-            $catalog = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'catalog.json');
+                $html = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'index.html');
+                $manifest = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'manifest.json');
+                $catalog = $this->artifacts->readFromFileInStep(DbtService::COMMAND_DOCS_GENERATE, 'catalog.json');
 
-            $finalHtml = DbtDocsHelper::mergeHtml($html, $catalog, $manifest);
-        } else {
-            $this->artifacts->downloadByName('index.html', $componentId, $configId, $branchId);
-            $finalHtml = $this->artifacts->readFromFile('index.html');
+                $finalHtml = DbtDocsHelper::mergeHtml($html, $catalog, $manifest);
+            } else {
+                $this->artifacts->downloadByName('index.html', $componentId, $configId, $branchId);
+                $finalHtml = $this->artifacts->readFromFile('index.html');
+            }
+        } catch (ArtifactNotFoundException $e) {
+            throw new UserException(sprintf(
+                '%s Run the component with "dbt docs generate" command enabled first.',
+                $e->getMessage(),
+            ));
         }
 
         return [
@@ -280,6 +288,7 @@ class Component extends BaseComponent
 
     /**
      * @return array<string, array<int, array<string, mixed>>>
+     * @throws \Keboola\Component\UserException|\JsonException
      */
     protected function actionDbtRunResults(): array
     {
@@ -290,20 +299,27 @@ class Component extends BaseComponent
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getEnvKbcBranchId();
 
-        if ($isArchive) {
-            $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+        try {
+            if ($isArchive) {
+                $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
 
-            $manifestJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'manifest.json');
-            $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
-            $runResultsJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'run_results.json');
-            /** @var array<string, array<string, mixed>> $runResults */
-            $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
-            $modelTimingFinal = DbtDocsHelper::getModelTiming($manifest, $runResults);
-        } else {
-            $this->artifacts->downloadByName('model_timing.json', $componentId, $configId, $branchId);
-            $modelTimingFinalJson = $this->artifacts->readFromFile('model_timing.json');
-            /** @var array<int, array<string, mixed>> $modelTimingFinal */
-            $modelTimingFinal = (array) json_decode($modelTimingFinalJson, true, 512, JSON_THROW_ON_ERROR);
+                $manifestJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'manifest.json');
+                $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
+                $runResultsJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'run_results.json');
+                /** @var array<string, array<string, mixed>> $runResults */
+                $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);
+                $modelTimingFinal = DbtDocsHelper::getModelTiming($manifest, $runResults);
+            } else {
+                $this->artifacts->downloadByName('model_timing.json', $componentId, $configId, $branchId);
+                $modelTimingFinalJson = $this->artifacts->readFromFile('model_timing.json');
+                /** @var array<int, array<string, mixed>> $modelTimingFinal */
+                $modelTimingFinal = (array) json_decode($modelTimingFinalJson, true, 512, JSON_THROW_ON_ERROR);
+            }
+        } catch (ArtifactNotFoundException $e) {
+            throw new UserException(sprintf(
+                '%s Run the component with "dbt run" command enabled first.',
+                $e->getMessage(),
+            ));
         }
 
         return [
@@ -324,15 +340,22 @@ class Component extends BaseComponent
         $configId = $this->getConfig()->getConfigId();
         $branchId = $this->getConfig()->getEnvKbcBranchId();
 
-        if ($isArchive) {
-            $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
-            $runArtifactPath = $this->artifacts->getDownloadDir() . '/' . DbtService::COMMAND_RUN;
-            $compiledFinal = DbtCompileHelper::getCompiledSqlFilesContent($runArtifactPath);
-        } else {
-            $this->artifacts->downloadByName('compiled_sql.json', $componentId, $configId, $branchId);
-            $compiledSqlJson = $this->artifacts->readFromFile('compiled_sql.json');
-            /** @var array<int|string, string|false> $compiledFinal */
-            $compiledFinal = (array) json_decode($compiledSqlJson, true, 512, JSON_THROW_ON_ERROR);
+        try {
+            if ($isArchive) {
+                $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
+                $runArtifactPath = $this->artifacts->getDownloadDir() . '/' . DbtService::COMMAND_RUN;
+                $compiledFinal = DbtCompileHelper::getCompiledSqlFilesContent($runArtifactPath);
+            } else {
+                $this->artifacts->downloadByName('compiled_sql.json', $componentId, $configId, $branchId);
+                $compiledSqlJson = $this->artifacts->readFromFile('compiled_sql.json');
+                /** @var array<int|string, string|false> $compiledFinal */
+                $compiledFinal = (array) json_decode($compiledSqlJson, true, 512, JSON_THROW_ON_ERROR);
+            }
+        } catch (ArtifactNotFoundException $e) {
+            throw new UserException(sprintf(
+                '%s Run the component with "dbt run" command enabled first.',
+                $e->getMessage(),
+            ));
         }
 
         return [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Service;
 
+use DbtTransformation\Exception\ArtifactNotFoundException;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use Keboola\Component\UserException;
@@ -135,6 +136,7 @@ class ArtifactsService
 
     /**
      * @throws \Keboola\Component\UserException
+     * @throws \DbtTransformation\Exception\ArtifactNotFoundException
      */
     public function downloadLastRun(string $componentId, string $configId, string $branchId): ?int
     {
@@ -152,9 +154,7 @@ class ArtifactsService
         );
 
         if (empty($files)) {
-            throw new UserException(
-                'No artifact from previous run found. Run the component first.',
-            );
+            throw new ArtifactNotFoundException($configId, ArtifactNotFoundException::TYPE_ZIP);
         }
 
         $file = array_shift($files);
@@ -191,9 +191,7 @@ class ArtifactsService
         );
 
         if (empty($files)) {
-            throw new UserException(
-                'No artifact from previous run found. Run the component first.',
-            );
+            throw new ArtifactNotFoundException($configId, ArtifactNotFoundException::TYPE_NO_ZIP);
         }
 
         $file = array_shift($files);

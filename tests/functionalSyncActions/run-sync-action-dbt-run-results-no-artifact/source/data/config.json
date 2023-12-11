@@ -1,0 +1,7 @@
+{
+  "componentId": "keboola.dbt-transformation",
+  "action": "dbtRunResults",
+  "parameters": {
+    "configId": "54321"
+  }
+}

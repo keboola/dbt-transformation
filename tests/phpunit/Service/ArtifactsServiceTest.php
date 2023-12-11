@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Service;
 
 use DbtTransformation\Component;
+use DbtTransformation\Exception\ArtifactNotFoundException;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Service\ArtifactsService;
 use Keboola\Component\UserException;
@@ -116,8 +117,8 @@ class ArtifactsServiceTest extends TestCase
         $temp = new Temp();
         $artifacts = new ArtifactsService($this->storageClient, $temp->getTmpFolder());
 
-        $this->expectException(UserException::class);
-        $this->expectExceptionMessage('No artifact from previous run found. Run the component first.');
+        $this->expectException(ArtifactNotFoundException::class);
+        $this->expectExceptionMessage('Zip artifact for configuration "456" not found.');
         $artifacts->downloadLastRun(Component::COMPONENT_ID, '456', 'default');
     }
 

@@ -52,7 +52,9 @@ class DbtCompileHelperTest extends TestCase
         $temp = new Temp();
 
         $this->expectException(UserException::class);
-        $this->expectExceptionMessage('Compiled SQL files not found. Run the component with "dbt run" step first.');
+        $this->expectExceptionMessage(
+            'Compiled SQL files not found. Run the component with "dbt run" or "dbt build" step first.',
+        );
 
         DbtCompileHelper::getCompiledSqlFilesContent($temp->getTmpFolder());
     }

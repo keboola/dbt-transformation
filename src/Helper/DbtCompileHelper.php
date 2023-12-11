@@ -49,7 +49,9 @@ class DbtCompileHelper
                 ->in($compiledDirInfo->getPathname())
                 ->name('*.sql'));
         } catch (DirectoryNotFoundException $e) {
-            throw new UserException('Compiled SQL files not found. Run the component with "dbt run" step first.');
+            throw new UserException(
+                'Compiled SQL files not found. Run the component with "dbt run" or "dbt build" step first.',
+            );
         }
     }
 }

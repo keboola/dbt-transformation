@@ -317,7 +317,7 @@ class Component extends BaseComponent
             }
         } catch (ArtifactNotFoundException $e) {
             throw new UserException(sprintf(
-                '%s Run the component with "dbt run" command enabled first.',
+                '%s Run the component with "dbt run" or "dbt build" command enabled first.',
                 $e->getMessage(),
             ));
         }
@@ -353,7 +353,7 @@ class Component extends BaseComponent
             }
         } catch (ArtifactNotFoundException $e) {
             throw new UserException(sprintf(
-                '%s Run the component with "dbt run" command enabled first.',
+                '%s Run the component with "dbt run" or "dbt build" command enabled first.',
                 $e->getMessage(),
             ));
         }

@@ -1,1 +1,1 @@
-Zip artifact for configuration "54321" not found. Run the component with "dbt run" command enabled first.
+Zip artifact for configuration "54321" not found. Run the component with "dbt run" or "dbt build" command enabled first.

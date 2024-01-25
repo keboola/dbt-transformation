@@ -69,11 +69,12 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             }
         }
 
+        $this->setEnvVars();
+
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
             $this->getOutputs($configurationNames, self::getDbtParams(), $this->projectIds),
         );
-        $this->setEnvVars();
 
         if ($this->config->generateSources()) {
             $this->createSourceFileService->dumpYaml(

@@ -43,6 +43,9 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
         putenv(sprintf('DBT_KBC_PROD_PROJECT=%s', $workspace['project']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['project']));
         putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['dataset']));
+        if (isset($workspace['region'])) {
+            putenv(sprintf('DBT_KBC_PROD_LOCATION=%s', $workspace['location']));
+        }
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
         // create temp file with key
         $tmpKeyFile = $this->temp->createFile('key');
@@ -70,7 +73,7 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
      */
     public static function getDbtParams(): array
     {
-        return [
+        $dbtParams = [
             'type',
             'method',
             'project',
@@ -78,6 +81,12 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
             'threads',
             'keyfile',
         ];
+
+        if (getenv('DBT_KBC_PROD_LOCATION') !== false) {
+            $dbtParams[] = 'location';
+        }
+
+        return $dbtParams;
     }
 
     protected function getConnectionLogMessage(): string

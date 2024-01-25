@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
+use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
+use Generator;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -48,6 +50,52 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
+    }
+
+    /**
+     * @dataProvider remoteBigQueryProvider
+     */
+    public function testCreateProfileYamlWithRemoteBigQuery(bool $includeLocation, string $expectedProfilesPath): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        if ($includeLocation) {
+            putenv('DBT_KBC_PROD_LOCATION=EU');
+        }
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                [],
+                RemoteBigQueryProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertFileEquals(
+            $expectedProfilesPath,
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+    }
+
+    public function remoteBigQueryProvider(): Generator
+    {
+        yield 'without location' => [
+            'includeLocation' => false,
+            'expectedProfilesPath' => sprintf('%s/expectedRemoteBigQueryProfiles.yml', $this->providerDataDir),
+        ];
+
+        yield 'with location' => [
+            'includeLocation' => true,
+            'expectedProfilesPath' => sprintf(
+                '%s/expectedRemoteBigQueryProfilesWithLocation.yml',
+                $this->providerDataDir,
+            ),
+        ];
     }
 
     /**

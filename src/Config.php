@@ -76,10 +76,10 @@ class Config extends BaseConfig
         // For backward compatibility when modelNames were in the UI
         if (!empty($this->getModelNames())) {
             foreach ($executionSteps as $key => $executionStep) {
-                if (strpos($executionStep, 'dbt deps') === false
-                    && strpos($executionStep, 'dbt debug') === false
-                    && strpos($executionStep, 'dbt source freshness') === false
-                    && strpos($executionStep, '--select') === false
+                if (!str_contains($executionStep, 'dbt deps')
+                    && !str_contains($executionStep, 'dbt debug')
+                    && !str_contains($executionStep, 'dbt source freshness')
+                    && !str_contains($executionStep, '--select')
                 ) {
                     $executionSteps[$key] .= ' --select ' . implode(' ', $this->getModelNames());
                 }

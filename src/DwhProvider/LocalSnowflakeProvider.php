@@ -8,7 +8,6 @@ use DbtTransformation\Config;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Keboola\StorageApi\Client;
-use Keboola\StorageApi\ClientException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 

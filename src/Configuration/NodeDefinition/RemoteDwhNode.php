@@ -110,19 +110,19 @@ class RemoteDwhNode extends ArrayNodeDefinition
     {
         switch ($type) {
             case RemoteSnowflakeProvider::DWH_PROVIDER_TYPE:
-                return RemoteSnowflakeProvider::getConnectionParams();
+                return RemoteSnowflakeProvider::getRequiredConnectionParams();
 
             case RemotePostgresProvider::DWH_PROVIDER_TYPE:
-                return RemotePostgresProvider::getConnectionParams();
+                return RemotePostgresProvider::getRequiredConnectionParams();
 
             case RemoteBigQueryProvider::DWH_PROVIDER_TYPE:
-                return RemoteBigQueryProvider::getConnectionParams();
+                return RemoteBigQueryProvider::getRequiredConnectionParams();
 
             case RemoteMssqlProvider::DWH_PROVIDER_TYPE:
-                return RemoteMssqlProvider::getConnectionParams();
+                return RemoteMssqlProvider::getRequiredConnectionParams();
 
             case RemoteRedshiftProvider::DWH_PROVIDER_TYPE:
-                return RemoteRedshiftProvider::getConnectionParams();
+                return RemoteRedshiftProvider::getRequiredConnectionParams();
         }
 
         throw new InvalidConfigurationException(sprintf('Remote DWH type "%s" not supported', $type));

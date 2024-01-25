@@ -53,7 +53,7 @@ class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProvi
     /**
      * @return array<int, string>
      */
-    public static function getConnectionParams(): array
+    public static function getRequiredConnectionParams(): array
     {
         return [
             'type',

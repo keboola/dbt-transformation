@@ -8,7 +8,6 @@ use DbtTransformation\Config;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Keboola\StorageApi\Client;
-use Keboola\StorageApi\ClientException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -69,11 +68,12 @@ class LocalSnowflakeProvider implements DwhProviderInterface
             }
         }
 
+        $this->setEnvVars();
+
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
             $this->getOutputs($configurationNames, self::getDbtParams(), $this->projectIds),
         );
-        $this->setEnvVars();
 
         if ($this->config->generateSources()) {
             $this->createSourceFileService->dumpYaml(
@@ -107,7 +107,7 @@ class LocalSnowflakeProvider implements DwhProviderInterface
     /**
      * @return array<int, string>
      */
-    public static function getConnectionParams(): array
+    public static function getRequiredConnectionParams(): array
     {
         return [
             'schema',

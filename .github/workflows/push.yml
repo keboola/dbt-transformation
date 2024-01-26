@@ -22,6 +22,7 @@ env:
     BIGQUERY_PROJECT_ID: devel-249608
     BIGQUERY_DATASET: dbt
     BIGQUERY_THREADS: 1
+    BIGQUERY_LOCATION: US
     BIGQUERY_KEY_CONTENT: ${{ secrets.BIGQUERY_KEY_CONTENT }}
 
     # Redshift
@@ -145,6 +146,7 @@ jobs:
                     -e SNOWFLAKE_PASSWORD \
                     -e BIGQUERY_PROJECT_ID \
                     -e BIGQUERY_DATASET \
+                    -e BIGQUERY_LOCATION \
                     -e BIGQUERY_THREADS \
                     -e BIGQUERY_KEY_CONTENT \
                     -e REDSHIFT_DB_HOST \

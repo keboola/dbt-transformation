@@ -5,27 +5,27 @@ declare(strict_types=1);
 namespace DbtTransformation\DwhProvider;
 
 use DbtTransformation\Config;
+use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
-use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
 use Keboola\StorageApi\Client;
+use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
-class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
+class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
 {
-    public const STRING_TO_REMOVE_FROM_HOST = '.snowflakecomputing.com';
+    public const DWH_PROVIDER_TYPE = 'bigquery';
 
     protected DbtSourcesYaml $createSourceFileService;
     protected DbtProfilesYaml $createProfilesFileService;
     protected Config $config;
     protected string $projectPath;
     protected LoggerInterface $logger;
-    /** @var array<int, int> */
-    protected array $projectIds = [];
+    private Temp $temp;
 
     public function __construct(
-        SnowflakeDbtSourcesYaml $createSourceFileService,
+        BigQueryDbtSourcesYaml $createSourceFileService,
         DbtProfilesYaml $createProfilesFileService,
         LoggerInterface $logger,
         Config $config,
@@ -36,6 +36,7 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
         $this->logger = $logger;
         $this->config = $config;
         $this->projectPath = $projectPath;
+        $this->temp = new Temp('dbt-big-query-local');
     }
 
     /**
@@ -58,22 +59,16 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
                     if (empty($inputTables) || in_array($table['id'], $inputTables)) {
                         $bucketId = (string) ($bucket['sourceBucket']['id'] ?? $bucket['id']);
                         $tablesData[$bucketId]['tables'][] = $table;
-                        if (isset($bucket['sourceBucket']['project']['id'])) {
-                            $sourceProjectId = (int) $bucket['sourceBucket']['project']['id'];
-                            $this->projectIds[$sourceProjectId] = $sourceProjectId;
-                            $tablesData[$bucketId]['projectId'] = $sourceProjectId;
-                        }
                     }
                 }
             }
         }
 
-        $this->setEnvVars();
-
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
-            $this->getOutputs($configurationNames, self::getDbtParams(), $this->projectIds),
+            $this->getOutputs($configurationNames, self::getDbtParams()),
         );
+        $this->setEnvVars();
 
         if ($this->config->generateSources()) {
             $this->createSourceFileService->dumpYaml(
@@ -87,36 +82,28 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
     protected function setEnvVars(): void
     {
         $workspace = $this->config->getAuthorization()['workspace'];
-        $workspace['type'] = 'snowflake';
-
-        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', $workspace['type']));
-        putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
-        putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
-        foreach ($this->projectIds as $projectId) {
-            $stackPrefix = strtok($workspace['database'], '_');
-            putenv(sprintf('DBT_KBC_PROD_%d_DATABASE=%s_%d', $projectId, $stackPrefix, $projectId));
-        }
-        putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
-        $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
-        putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
-        putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
-        putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $this->config->getThreads()));
+        putenv(sprintf('DBT_KBC_PROD_TYPE=%s', self::DWH_PROVIDER_TYPE));
+        putenv(sprintf('DBT_KBC_PROD_METHOD=%s', 'service-account'));
+        putenv(sprintf('DBT_KBC_PROD_PROJECT=%s', $workspace['credentials']['project_id']));
+        putenv(sprintf('DBT_KBC_PROD_LOCATION=%s', $workspace['region']));
+        putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['schema']));
+        // create temp file with key
+        $tmpKeyFile = $this->temp->createFile('key');
+        file_put_contents($tmpKeyFile->getPathname(), json_encode($workspace['credentials']));
+        putenv(sprintf('DBT_KBC_PROD_KEYFILE=%s', $tmpKeyFile));
     }
 
     /**
      * @return array<int, string>
      */
-    public static function getRequiredConnectionParams(): array
+    public static function getConnectionParams(): array
     {
         return [
-            'schema',
-            'database',
-            'warehouse',
-            'host',
-            'user',
-            '#password',
-            'threads',
+            'type',
+            'method',
+            'project',
+            'dataset',
+            'keyfile',
         ];
     }
 
@@ -127,13 +114,16 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
     {
         return [
             'type',
-            'user',
-            'password',
-            'schema',
-            'warehouse',
-            'database',
-            'account',
-            'threads',
+            'method',
+            'project',
+            //'location',
+            'dataset',
+            'keyfile',
         ];
+    }
+
+    public function __destruct()
+    {
+        $this->temp->remove();
     }
 }

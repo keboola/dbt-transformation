@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
-class RemoteSnowflakeProvider extends LocalSnowflakeProvider implements DwhProviderInterface
+class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInterface
 {
     public const DWH_PROVIDER_TYPE = 'snowflake';
 
@@ -16,7 +16,7 @@ class RemoteSnowflakeProvider extends LocalSnowflakeProvider implements DwhProvi
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
-        $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
+        $account = str_replace(LocalSnowflakeProvider::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
         putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
@@ -24,18 +24,36 @@ class RemoteSnowflakeProvider extends LocalSnowflakeProvider implements DwhProvi
     }
 
     /**
-     * @param array<int, string> $configurationNames
-     * @throws \Keboola\Component\UserException
+     * @return array<int, string>
      */
-    public function createDbtYamlFiles(array $configurationNames = []): void
+    public static function getDbtParams(): array
     {
-        $this->createProfilesFileService->dumpYaml(
-            $this->projectPath,
-            $this->getOutputs($configurationNames, static::getDbtParams()),
-        );
-        $this->setEnvVars();
+        return [
+            'type',
+            'user',
+            'password',
+            'schema',
+            'warehouse',
+            'database',
+            'account',
+            'threads',
+        ];
+    }
 
-        $this->logger->info($this->getConnectionLogMessage());
+    /**
+     * @return array<int, string>
+     */
+    public static function getRequiredConnectionParams(): array
+    {
+        return [
+            'schema',
+            'database',
+            'warehouse',
+            'host',
+            'user',
+            '#password',
+            'threads',
+        ];
     }
 
     protected function getConnectionLogMessage(): string

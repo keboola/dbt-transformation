@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3f39b5ba9f5950db521544e4cc864dd5",
+    "content-hash": "126d4fed6b4ccb7a812c604b4db02ee2",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -677,16 +677,16 @@
         },
         {
             "name": "google/cloud-bigquery",
-            "version": "v1.28.2",
+            "version": "v1.28.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-bigquery.git",
-                "reference": "a918523062c78d8fd29422e873f72c59ee97bbe0"
+                "reference": "1094709bfd6533bdd37aeab0a9e521a4e5613956"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-bigquery/zipball/a918523062c78d8fd29422e873f72c59ee97bbe0",
-                "reference": "a918523062c78d8fd29422e873f72c59ee97bbe0",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-bigquery/zipball/1094709bfd6533bdd37aeab0a9e521a4e5613956",
+                "reference": "1094709bfd6533bdd37aeab0a9e521a4e5613956",
                 "shasum": ""
             },
             "require": {
@@ -726,9 +726,9 @@
             ],
             "description": "BigQuery Client for PHP",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-bigquery/tree/v1.28.2"
+                "source": "https://github.com/googleapis/google-cloud-php-bigquery/tree/v1.28.3"
             },
-            "time": "2023-10-16T22:54:31+00:00"
+            "time": "2024-01-05T17:34:35+00:00"
         },
         {
             "name": "google/cloud-bigquery-analyticshub",
@@ -6415,5 +6415,5 @@
         "ext-odbc": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

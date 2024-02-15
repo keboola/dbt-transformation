@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
-class RemoteRedshiftProvider extends RemoteSnowflakeProvider implements DwhProviderInterface
+class RemoteRedshiftProvider extends RemoteProvider implements DwhProviderInterface
 {
     public const DWH_PROVIDER_TYPE = 'redshift';
 

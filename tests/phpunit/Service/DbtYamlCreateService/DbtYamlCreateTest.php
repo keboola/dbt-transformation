@@ -6,8 +6,9 @@ namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
 use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
+use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
-use DbtTransformation\FileDumper\DbtSourcesYaml;
+use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
 use Generator;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
@@ -65,12 +66,14 @@ class DbtYamlCreateTest extends TestCase
 
         if ($includeLocation) {
             putenv('DBT_KBC_PROD_LOCATION=EU');
+        } else {
+            putenv('DBT_KBC_PROD_LOCATION');
         }
 
         $service = new DbtProfilesYaml();
         $service->dumpYaml(
             $this->dataDir,
-            LocalSnowflakeProvider::getOutputs(
+            RemoteBigQueryProvider::getOutputs(
                 [],
                 RemoteBigQueryProvider::getDbtParams(),
             ),
@@ -120,22 +123,13 @@ class DbtYamlCreateTest extends TestCase
     }
 
     /**
-     * @throws \JsonException
+     * @dataProvider sourcesProvider
+     * @param array<string, array{tables: array<array{name: string, primaryKey: array<string>}>}> $tablesData
      */
-    public function testCreateSourceYaml(): void
+    public function testCreateSourceYaml(string $serviceClass, array $tablesData, string $expectedFileSuffix): void
     {
-        $service = new DbtSourcesYaml();
-
-        $tablesData = [
-            'bucket-1' => ['tables' => [['name' => 'table1', 'primaryKey' => ['id']]]],
-            'bucket-2' => ['tables' => [
-                ['name' => 'table2', 'primaryKey' => ['vatId']],
-                ['name' => 'tableWithCompoundPrimaryKey', 'primaryKey' => ['id', 'vatId']],
-            ]],
-            'linked-bucket' => ['tables' => [
-                ['name' => 'linkedTable', 'primaryKey' => []],
-            ], 'projectId' => '9090'],
-        ];
+        /** @var SnowflakeDbtSourcesYaml|BigQueryDbtSourcesYaml $service */
+        $service = new $serviceClass();
 
         $freshness = [
             'warn_after' => ['count' => 1, 'period' => 'hour'],
@@ -150,9 +144,46 @@ class DbtYamlCreateTest extends TestCase
 
         foreach ($tablesData as $bucket => $tables) {
             self::assertFileEquals(
-                sprintf('%s/models/_sources/%s.yml', $this->providerDataDir, $bucket),
+                sprintf('%s/models/_sources/%s%s.yml', $this->providerDataDir, $bucket, $expectedFileSuffix),
                 sprintf('%s/models/_sources/%s.yml', $this->dataDir, $bucket),
             );
         }
+    }
+
+    /**
+     * @return Generator<string, array{
+     *     serviceClass: class-string<SnowflakeDbtSourcesYaml|BigQueryDbtSourcesYaml>,
+     *     tablesData: array<string, array{tables: array<array{name: string, primaryKey: array<string>}>}>,
+     *     expectedFileSuffix: string
+     * }>
+     */
+    public function sourcesProvider(): Generator
+    {
+        yield 'Snowflake' => [
+            'serviceClass' => SnowflakeDbtSourcesYaml::class,
+            'tablesData' => [
+                'bucket-1' => ['tables' => [['name' => 'table1', 'primaryKey' => ['id']]]],
+                'bucket-2' => ['tables' => [
+                    ['name' => 'table2', 'primaryKey' => ['vatId']],
+                    ['name' => 'tableWithCompoundPrimaryKey', 'primaryKey' => ['id', 'vatId']],
+                ]],
+                'linked-bucket' => ['tables' => [
+                    ['name' => 'linkedTable', 'primaryKey' => []],
+                ], 'projectId' => '9090'],
+            ],
+            'expectedFileSuffix' => '',
+        ];
+
+        yield 'BigQuery' => [
+            'serviceClass' => BigQueryDbtSourcesYaml::class,
+            'tablesData' => [
+                'bucket-1' => ['tables' => [['name' => 'table1', 'primaryKey' => ['id']]]],
+                'bucket-2' => ['tables' => [
+                    ['name' => 'table2', 'primaryKey' => ['vatId']],
+                    ['name' => 'tableWithCompoundPrimaryKey', 'primaryKey' => ['id', 'vatId']],
+                ]],
+            ],
+            'expectedFileSuffix' => '-bigquery',
+        ];
     }
 }

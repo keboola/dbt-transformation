@@ -6,14 +6,12 @@ namespace DbtTransformation\Tests\Service;
 
 use DbtTransformation\Config;
 use DbtTransformation\Configuration\ConfigDefinition;
-use DbtTransformation\Configuration\SyncAction\DbtCompileDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
-use DbtTransformation\FileDumper\DbtProfilesYaml;
-use DbtTransformation\FileDumper\DbtSourcesYaml;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
+use Generator;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 use Symfony\Component\Filesystem\Filesystem;
@@ -23,23 +21,16 @@ class DbtServiceTest extends TestCase
 {
     private string $dataDir = __DIR__ . '/../../../data';
     private GitRepositoryService $gitRepositoryService;
-    private TestLogger $logger;
     private DbtService $dbtService;
     private DwhProviderFactory $dwhProviderFactory;
 
     public function setUp(): void
     {
-        $createProfilesFileService = new DbtProfilesYaml;
-        $createSourceFileService = new DbtSourcesYaml;
         $this->gitRepositoryService = new GitRepositoryService($this->dataDir);
-        $this->logger = new TestLogger();
+        $logger = new TestLogger();
 
         $this->dbtService = new DbtService($this->getProjectPath());
-        $this->dwhProviderFactory = new DwhProviderFactory(
-            $createSourceFileService,
-            $createProfilesFileService,
-            $this->logger,
-        );
+        $this->dwhProviderFactory = new DwhProviderFactory($logger);
     }
 
     public function tearDown(): void
@@ -47,6 +38,7 @@ class DbtServiceTest extends TestCase
         $fs = new Filesystem();
         $finder = new Finder();
         $fs->remove($finder->in($this->dataDir));
+        putenv('KBC_COMPONENTID=keboola.dbt-transformation');
     }
 
     private function getProjectPath(): string
@@ -54,18 +46,11 @@ class DbtServiceTest extends TestCase
         return sprintf('%s/%s', $this->dataDir, 'dbt-project');
     }
 
-    private function getConfig(string $executeStep): Config
+    private function getConfig(string $backend, string $executeStep): Config
     {
         return new Config([
             'authorization' => [
-                'workspace' => [
-                    'host' => (string) getenv('SNOWFLAKE_HOST'),
-                    'warehouse' => (string) getenv('SNOWFLAKE_WAREHOUSE'),
-                    'database' => (string) getenv('SNOWFLAKE_DATABASE'),
-                    'schema' => (string) getenv('SNOWFLAKE_SCHEMA'),
-                    'user' => (string) getenv('SNOWFLAKE_USER'),
-                    'password' => (string) getenv('SNOWFLAKE_PASSWORD'),
-                ],
+                'workspace' => $this->getWorkspaceNode($backend),
             ],
             'parameters' => [
                 'git' => [
@@ -80,9 +65,15 @@ class DbtServiceTest extends TestCase
         ], new ConfigDefinition());
     }
 
-    public function testDbtDebug(): void
+    /**
+     * @dataProvider backendProvider
+     */
+    public function testDbtDebug(string $backend): void
     {
-        $config = $this->getConfig(DbtService::COMMAND_DEBUG);
+        if ($backend === 'bigquery') {
+            putenv('KBC_COMPONENTID=keboola.dbt-transformation-local-bigquery');
+        }
+        $config = $this->getConfig($backend, DbtService::COMMAND_DEBUG);
         $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
         $provider = $this->dwhProviderFactory->getProvider($config, $this->getProjectPath());
         $provider->createDbtYamlFiles();
@@ -95,9 +86,16 @@ class DbtServiceTest extends TestCase
         self::assertStringContainsString('Connection test:', $output);
     }
 
-    public function testDbtCompile(): void
+    /**
+     * @dataProvider backendProvider
+     */
+    public function testDbtCompile(string $backend, string $firstSql, string $secondSql): void
     {
-        $config = $this->getConfig(DbtService::COMMAND_COMPILE);
+        if ($backend === 'bigquery') {
+            putenv('KBC_COMPONENTID=keboola.dbt-transformation-local-bigquery');
+        }
+
+        $config = $this->getConfig($backend, DbtService::COMMAND_COMPILE);
         $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
         $provider = $this->dwhProviderFactory->getProvider($config, $this->getProjectPath());
         $provider->createDbtYamlFiles();
@@ -107,7 +105,6 @@ class DbtServiceTest extends TestCase
         $stringsToFind = [
             'Starting full parse.',
             'Found 2 models, 2 tests',
-            'Concurrency: 4 threads (target=\'kbc_prod\')',
         ];
 
         $foundedCount = 0;
@@ -131,13 +128,64 @@ class DbtServiceTest extends TestCase
         self::assertContains('stg_model.sql', $keys);
 
         self::assertStringContainsString(
-            'select "id"' . PHP_EOL . 'from "SAPI_9317"."in.c-test-bucket"."test"',
+            $firstSql,
             (string) $compiledSql['source_not_null_in.c-test-bucket_test__id_.sql'],
         );
         self::assertStringContainsString('with source as (', (string) $compiledSql['stg_model.sql']);
         self::assertStringContainsString(
-            'select * from "SAPI_9317"."in.c-test-bucket"."test"',
+            $secondSql,
             (string) $compiledSql['stg_model.sql'],
         );
+    }
+
+    /**
+     * @return array<string, array<string, string>|string>
+     */
+    protected function getWorkspaceNode(string $backend): array
+    {
+        if ($backend === 'snowflake') {
+            return [
+                'host' => (string) getenv('SNOWFLAKE_HOST'),
+                'warehouse' => (string) getenv('SNOWFLAKE_WAREHOUSE'),
+                'database' => (string) getenv('SNOWFLAKE_DATABASE'),
+                'schema' => (string) getenv('SNOWFLAKE_SCHEMA'),
+                'user' => (string) getenv('SNOWFLAKE_USER'),
+                'password' => (string) getenv('SNOWFLAKE_PASSWORD'),
+            ];
+        } else {
+            return [
+                'schema' => (string) getenv('BQ_SCHEMA'),
+                'region' => (string) getenv('BQ_LOCATION'),
+                'credentials' => [
+                    'type' => (string) getenv('BQ_CREDENTIALS_TYPE'),
+                    'project_id' => (string) getenv('BQ_CREDENTIALS_PROJECT_ID'),
+                    'private_key_id' => (string) getenv('BQ_CREDENTIALS_PRIVATE_KEY_ID'),
+                    'private_key' => (string) getenv('BQ_CREDENTIALS_PRIVATE_KEY'),
+                    'client_email' => (string) getenv('BQ_CREDENTIALS_CLIENT_EMAIL'),
+                    'client_id' => (string) getenv('BQ_CREDENTIALS_CLIENT_ID'),
+                    'auth_uri' => (string) getenv('BQ_CREDENTIALS_AUTH_URI'),
+                    'token_uri' => (string) getenv('BQ_CREDENTIALS_TOKEN_URI'),
+                    'auth_provider_x509_cert_url' => (string) getenv('BQ_CREDENTIALS_AUTH_PROVIDER_X509_CERT_URL'),
+                    'client_x509_cert_url' => (string) getenv('BQ_CREDENTIALS_CLIENT_X509_CERT_URL'),
+                ],
+            ];
+        }
+    }
+
+    /**
+     * @return Generator<string, array{backend: string, firstSql: string, secondSql: string}>
+     */
+    public function backendProvider(): Generator
+    {
+        yield 'Snowflake local backend' => [
+            'backend' => 'snowflake',
+            'firstSql' => 'select "id"' . PHP_EOL . 'from "SAPI_9317"."in.c-test-bucket"."test"',
+            'secondSql' => 'select * from "SAPI_9317"."in.c-test-bucket"."test"',
+        ];
+        yield 'BigQuery local backend' => [
+            'backend' => 'bigquery',
+            'firstSql' => 'select "id"' . PHP_EOL . 'from `kbc-euw3-55`.`in_c_test_bucket`.`test`'. PHP_EOL,
+            'secondSql' => 'select * from `kbc-euw3-55`.`in_c_test_bucket`.`test`',
+        ];
     }
 }

@@ -1,0 +1,33 @@
+version: 2
+sources:
+    -
+        name: bucket-2
+        freshness:
+            warn_after:
+                count: 1
+                period: hour
+            error_after:
+                count: 1
+                period: day
+        project: '{{ env_var("DBT_KBC_PROD_PROJECT") }}'
+        schema: bucket_2
+        loaded_at_field: '"_timestamp"'
+        tables:
+            -
+                name: table2
+                quoting:
+                    database: true
+                    schema: true
+                    identifier: true
+                columns:
+                    -
+                        name: '"vatId"'
+                        tests:
+                            - unique
+                            - not_null
+            -
+                name: tableWithCompoundPrimaryKey
+                quoting:
+                    database: true
+                    schema: true
+                    identifier: true

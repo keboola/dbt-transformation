@@ -46,6 +46,26 @@ env:
     KBC_URL: "https://connection.keboola.com"
     KBC_TOKEN: ${{ secrets.KBC_API_TOKEN }}
     KBC_TOKEN_NO_RO_MAPPING: ${{ secrets.KBC_API_TOKEN_NO_RO_MAPPING }}
+    SNFK_KBC_URL: "https://connection.keboola.com"
+    SNFK_KBC_TOKEN: ${{ secrets.SNFK_KBC_TOKEN }}
+    GCP_KBC_TOKEN: ${{ secrets.GCP_KBC_TOKEN }}
+    GCP_KBC_URL: "https://connection.europe-west3.gcp.keboola.com"
+
+    # BigQuery
+    BQ_SCHEMA: "WORKSPACE_40431"
+    BQ_LOCATION: "US"
+    BQ_CREDENTIALS_TYPE: "service_account"
+    BQ_CREDENTIALS_PROJECT_ID: "kbc-euw3-55"
+    BQ_CREDENTIALS_PRIVATE_KEY_ID: ${{ secrets.BQ_CREDENTIALS_PRIVATE_KEY_ID }}
+    BQ_CREDENTIALS_PRIVATE_KEY: ${{ secrets.BQ_CREDENTIALS_PRIVATE_KEY }}
+    BQ_CREDENTIALS_CLIENT_EMAIL: "kbc-euw3-ws-40431@kbc-euw3-55.iam.gserviceaccount.com"
+    BQ_CREDENTIALS_CLIENT_ID: "112082628224921357272"
+    BQ_CREDENTIALS_AUTH_URI: "https://accounts.google.com/o/oauth2/auth"
+    BQ_CREDENTIALS_TOKEN_URI: "https://oauth2.googleapis.com/token"
+    BQ_CREDENTIALS_AUTH_PROVIDER_X509_CERT_URL: "https://www.googleapis.com/oauth2/v1/certs"
+    BQ_CREDENTIALS_CLIENT_X509_CERT_URL: "https://www.googleapis.com/robot/v1/metadata/x509/kbc-euw3-ws-40431%40kbc-euw3-55.iam.gserviceaccount.com"
+
+    KBC_COMPONENTID: "keboola.dbt-transformation"
 
     DOCKERHUB_USER: '${{ secrets.DOCKERHUB_USER }}'
     DOCKERHUB_TOKEN: '${{ secrets.DOCKERHUB_TOKEN }}'
@@ -62,6 +82,7 @@ jobs:
             matrix:
                 APP_ID:
                     - keboola.dbt-transformation
+                    - keboola.dbt-transformation-local-bigquery
                     - keboola.dbt-transformation-remote-snowflake
                     - keboola.dbt-transformation-remote-postgresql
                     - keboola.dbt-transformation-remote-mssql
@@ -77,7 +98,7 @@ jobs:
         steps:
             -
                 name: 'Check out the repo'
-                uses: actions/checkout@v2
+                uses: actions/checkout@v4
             -
                 name: 'Print Docker version'
                 run: 'docker -v'
@@ -95,8 +116,8 @@ jobs:
                     TAG="${GITHUB_REF##*/}"
                     IS_SEMANTIC_TAG=$(echo "$TAG" | grep -q '^v\?[0-9]\+\.[0-9]\+\.[0-9]\+$' && echo true || echo false)
                     echo "Tag = '$TAG', is semantic tag = '$IS_SEMANTIC_TAG'"
-                    echo "::set-output name=app_image_tag::$TAG"
-                    echo "::set-output name=is_semantic_tag::$IS_SEMANTIC_TAG"
+                    echo "is_semantic_tag=$IS_SEMANTIC_TAG" >> $GITHUB_OUTPUT
+                    echo "app_image_tag=$TAG" >> $GITHUB_OUTPUT
             -
                 name: 'Push image to ECR'
                 uses: keboola/action-push-to-ecr@master
@@ -119,7 +140,7 @@ jobs:
         steps:
             -
                 name: 'Check out the repo'
-                uses: actions/checkout@v2
+                uses: actions/checkout@v4
             -
                 name: 'Pull image from ECR'
                 uses: keboola/action-pull-from-ecr@master
@@ -165,6 +186,23 @@ jobs:
                     -e KBC_URL \
                     -e KBC_TOKEN \
                     -e KBC_TOKEN_NO_RO_MAPPING \
+                    -e SNFK_KBC_URL \
+                    -e SNFK_KBC_TOKEN \
+                    -e GCP_KBC_TOKEN \
+                    -e GCP_KBC_URL \
+                    -e BQ_SCHEMA \
+                    -e BQ_LOCATION \
+                    -e BQ_CREDENTIALS_TYPE \
+                    -e BQ_CREDENTIALS_PROJECT_ID \
+                    -e BQ_CREDENTIALS_PRIVATE_KEY_ID \
+                    -e BQ_CREDENTIALS_PRIVATE_KEY \
+                    -e BQ_CREDENTIALS_CLIENT_EMAIL \
+                    -e BQ_CREDENTIALS_CLIENT_ID \
+                    -e BQ_CREDENTIALS_AUTH_URI \
+                    -e BQ_CREDENTIALS_TOKEN_URI \
+                    -e BQ_CREDENTIALS_AUTH_PROVIDER_X509_CERT_URL \
+                    -e BQ_CREDENTIALS_CLIENT_X509_CERT_URL \
+                    -e KBC_COMPONENTID \
                     dev composer ci
     tests-in-kbc:
         needs: build
@@ -190,6 +228,7 @@ jobs:
             matrix:
                 APP_ID:
                     - keboola.dbt-transformation
+                    - keboola.dbt-transformation-local-bigquery
                     - keboola.dbt-transformation-remote-snowflake
                     - keboola.dbt-transformation-remote-postgresql
                     - keboola.dbt-transformation-remote-mssql

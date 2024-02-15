@@ -1,0 +1,16 @@
+Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-for-local-bigquery (%s)
+Executing command "dbt deps"
+Running with dbt=%A
+Warning: No packages were found in packages.yml
+Executing command "dbt run"
+Running with dbt=%A
+%s Starting full parse.
+Found 2 models%S
+%AConcurrency: 1 threads (target='kbc_prod')%A
+1 of 2 START %Stable model %s.stg_model %s [RUN]
+1 of 2 OK created %Stable model %s.stg_model %s [CREATE TABLE (4.0 rows, %s Bytes processed) in %ss]
+2 of 2 START %Stable model %s.fct_model %s [RUN]
+2 of 2 OK created %Stable model %s.fct_model %s [CREATE TABLE (1.0 rows, %s Bytes processed) in %ss]
+%AFinished running 2 table models in %s hours %s minutes and %s seconds (%ss).%A
+Completed successfully%A
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2

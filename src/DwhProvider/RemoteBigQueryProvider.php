@@ -6,25 +6,22 @@ namespace DbtTransformation\DwhProvider;
 
 use DbtTransformation\Config;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
-use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
 
-class RemoteBigQueryProvider extends RemoteSnowflakeProvider implements DwhProviderInterface
+class RemoteBigQueryProvider extends RemoteProvider implements DwhProviderInterface
 {
     public const DWH_PROVIDER_TYPE = 'bigquery';
 
     private Temp $temp;
 
     public function __construct(
-        DbtSourcesYaml $createSourceFileService,
         DbtProfilesYaml $createProfilesFileService,
         LoggerInterface $logger,
         Config $config,
         string $projectPath,
     ) {
         parent::__construct(
-            $createSourceFileService,
             $createProfilesFileService,
             $logger,
             $config,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
-class RemotePostgresProvider extends RemoteSnowflakeProvider implements DwhProviderInterface
+class RemotePostgresProvider extends RemoteProvider implements DwhProviderInterface
 {
     public const DWH_PROVIDER_TYPE = 'postgres';
 

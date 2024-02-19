@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Tests\FileDumper;
 
-use DbtTransformation\FileDumper\OutputManifest;
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
+use DbtTransformation\FileDumper\OutputManifest\OutputManifest;
+use DbtTransformation\FileDumper\OutputManifest\OutputManifestSnowflake;
 use Keboola\Component\Manifest\ManifestManager;
 use Keboola\SnowflakeDbAdapter\Connection;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Yaml;
 
 class OutputManifestTest extends TestCase
 {
@@ -454,7 +453,7 @@ class OutputManifestTest extends TestCase
 
         $manifestManager = new ManifestManager($this->dataDir);
 
-        $outputManifest = new OutputManifest(
+        $outputManifest = new OutputManifestSnowflake(
             $workspaceConfig,
             $this->getConnectionMock(),
             $manifestManager,
@@ -555,7 +554,7 @@ class OutputManifestTest extends TestCase
         ];
 
         $manifestManager = new ManifestManager($this->dataDir);
-        $outputManifest = new OutputManifest(
+        $outputManifest = new OutputManifestSnowflake(
             $workspaceConfig,
             $this->getConnectionMock(),
             $manifestManager,
@@ -656,7 +655,7 @@ class OutputManifestTest extends TestCase
         ];
 
         $manifestManager = new ManifestManager($this->dataDir);
-        $outputManifest = new OutputManifest(
+        $outputManifest = new OutputManifestSnowflake(
             $workspaceConfig,
             $this->getConnectionMock(true),
             $manifestManager,

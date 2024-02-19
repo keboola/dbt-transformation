@@ -21,7 +21,12 @@ class DbtManifestParser
     }
 
     /**
-     * @return array<array<string, array<int|string, mixed>>>
+     * @return array<string, array{
+     *      columns: array<string>,
+     *      primary_key: array<string>,
+     *      metadata: array<array{key: string, value: string}>,
+     *      column_metadata: array<string, array<array{key: string, value: mixed}>>
+     *  }>
      * @throws \JsonException
      */
     public function parse(): array
@@ -35,7 +40,16 @@ class DbtManifestParser
                 JSON_THROW_ON_ERROR,
             );
 
-            /** @var array<string, array<string, string|array<string, array<string, array<string, mixed>>>>> $modelNodes */
+            /** @var array<string, array{
+             *     name: string,
+             *     description?: string,
+             *     columns: array<string, array{
+             *         description?: string,
+             *         data_type?: string,
+             *         meta?: array{primary-key?: bool}
+             *     }>,
+             *     meta?: array{owner?: string}
+             * }> $modelNodes */
             $modelNodes = array_filter(
                 (array) $dbtManifest['nodes'],
                 function ($node) {
@@ -49,13 +63,13 @@ class DbtManifestParser
                 if (isset($tableData['description'])) {
                     $tableMetadata[] = [
                         'key' => 'KBC.description',
-                        'value' => $tableData['description'],
+                        'value' => (string) $tableData['description'],
                     ];
                 }
                 if (isset($tableData['meta']['owner'])) {
                     $tableMetadata[] = [
                         'key' => 'meta.owner',
-                        'value' => $tableData['meta']['owner'],
+                        'value' => (string) $tableData['meta']['owner'],
                     ];
                 }
 
@@ -67,13 +81,13 @@ class DbtManifestParser
                     if (isset($values['description'])) {
                         $columnsMetadata[$columnNameLC][] = [
                             'key' => 'KBC.description',
-                            'value' => $values['description'],
+                            'value' => (string) $values['description'],
                         ];
                     }
                     if (isset($values['data_type'])) {
                         $columnsMetadata[$columnNameLC][] = [
                             'key' => 'dbt.data_type',
-                            'value' => $values['data_type'],
+                            'value' => (string) $values['data_type'],
                         ];
                     }
                     if (isset($values['meta'])) {
@@ -85,12 +99,11 @@ class DbtManifestParser
 
                         $columnsMetadata[$columnNameLC][] = [
                             'key' => 'dbt.meta',
-                            'value' => json_encode($values['meta']),
+                            'value' => (string) json_encode($values['meta']),
                         ];
                     }
                 }
 
-                /** @phpstan-ignore-next-line */
                 $tableName = strval($tableData['name']);
                 $result[$tableName] = [
                     'columns' => array_keys($columns),

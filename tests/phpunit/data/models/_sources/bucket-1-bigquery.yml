@@ -1,0 +1,27 @@
+version: 2
+sources:
+    -
+        name: bucket-1
+        freshness:
+            warn_after:
+                count: 1
+                period: hour
+            error_after:
+                count: 1
+                period: day
+        project: '{{ env_var("DBT_KBC_PROD_PROJECT") }}'
+        schema: bucket_1
+        loaded_at_field: '"_timestamp"'
+        tables:
+            -
+                name: table1
+                quoting:
+                    database: true
+                    schema: true
+                    identifier: true
+                columns:
+                    -
+                        name: '"id"'
+                        tests:
+                            - unique
+                            - not_null

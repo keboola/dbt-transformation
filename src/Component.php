@@ -11,10 +11,10 @@ use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
 use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\Exception\ArtifactNotFoundException;
-use DbtTransformation\FileDumper\DbtProfilesYaml;
-use DbtTransformation\FileDumper\DbtSourcesYaml;
-use DbtTransformation\FileDumper\OutputManifest;
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
+use DbtTransformation\FileDumper\OutputManifest\OutputManifestBigQuery;
+use DbtTransformation\FileDumper\OutputManifest\OutputManifestInterface;
+use DbtTransformation\FileDumper\OutputManifest\OutputManifestSnowflake;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
@@ -23,6 +23,7 @@ use DbtTransformation\Service\ArtifactsService;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
 use ErrorException;
+use Google\Cloud\BigQuery\BigQueryClient;
 use Keboola\Component\BaseComponent;
 use Keboola\Component\Config\BaseConfig;
 use Keboola\Component\Manifest\ManifestManager;
@@ -40,8 +41,6 @@ class Component extends BaseComponent
 {
     public const COMPONENT_ID = 'keboola.dbt-transformation';
 
-    private DbtSourcesYaml $createSourceFileService;
-    private DbtProfilesYaml $createProfilesFileService;
     private GitRepositoryService $gitRepositoryService;
     private string $projectPath;
     private StorageClient $storageClient;
@@ -57,8 +56,6 @@ class Component extends BaseComponent
             return str_contains($e->getMessage(), 'shallow file has changed since we read it');
         }));
 
-        $this->createProfilesFileService = new DbtProfilesYaml;
-        $this->createSourceFileService = new DbtSourcesYaml;
         $this->gitRepositoryService = new GitRepositoryService($this->getDataDir(), $this->gitRetryProxy);
         $this->storageClient = new StorageClient([
             'url' => $this->getConfig()->getStorageApiUrl(),
@@ -71,8 +68,6 @@ class Component extends BaseComponent
         );
         $this->setProjectPath($this->getDataDir());
         $this->dwhProviderFactory = new DwhProviderFactory(
-            $this->createSourceFileService,
-            $this->createProfilesFileService,
             $this->getLogger(),
         );
     }
@@ -108,28 +103,43 @@ class Component extends BaseComponent
      * @param array<string, string> $workspaceCredentials
      * @throws \Keboola\SnowflakeDbAdapter\Exception\SnowflakeDbAdapterException
      */
-    public function getOutputManifest(array $workspaceCredentials): OutputManifest
+    public function getOutputManifest(array $workspaceCredentials): OutputManifestInterface
     {
         $manifestManager = new ManifestManager($this->getDataDir());
         $manifestConverter = new DbtManifestParser($this->projectPath);
-        $connectionConfig = array_intersect_key(
-            $workspaceCredentials,
-            array_flip(['host', 'warehouse', 'database', 'user', 'password']),
-        );
-        $connection = new Connection($connectionConfig);
 
         /** @var array<string, array<string, bool>> $dbtProjectYaml */
         $dbtProjectYaml = Yaml::parseFile(sprintf('%s/dbt_project.yml', $this->projectPath));
         $quoteIdentifier = $dbtProjectYaml['quoting']['identifier'] ?? false;
 
-        return new OutputManifest(
-            $workspaceCredentials,
-            $connection,
-            $manifestManager,
-            $manifestConverter,
-            $this->getLogger(),
-            $quoteIdentifier,
-        );
+        if ($this->config->getEnvKbcComponentId() === 'keboola.dbt-transformation-local-bigquery') {
+            $client = new BigQueryClient([
+                'keyFile' => $workspaceCredentials['credentials'],
+                //'location' => $workspaceCredentials['region'],
+            ]);
+            return new OutputManifestBigQuery(
+                $workspaceCredentials,
+                $client,
+                $manifestManager,
+                $manifestConverter,
+                $this->getLogger(),
+                $quoteIdentifier,
+            );
+        } else {
+            $connectionConfig = array_intersect_key(
+                $workspaceCredentials,
+                array_flip(['host', 'warehouse', 'database', 'user', 'password']),
+            );
+            $connection = new Connection($connectionConfig);
+            return new OutputManifestSnowflake(
+                $workspaceCredentials,
+                $connection,
+                $manifestManager,
+                $manifestConverter,
+                $this->getLogger(),
+                $quoteIdentifier,
+            );
+        }
     }
 
     public function getConfig(): Config
@@ -149,19 +159,13 @@ class Component extends BaseComponent
         $configRaw = $this->getRawConfig();
         $action = $configRaw['action'] ?? 'run';
 
-        switch ($action) {
-            case 'dbtCompile':
-                return DbtCompileDefinition::class;
-            case 'dbtDocs':
-                return DbtDocsDefinition::class;
-            case 'dbtRunResults':
-                return DbtRunResultsDefinition::class;
-            case 'gitRepository':
-                return GitRepositoryDefinition::class;
-            case 'run':
-            default:
-                return ConfigDefinition::class;
-        }
+        return match ($action) {
+            'dbtCompile' => DbtCompileDefinition::class,
+            'dbtDocs' => DbtDocsDefinition::class,
+            'dbtRunResults' => DbtRunResultsDefinition::class,
+            'gitRepository' => GitRepositoryDefinition::class,
+            default => ConfigDefinition::class,
+        };
     }
 
     protected function setProjectPath(string $dataDir): void

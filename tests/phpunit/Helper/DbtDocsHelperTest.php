@@ -5,29 +5,54 @@ declare(strict_types=1);
 namespace DbtTransformation\Tests\Helper;
 
 use DbtTransformation\Helper\DbtDocsHelper;
+use Generator;
 use PHPUnit\Framework\TestCase;
 
 class DbtDocsHelperTest extends TestCase
 {
-    public function testMergeHtml(): void
+    /**
+     * @dataProvider htmlMergeDataProvider
+     */
+    public function testMergeHtml(string $html, string $expectedHtml): void
     {
         $manifestJson = '{"metadata":{"foo":"bar"}}';
         $catalogJson = '{"metadata":{"dbt_version":"1.0.6"}}';
-        $html = '<html><head></head><body><script type="application/javascript">            
+        $resultHtml = DbtDocsHelper::mergeHtml($html, $catalogJson, $manifestJson);
+        self::assertEquals($expectedHtml, $resultHtml);
+    }
+
+    /**
+     * @return Generator<string, array{html: string, expectedHtml: string}>
+     */
+    public function htmlMergeDataProvider(): Generator
+    {
+        yield 'legacy structure' => [
+            'html' => '<html><head></head><body><script type="application/javascript">            
             loadProject=function() {            
                 o=[i("manifest","manifest.json"+t),i("catalog","catalog.json"+t)];            
             }
-            </script></body></html>';
-
-        $expectedHtml = '<html><head></head><body><script type="application/javascript">            
+            </script></body></html>',
+            'expectedHtml' => '<html><head></head><body><script type="application/javascript">            
             loadProject=function() {            
                 o=[{label: \'manifest\', data: {"metadata":{"foo":"bar"}}},'
                 . '{label: \'catalog\', data: {"metadata":{"dbt_version":"1.0.6"}}}];            
             }
-            </script></body></html>';
+            </script></body></html>',
+        ];
 
-        $resultHtml = DbtDocsHelper::mergeHtml($html, $catalogJson, $manifestJson);
-        self::assertEquals($expectedHtml, $resultHtml);
+        yield 'new structure' => [
+            'html' => '<html><head></head><body><script type="application/javascript">            
+            loadProject=function() {            
+                n=[o("manifest","manifest.json"+t),o("catalog","catalog.json"+t)];            
+            }
+            </script></body></html>',
+            'expectedHtml' => '<html><head></head><body><script type="application/javascript">            
+            loadProject=function() {            
+                n=[{label: \'manifest\', data: {"metadata":{"foo":"bar"}}},'
+                . '{label: \'catalog\', data: {"metadata":{"dbt_version":"1.0.6"}}}];            
+            }
+            </script></body></html>',
+        ];
     }
 
     public function testGetModelTiming(): void

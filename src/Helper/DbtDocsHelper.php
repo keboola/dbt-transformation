@@ -15,7 +15,20 @@ class DbtDocsHelper
             $catalogJson,
         );
 
-        return (string) str_replace($searchStr, $newStr, $html);
+        $resultHtml = str_replace($searchStr, $newStr, $html, $count);
+
+        if ($count === 0) { // Fallback for new structure
+            $fallbackSearchStr = 'n=[o("manifest","manifest.json"+t),o("catalog","catalog.json"+t)]';
+            $fallbackNewStr = sprintf(
+                'n=[{label: \'manifest\', data: %s},{label: \'catalog\', data: %s}]',
+                $manifestJson,
+                $catalogJson,
+            );
+
+            $resultHtml = str_replace($fallbackSearchStr, $fallbackNewStr, $html);
+        }
+
+        return $resultHtml;
     }
 
     /**

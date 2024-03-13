@@ -95,7 +95,7 @@ class DbtService
     private function findDisallowedOption(string $commandPart): ?string
     {
         foreach (self::DISALLOWED_OPTIONS as $option) {
-            if (strpos($commandPart, $option) !== false) {
+            if (str_starts_with($commandPart, $option) !== false) {
                 return $option;
             }
         }

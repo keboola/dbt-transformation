@@ -12,10 +12,12 @@ use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
 use Generator;
+use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 
 class DbtServiceTest extends TestCase
 {
@@ -64,6 +66,65 @@ class DbtServiceTest extends TestCase
             ],
         ], new ConfigDefinition());
     }
+
+    /**
+     * @dataProvider validDbtOptionsProvider
+     */
+    public function testValidDbtOptions(string $command): void
+    {
+        try {
+            $this->dbtService->runCommand($command);
+        } catch (UserException $e) {
+            $this->fail('Command should not fail with valid options: ' . $e->getMessage());
+        } catch (Throwable) {
+            // It is expected that command fails without dbt project, but must not fail on invalid options
+            $this->expectNotToPerformAssertions();
+        }
+    }
+
+    /**
+     * @dataProvider invalidDbtOptionsProvider
+     */
+    public function testInvalidDbtOptions(string $command, string $expectedExceptionMessage): void
+    {
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        $this->dbtService->runCommand($command);
+    }
+
+    /**
+     * @return Generator<string, array{0: string}>
+     */
+    public function validDbtOptionsProvider(): Generator
+    {
+        yield 'valid option resource-type' => ['dbt ls --resource-type model'];
+        yield 'valid option models' => ['dbt run --models my_model'];
+    }
+
+    /**
+     * @return Generator<string, array{0: string, 1: string}>
+     */
+    public function invalidDbtOptionsProvider(): Generator
+    {
+        yield 'invalid option profiles-dir' => [
+            'dbt run --profiles-dir dir',
+            'You cannot override option --profiles-dir in your dbt command. Please remove it.',
+        ];
+        yield 'invalid option log-format' => [
+            'dbt run --log-format json',
+            'You cannot override option --log-format in your dbt command. Please remove it.',
+        ];
+        yield 'invalid option target' => [
+            'dbt run --target dev',
+            'You cannot override option --target in your dbt command. Please remove it.',
+        ];
+        yield 'invalid option shorthand target' => [
+            'dbt run -t dev',
+            'You cannot override option -t in your dbt command. Please remove it.',
+        ];
+    }
+
 
     /**
      * @dataProvider backendProvider

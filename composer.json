@@ -3,12 +3,12 @@
     "description": "DBT transformation POC component",
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "ext-json": "*",
         "ext-odbc": "*",
         "google/cloud-bigquery": "^1.28",
         "keboola/db-adapter-snowflake": "^1.1",
-        "keboola/php-component": "^9.1",
+        "keboola/php-component": "^10.1",
         "keboola/retry": "^0.5",
         "keboola/storage-api-client": "^14.12",
         "keboola/table-backend-utils": "^1.11",
@@ -18,6 +18,7 @@
         "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
+        "colinodell/psr-testlogger": "^1.3",
         "keboola/coding-standard": ">=7.0.2",
         "keboola/datadir-tests": "^5.2",
         "keboola/php-temp": "^2.0",

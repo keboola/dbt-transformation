@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 php:8.1-cli-buster
+FROM --platform=linux/amd64 php:8.3-cli-bullseye
 
 ARG DBT_VERSION=1.7.1
 ENV DBT_VERSION=${DBT_VERSION}
@@ -72,12 +72,8 @@ RUN pip3 install \
     dbt-postgres \
     dbt-redshift \
     dbt-bigquery \
-    dbt-sqlserver
-
-# install git v 2.30
-RUN echo deb http://deb.debian.org/debian buster-backports main | tee /etc/apt/sources.list.d/buster-backports.list \
-    && apt-get update \
-    && apt-get -t buster-backports install -y git
+    dbt-sqlserver \
+    protobuf==4.25.3 # dbt requires protobuf < 5
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \

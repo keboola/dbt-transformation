@@ -26,9 +26,10 @@ class OutputManifestBigQuery extends OutputManifest implements OutputManifestInt
         ManifestManager $manifestManager,
         DbtManifestParser $dbtManifestParser,
         LoggerInterface $logger,
+        bool $legacyFormat = true,
         bool $quoteIdentifier = false,
     ) {
-        parent::__construct($manifestManager, $dbtManifestParser, 'bigquery', $quoteIdentifier);
+        parent::__construct($manifestManager, $dbtManifestParser, 'bigquery', $legacyFormat, $quoteIdentifier);
         $this->client = $client;
         $this->logger = $logger;
         $this->schema = $databaseConfig['schema'];

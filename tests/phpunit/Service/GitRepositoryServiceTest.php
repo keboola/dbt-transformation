@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Tests\Service;
 
+use ColinODell\PsrTestLogger\TestLogger;
 use DbtTransformation\Service\GitRepositoryService;
 use Generator;
 use Keboola\Component\UserException;
-use Monolog\Handler\TestHandler;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\Test\TestLogger;
 use Retry\BackOff\NoBackOffPolicy;
 use Retry\Policy\CallableRetryPolicy;
 use Retry\RetryProxy;

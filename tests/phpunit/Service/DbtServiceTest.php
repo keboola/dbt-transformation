@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Tests\Service;
 
+use ColinODell\PsrTestLogger\TestLogger;
 use DbtTransformation\Config;
 use DbtTransformation\Configuration\ConfigDefinition;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
@@ -14,7 +15,6 @@ use DbtTransformation\Service\GitRepositoryService;
 use Generator;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\Test\TestLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Throwable;

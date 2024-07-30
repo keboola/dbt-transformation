@@ -21,6 +21,7 @@ services:
       MSSQL_DB_PASSWORD: Passw@rd
       MSSQL_DB_SCHEMA: dbo
       MSSQL_DB_DATABASE: test
+      KBC_DATA_TYPE_SUPPORT: none
     links:
       - pgsql
       - mssql

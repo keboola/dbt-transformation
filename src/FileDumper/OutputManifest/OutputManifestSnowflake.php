@@ -31,12 +31,14 @@ class OutputManifestSnowflake extends OutputManifest implements OutputManifestIn
         ManifestManager $manifestManager,
         DbtManifestParser $dbtManifestParser,
         LoggerInterface $logger,
+        bool $legacyFormat = true,
         bool $quoteIdentifier = false,
     ) {
         parent::__construct(
             $manifestManager,
             $dbtManifestParser,
             SnowflakeDatatype::METADATA_BACKEND,
+            $legacyFormat,
             $quoteIdentifier,
         );
         $this->databaseConfig = $databaseConfig;

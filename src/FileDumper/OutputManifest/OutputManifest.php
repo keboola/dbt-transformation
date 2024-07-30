@@ -179,8 +179,10 @@ abstract class OutputManifest implements OutputManifestInterface
         } else {
             $backend = $defaultBackend ?? 'base';
         }
-        if (in_array($key, ['type', 'length', 'default'])) {
+        if (in_array($key, ['type', 'default'], true)) {
             $dataTypes['base'][$key] = $meta['value'];
+            $dataTypes[$backend][$key] = $meta['value'];
+        } elseif ($key === 'length') {
             $dataTypes[$backend][$key] = $meta['value'];
         }
     }

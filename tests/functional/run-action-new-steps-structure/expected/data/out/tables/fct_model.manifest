@@ -30,12 +30,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             }
         ],
         "col2": [
@@ -48,12 +48,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             }
         ],
         "col3": [
@@ -66,12 +66,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             }
         ],
         "col4": [
@@ -84,12 +84,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             }
         ]
     }

@@ -88,7 +88,7 @@ jobs:
                     - keboola.dbt-transformation-remote-mssql
                     - keboola.dbt-transformation-remote-bigquery
                     - keboola.dbt-transformation-remote-redshift
-                dbt_version: [ 1.7.1, 1.6.8, 1.5.9, 1.4.9, 1.3.7, 1.2.6 ]
+                dbt_version: [ 1.7.1, 1.6.8, 1.5.9, 1.4.9 ]
                 # MSSQL is not supported yet in dbt 1.7.1 and 1.6.8
                 exclude:
                     - APP_ID: keboola.dbt-transformation-remote-mssql
@@ -136,7 +136,7 @@ jobs:
             fail-fast: false
             max-parallel: 1
             matrix:
-                dbt_version: [ 1.7.1, 1.6.8, 1.5.9, 1.4.9, 1.3.7, 1.2.6 ]
+                dbt_version: [ 1.7.1, 1.6.8, 1.5.9, 1.4.9 ]
         steps:
             -
                 name: 'Check out the repo'

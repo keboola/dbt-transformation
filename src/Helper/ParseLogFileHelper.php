@@ -28,7 +28,7 @@ class ParseLogFileHelper
         $logs = [];
         while (!$file->eof()) {
             $fgets = $file->fgets();
-            $logs[] = $fgets !== false ? json_decode($fgets, true) : null;
+            $logs[] = json_decode($fgets, true);
         }
 
         /** @var array{

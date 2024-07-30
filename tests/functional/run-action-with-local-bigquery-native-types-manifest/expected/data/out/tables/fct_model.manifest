@@ -1,0 +1,35 @@
+{
+    "table_metadata": {
+        "KBC.description": "",
+        "KBC.name": "fct_model",
+        "KBC.datatype.backend": "bigquery"
+    },
+    "schema": [
+        {
+            "nullable": true,
+            "primary_key": false,
+            "name": "id",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                },
+                "bigquery": {
+                    "type": "STRING"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "name": "col2",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                },
+                "bigquery": {
+                    "type": "STRING"
+                }
+            }
+        }
+    ]
+}

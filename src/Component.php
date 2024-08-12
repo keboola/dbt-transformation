@@ -123,6 +123,7 @@ class Component extends BaseComponent
                 $manifestManager,
                 $manifestConverter,
                 $this->getLogger(),
+                $this->config->getDataTypeSupport()->usingLegacyManifest(),
                 $quoteIdentifier,
             );
         } else {
@@ -137,6 +138,7 @@ class Component extends BaseComponent
                 $manifestManager,
                 $manifestConverter,
                 $this->getLogger(),
+                $this->config->getDataTypeSupport()->usingLegacyManifest(),
                 $quoteIdentifier,
             );
         }

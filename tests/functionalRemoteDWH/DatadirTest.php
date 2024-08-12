@@ -44,6 +44,7 @@ class DatadirTest extends DatadirTestCase
             'KBC_DATADIR' => $datadirPath,
             'KBC_RUNID' => $runId ?? $defaultRunId,
             'KBC_COMPONENTID' => 'keboola.dbt-transformation-remote',
+            'KBC_DATA_TYPE_SUPPORT' => $this->getEnv('KBC_DATA_TYPE_SUPPORT'),
         ];
         if (getEnv('KBC_COMPONENT_RUN_MODE')) {
             $environments['KBC_COMPONENT_RUN_MODE'] = getEnv('KBC_COMPONENT_RUN_MODE');

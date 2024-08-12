@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace DbtTransformation\FileDumper\OutputManifest;
 
 use Keboola\Component\Manifest\ManifestManager;
-use Keboola\Component\Manifest\ManifestManager\Options\OutTableManifestOptions;
+use Keboola\Component\Manifest\ManifestManager\Options\OutTable\ManifestOptions;
+use Keboola\Component\Manifest\ManifestManager\Options\OutTable\ManifestOptionsSchema;
 use Keboola\Datatype\Definition\Bigquery;
 use Keboola\Datatype\Definition\Common;
 use Keboola\Datatype\Definition\Snowflake;
@@ -17,16 +18,19 @@ abstract class OutputManifest implements OutputManifestInterface
     private DbtManifestParser $dbtManifestParser;
     private string $backend;
     private bool $quoteIdentifier;
+    private bool $legacyFormat;
 
     public function __construct(
         ManifestManager $manifestManager,
         DbtManifestParser $dbtManifestParser,
         string $backend,
+        bool $legacyFormat = true,
         bool $quoteIdentifier = false,
     ) {
         $this->manifestManager = $manifestManager;
         $this->dbtManifestParser = $dbtManifestParser;
         $this->backend = $backend;
+        $this->legacyFormat = $legacyFormat;
         $this->quoteIdentifier = $quoteIdentifier;
     }
 
@@ -114,17 +118,95 @@ abstract class OutputManifest implements OutputManifestInterface
         object $columnsMetadata,
         array $dbtPrimaryKey,
     ): void {
-        $tableManifestOptions = new OutTableManifestOptions();
-        $tableManifestOptions
-            ->setMetadata($tableMetadata)
-            ->setColumns($tableDef->getColumnsNames())
-            ->setColumnMetadata($columnsMetadata)
-            ->setPrimaryKeyColumns(self::getPrimaryKeyColumnNames(
-                $dbtPrimaryKey,
-                $tableDef->getColumnsNames(),
-            ));
+        $tableManifestOptions = new ManifestOptions();
+        $primaryKeys = self::getPrimaryKeyColumnNames(
+            $dbtPrimaryKey,
+            $tableDef->getColumnsNames(),
+        );
 
-        $this->manifestManager->writeTableManifest($realTableName, $tableManifestOptions);
+        $metadataBackend = null;
+        $tableMetadataKeyValue = [];
+        foreach ($tableMetadata as $metadata) {
+            if ($metadata['key'] === 'KBC.datatype.backend') {
+                $metadataBackend = $metadata['value'];
+            }
+            $tableMetadataKeyValue[$metadata['key']] = $metadata['value'];
+        }
+
+        $schema = [];
+        foreach ($tableDef->getColumnsNames() as $columnName) {
+            $columnMetadata = $columnsMetadata->$columnName ?? [];
+            $dataTypes = [];
+            $metadata = [];
+            $isNullable = true;
+            $primaryKey = false;
+            $description = null;
+
+            foreach ($columnMetadata as $meta) {
+                if (str_starts_with($meta['key'], 'KBC.datatype.') && $meta['key'] !== 'KBC.datatype.nullable') {
+                    $this->setDataType($meta, $dataTypes, $metadataBackend);
+                } else {
+                    $this->setMetadata($meta, $metadata, $description, $primaryKey, $isNullable);
+                }
+            }
+
+            $isPK = in_array($columnName, $primaryKeys);
+            $schema[] = new ManifestOptionsSchema(
+                $columnName,
+                $dataTypes,
+                $isNullable,
+                $isPK,
+                $description,
+                empty($metadata) ? null : $metadata,
+            );
+        }
+        $tableManifestOptions->setSchema($schema);
+        $tableManifestOptions->setTableMetadata($tableMetadataKeyValue);
+
+        $this->manifestManager->writeTableManifest($realTableName, $tableManifestOptions, $this->legacyFormat);
+    }
+
+    /**
+     * @param array<string, string> $meta
+     * @param array<string, array<string, mixed>> $dataTypes
+     */
+    private function setDataType(array $meta, array &$dataTypes, ?string $defaultBackend): void
+    {
+        $key = (string) str_replace('KBC.datatype.', '', $meta['key']);
+        if ($key === 'basetype') {
+            $backend = 'base';
+            $key = 'type';
+        } else {
+            $backend = $defaultBackend ?? 'base';
+        }
+        if (in_array($key, ['type', 'default'], true)) {
+            $dataTypes['base'][$key] = $meta['value'];
+            $dataTypes[$backend][$key] = $meta['value'];
+        } elseif ($key === 'length') {
+            $dataTypes[$backend][$key] = $meta['value'];
+        }
+    }
+
+    /**
+     * @param array<string, string> $meta
+     * @param array<string, string> $metadata
+     */
+    private function setMetadata(
+        array $meta,
+        array &$metadata,
+        ?string &$description,
+        bool &$primaryKey,
+        bool &$isNullable,
+    ): void {
+        if ($meta['key'] === 'KBC.description') {
+            $description = $meta['value'];
+        } elseif ($meta['key'] === 'KBC.primaryKey') {
+            $primaryKey = (bool) $meta['value'];
+        } elseif ($meta['key'] === 'KBC.datatype.nullable') {
+            $isNullable = (bool) $meta['value'];
+        } else {
+            $metadata[$meta['key']] = $meta['value'];
+        }
     }
 
     /**

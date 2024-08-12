@@ -15,7 +15,7 @@ class ParseDbtOutputHelper
     public static function getMessagesFromOutput(string $output, string $level = 'info'): Generator
     {
         $matches = preg_match_all('~\{(?:[^{}]|(?R))*}~', $output, $messages);
-        if (!$matches) {
+        if (!$matches || $messages === []) {
             return yield $output;
         }
         foreach (reset($messages) as $messageJson) {

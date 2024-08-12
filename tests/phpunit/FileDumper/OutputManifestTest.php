@@ -10,7 +10,7 @@ use DbtTransformation\FileDumper\OutputManifest\OutputManifestSnowflake;
 use Keboola\Component\Manifest\ManifestManager;
 use Keboola\SnowflakeDbAdapter\Connection;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\Test\TestLogger;
+use Psr\Log\NullLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -458,7 +458,8 @@ class OutputManifestTest extends TestCase
             $this->getConnectionMock(),
             $manifestManager,
             $this->getDbtManifestParserMock(),
-            new TestLogger(),
+            new NullLogger(),
+            true,
             true,
         );
 
@@ -510,7 +511,7 @@ class OutputManifestTest extends TestCase
                 'value' => 'snowflake',
             ],
         ];
-        self::assertEquals($expectedTableMetadata1, $manifest1['metadata']);
+        self::assertEqualsCanonicalizing($expectedTableMetadata1, $manifest1['metadata']);
 
         $expectedColumnMetadata1 = [
             [
@@ -538,7 +539,7 @@ class OutputManifestTest extends TestCase
                 'value' => '[]',
             ],
         ];
-        self::assertEquals($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
+        self::assertEqualsCanonicalizing($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
     }
 
     public function testDumpJsonNoQuotes(): void
@@ -559,7 +560,8 @@ class OutputManifestTest extends TestCase
             $this->getConnectionMock(),
             $manifestManager,
             $this->getDbtManifestParserMock(),
-            new TestLogger(),
+            new NullLogger(),
+            true,
             false,
         );
 
@@ -611,7 +613,7 @@ class OutputManifestTest extends TestCase
                 'value' => 'snowflake',
             ],
         ];
-        self::assertEquals($expectedTableMetadata1, $manifest1['metadata']);
+        self::assertEqualsCanonicalizing($expectedTableMetadata1, $manifest1['metadata']);
 
         $expectedColumnMetadata1 = [
             [
@@ -639,7 +641,7 @@ class OutputManifestTest extends TestCase
                 'value' => '[]',
             ],
         ];
-        self::assertEquals($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
+        self::assertEqualsCanonicalizing($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
     }
 
     public function testDumpJsonUppercase(): void
@@ -660,7 +662,8 @@ class OutputManifestTest extends TestCase
             $this->getConnectionMock(true),
             $manifestManager,
             $this->getDbtManifestParserMock(),
-            new TestLogger(),
+            new NullLogger(),
+            true,
             false,
         );
 
@@ -712,7 +715,7 @@ class OutputManifestTest extends TestCase
                 'value' => 'snowflake',
             ],
         ];
-        self::assertEquals($expectedTableMetadata1, $manifest1['metadata']);
+        self::assertEqualsCanonicalizing($expectedTableMetadata1, $manifest1['metadata']);
 
         $expectedColumnMetadata1 = [
             [
@@ -740,7 +743,7 @@ class OutputManifestTest extends TestCase
                 'value' => '[]',
             ],
         ];
-        self::assertEquals($expectedColumnMetadata1, $manifest1['column_metadata']['BREWERY_NAME']);
+        self::assertEqualsCanonicalizing($expectedColumnMetadata1, $manifest1['column_metadata']['BREWERY_NAME']);
     }
 
     public function testGetPrimaryKeyColumnNames(): void

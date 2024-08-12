@@ -1,1 +1,50 @@
-{"primary_key":[],"columns":["id","col2"],"metadata":[{"key":"KBC.description","value":""},{"key":"KBC.name","value":"stg_model"},{"key":"KBC.datatype.backend","value":"bigquery"}],"column_metadata":{"id":[{"key":"KBC.datatype.type","value":"STRING"},{"key":"KBC.datatype.nullable","value":true},{"key":"KBC.datatype.basetype","value":"STRING"}],"col2":[{"key":"KBC.datatype.type","value":"STRING"},{"key":"KBC.datatype.nullable","value":true},{"key":"KBC.datatype.basetype","value":"STRING"}]}}
+{
+    "metadata": [
+        {
+            "key": "KBC.description",
+            "value": ""
+        },
+        {
+            "key": "KBC.name",
+            "value": "stg_model"
+        },
+        {
+            "key": "KBC.datatype.backend",
+            "value": "bigquery"
+        }
+    ],
+    "columns": [
+        "id",
+        "col2"
+    ],
+    "column_metadata": {
+        "id": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "STRING"
+            }
+        ],
+        "col2": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "STRING"
+            }
+        ]
+    }
+}

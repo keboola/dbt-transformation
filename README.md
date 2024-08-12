@@ -56,8 +56,8 @@ Clone this repository and init the workspace with following command:
 ```shell
 git clone https://github.com/keboola/dbt-transformation.git
 cd dbt-transformation
-docker-compose build 
-docker-compose run --rm app composer install --no-scripts
+docker compose build 
+docker compose run --rm app composer install --no-scripts
 ```
 
 ### ARM
@@ -65,14 +65,14 @@ docker-compose run --rm app composer install --no-scripts
 git clone https://github.com/keboola/dbt-transformation.git
 cd dbt-transformation
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
-docker-compose build --build-arg TARGETPLATFORM=linux/arm64
-docker-compose run --rm app composer install --no-scripts
+docker compose build --build-arg TARGETPLATFORM=linux/arm64
+docker compose run --rm app composer install --no-scripts
 ```
 
 Run the test suite using this command:
 
 ```shell
-docker-compose run --rm dev composer ci
+docker compose run --rm dev composer ci
 ```
  
 # Integration

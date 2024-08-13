@@ -155,9 +155,9 @@ jobs:
             -
                 name: 'Run tests'
                 run: |
-                    docker-compose run dev composer install
-                    docker-compose run wait
-                    docker-compose run \
+                    docker compose run dev composer install
+                    docker compose run wait
+                    docker compose run \
                     -e SNOWFLAKE_HOST \
                     -e SNOWFLAKE_PORT \
                     -e SNOWFLAKE_WAREHOUSE \

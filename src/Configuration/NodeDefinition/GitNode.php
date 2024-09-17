@@ -54,6 +54,8 @@ class GitNode extends ArrayNodeDefinition
                 ->end()
                 ->scalarNode('#password')
                 ->end()
+                ->scalarNode('folder')
+                ->end()
             ->end();
         // @formatter:on
     }

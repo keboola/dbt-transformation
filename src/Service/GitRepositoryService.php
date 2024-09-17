@@ -7,6 +7,7 @@ namespace DbtTransformation\Service;
 use Keboola\Component\UserException;
 use Retry\RetryProxy;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -31,10 +32,15 @@ class GitRepositoryService
         ?string $branch = null,
         ?string $username = null,
         ?string $password = null,
+        ?string $folder = null,
     ): void {
         $fs = new Filesystem();
         if ($fs->exists($this->projectPath)) {
             $fs->remove($this->projectPath);
+        }
+
+        if ($fs->exists($this->dataDir . '/temp')) {
+            $fs->remove($this->dataDir . '/temp');
         }
 
         $branchArgument = [];
@@ -42,9 +48,23 @@ class GitRepositoryService
             $branchArgument = ['-b', $branch];
         }
 
+        $gitFolder = $folder === null ? 'dbt-project' : 'temp';
+
         $url = $this->getUrl($repositoryUrl, $username, $password);
-        $process = new Process(['git', 'clone', ...$branchArgument, $url, 'dbt-project'], $this->dataDir);
+        $process = new Process(['git', 'clone', ...$branchArgument, $url, $gitFolder], $this->dataDir);
         $this->runGitCloneProcess($process, $repositoryUrl);
+
+        if ($folder !== null) {
+            $folderPath = sprintf('%s/temp/%s', $this->dataDir, $folder);
+            if ($fs->exists($folderPath) === false) {
+                throw new UserException(sprintf('Folder "%s" not found in the repository.', $folder));
+            }
+
+            $fs->symlink(
+                sprintf('%s/temp/%s', $this->dataDir, $folder),
+                sprintf('%s/dbt-project', $this->dataDir),
+            );
+        }
     }
 
     /**

@@ -42,6 +42,15 @@ class Config extends BaseConfig
         }
     }
 
+    public function getGitRepositoryFolder(): ?string
+    {
+        try {
+            return $this->getStringValue(['parameters', 'git', 'folder']);
+        } catch (InvalidArgumentException $e) {
+            return null;
+        }
+    }
+
     public function showSqls(): bool
     {
         return (bool) $this->getValue(['parameters', 'showExecutedSqls']);

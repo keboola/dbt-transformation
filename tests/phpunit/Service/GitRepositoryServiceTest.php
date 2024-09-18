@@ -169,6 +169,17 @@ class GitRepositoryServiceTest extends TestCase
         $gitService->clone($url, null, $username, $password);
     }
 
+    public function testCloneWithInvalidFolder(): void
+    {
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Folder "invalid-folder" not found in the repository.');
+        $gitService = new GitRepositoryService($this->dataDir);
+        $gitService->clone(
+            repositoryUrl: 'https://github.com/keboola/dbt-test-project-public.git',
+            folder: 'invalid-folder',
+        );
+    }
+
     /**
      * @return Generator<string, array<string, string>>
      */

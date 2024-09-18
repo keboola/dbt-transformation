@@ -9,6 +9,7 @@ The configuration `config.json` contains following properties in `parameters` ke
     - `username` - string (optional): GitHub username if repository is private.
     - `#password` - string (optional): GitHub Private Access Token if repository is private. Both or none of couple `username` and `password` must be specified.
     - `branch` - string (optional): Specify git branch if you want to clone project from specific branch.
+    - `folder` - string (optional): Specify folder in repository where dbt project is located. Default is root of repository.
 - `dbt` - object (required): Configuration of DBT
     - `executeSteps` - array of array prototypes (required) - at least one element required.
       - `step` - string (required) dbt step you want to run, you can also add some flags e.g. `dbt --warn-error run --select my_model` (but you cannot override some parameters such as `--profile-dir` or `--target` which are used by component itself)

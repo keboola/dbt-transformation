@@ -185,6 +185,7 @@ class Component extends BaseComponent
             $config->getGitRepositoryBranch(),
             $config->getGitRepositoryUsername(),
             $config->getGitRepositoryPassword(),
+            $config->getGitRepositoryFolder(),
         );
 
         $branch = $this->gitRepositoryService->getCurrentBranch($this->projectPath);

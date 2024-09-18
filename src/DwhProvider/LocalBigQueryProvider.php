@@ -116,7 +116,7 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
             'type',
             'method',
             'project',
-            //'location',
+            'location',
             'dataset',
             'keyfile',
         ];

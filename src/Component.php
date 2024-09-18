@@ -115,7 +115,7 @@ class Component extends BaseComponent
         if ($this->config->getEnvKbcComponentId() === 'keboola.dbt-transformation-local-bigquery') {
             $client = new BigQueryClient([
                 'keyFile' => $workspaceCredentials['credentials'],
-                //'location' => $workspaceCredentials['region'],
+                'location' => $workspaceCredentials['region'],
             ]);
             return new OutputManifestBigQuery(
                 $workspaceCredentials,

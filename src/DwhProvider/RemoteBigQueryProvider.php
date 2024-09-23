@@ -40,8 +40,8 @@ class RemoteBigQueryProvider extends RemoteProvider implements DwhProviderInterf
         putenv(sprintf('DBT_KBC_PROD_PROJECT=%s', $workspace['project']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['project']));
         putenv(sprintf('DBT_KBC_PROD_DATASET=%s', $workspace['dataset']));
-        if (isset($workspace['region'])) {
-            putenv(sprintf('DBT_KBC_PROD_LOCATION=%s', $workspace['region']));
+        if (isset($workspace['location'])) {
+            putenv(sprintf('DBT_KBC_PROD_LOCATION=%s', $workspace['location']));
         }
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
         // create temp file with key

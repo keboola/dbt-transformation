@@ -164,14 +164,14 @@ class DbtServiceTest extends TestCase
         $parsedOutput = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
 
         $stringsToFind = [
-            'Starting full parse.',
-            'Found 2 models, 2 tests',
+            '/Starting full parse./',
+            '/Found 2 models, 2 (data )?tests/',
         ];
 
         $foundedCount = 0;
         foreach ($parsedOutput as $line) {
             foreach ($stringsToFind as $stringToFind) {
-                if (str_contains($line, $stringToFind)) {
+                if (preg_match($stringToFind, $line) === 1) {
                     $foundedCount++;
                 };
             }

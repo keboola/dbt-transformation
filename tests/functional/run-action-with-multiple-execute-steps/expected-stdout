@@ -2,8 +2,9 @@ Successfully cloned repository https://github.com/keboola/dbt-test-project-publi
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
-Executing command "dbt build"
+%AExecuting command "dbt build"
 Running with dbt=%A
+%s
 %s Starting full parse.
 Found 2%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
@@ -15,11 +16,12 @@ Found 2%S
 3 of 4 OK created %Sview model WORKSPACE_%s.stg_model %s [SUCCESS 1 in %ss]
 4 of 4 START %Sview model WORKSPACE_%s.fct_model %s [RUN]
 4 of 4 OK created %Sview model WORKSPACE_%s.fct_model %s [SUCCESS 1 in %ss]
-%AFinished running 2 tests, 2 view models in %s hours %s minutes and %s seconds (%ss).%A
+%AFinished running 2 %s tests, 2 view models in %s hours %s minutes and %s seconds (%ss).%A
 Completed successfully%A
 Done. PASS=4 WARN=0 ERROR=0 SKIP=0 TOTAL=4
 Executing command "dbt run"
 Running with dbt=%A
+%s
 Found 2 models%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
 1 of 2 START %Sview model %s.stg_model %s [RUN]
@@ -31,24 +33,29 @@ Completed successfully%A
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
 Executing command "dbt docs generate"
 Running with dbt=%A
+%s
 Found 2 models%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
 Building catalog
 Catalog written to /tmp/%s/dbt-project/target/catalog.json
 Executing command "dbt test"
 Running with dbt=%A
+%s
 Found 2 models%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
 1 of 2 START test source_not_null_in.c-test-bucket_test__id_ %s [RUN]
 1 of 2 PASS source_not_null_in.c-test-bucket_test__id_ %s [PASS in %ss]
 2 of 2 START test source_unique_in.c-test-bucket_test__id_ %s [RUN]
 2 of 2 PASS source_unique_in.c-test-bucket_test__id_ %s [PASS in %ss]
-%AFinished running 2 tests in %s hours %s minutes and %s seconds (%ss).%A
+%AFinished running 2 %s tests in %s hours %s minutes and %s seconds (%ss).%A
 Completed successfully%A
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
 Executing command "dbt source freshness"
 Running with dbt=%A
+%s
 Found 2 models%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
 1 of 2 START freshness of in.c-test-bucket.test %s [RUN]%A
+%s
+%AFinished running 2 sources%a
 Done.

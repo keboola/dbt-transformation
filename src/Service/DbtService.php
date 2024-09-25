@@ -6,6 +6,7 @@ namespace DbtTransformation\Service;
 
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use Keboola\Component\UserException;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -77,10 +78,10 @@ class DbtService
      * @return array<string>
      * @throws \Keboola\Component\UserException
      */
-    protected function getCommandWithoutDbt(string $command): array
+    protected function getCommandWithoutDbt(string $commandString): array
     {
-        $command = explode(' ', $command);
-        unset($command[0]);
+        $stringInput = new StringInput($commandString);
+        $command = $stringInput->getRawTokens(true);
         foreach ($command as $commandPart) {
             $foundOption = $this->findDisallowedOption($commandPart);
             if ($foundOption !== null) {

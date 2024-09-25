@@ -44,7 +44,14 @@ class GitRepositoryServiceTest extends TestCase
         );
         $processMock = $this->getMockBuilder(Process::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['mustRun', 'getOutput', 'getErrorOutput', 'isStarted'])
+            ->onlyMethods([
+                'mustRun',
+                'getOutput',
+                'getErrorOutput',
+                'isStarted',
+                'getCommandLine',
+                'getWorkingDirectory',
+            ])
             ->getMock();
 
         $processMock->method('isStarted')->willReturn(true);

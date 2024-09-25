@@ -2,9 +2,9 @@ Successfully cloned repository https://github.com/keboola/dbt-test-project-publi
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
-Executing command "dbt build"
+%AExecuting command "dbt build"
 Running with dbt=%A
-%s Starting full parse.
+%a Starting full parse.
 Found 2%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
 1 of 4 START test source_not_null_in.c-test-bucket_test__id_ %s [RUN]
@@ -15,7 +15,7 @@ Found 2%S
 3 of 4 OK created %Sview model WORKSPACE_%s.stg_model %s [SUCCESS 1 in %ss]
 4 of 4 START %Sview model WORKSPACE_%s.fct_model %s [RUN]
 4 of 4 OK created %Sview model WORKSPACE_%s.fct_model %s [SUCCESS 1 in %ss]
-%AFinished running 2 tests, 2 view models in %s hours %s minutes and %s seconds (%ss).%A
+%AFinished running 2 %a
 Completed successfully%A
 Done. PASS=4 WARN=0 ERROR=0 SKIP=0 TOTAL=4
 Executing command "dbt run"
@@ -43,7 +43,7 @@ Found 2 models%S
 1 of 2 PASS source_not_null_in.c-test-bucket_test__id_ %s [PASS in %ss]
 2 of 2 START test source_unique_in.c-test-bucket_test__id_ %s [RUN]
 2 of 2 PASS source_unique_in.c-test-bucket_test__id_ %s [PASS in %ss]
-%AFinished running 2 tests in %s hours %s minutes and %s seconds (%ss).%A
+%AFinished running 2 %a
 Completed successfully%A
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
 Executing command "dbt source freshness"
@@ -51,4 +51,4 @@ Running with dbt=%A
 Found 2 models%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
 1 of 2 START freshness of in.c-test-bucket.test %s [RUN]%A
-Done.
+%aDone.

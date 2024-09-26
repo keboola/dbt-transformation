@@ -12,8 +12,9 @@
         "keboola/retry": "^0.5",
         "keboola/storage-api-client": "^14.12",
         "keboola/table-backend-utils": "^1.11",
+        "symfony/console": "^7.1",
         "symfony/filesystem": "^5.4",
-        "symfony/process": "^5.4",
+        "symfony/process": "^6.4",
         "symfony/yaml": "^5.4",
         "vlucas/phpdotenv": "^5.4"
     },

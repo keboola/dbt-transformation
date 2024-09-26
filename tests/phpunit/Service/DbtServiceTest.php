@@ -199,6 +199,25 @@ class DbtServiceTest extends TestCase
         );
     }
 
+    public function testDbtRunWithVars(): void
+    {
+        if (getenv('DBT_VERSION') === '1.4.9') {
+            $this->markTestSkipped('DBT 1.4 are not supporting debug mode to verify variables');
+        }
+
+        $backend = 'snowflake';
+        $command = DbtService::COMMAND_RUN . ' --vars \'{"var1": "value1", "var2": "value2"}\' --debug';
+
+        $config = $this->getConfig($backend, $command);
+        $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
+        $provider = $this->dwhProviderFactory->getProvider($config, $this->getProjectPath());
+        $provider->createDbtYamlFiles();
+
+        $output = $this->dbtService->runCommand($command);
+
+        self::assertStringContainsString('"vars": "{\'var1\': \'value1\', \'var2\': \'value2\'}', $output);
+    }
+
     /**
      * @return array<string, array<string, string>|string>
      */

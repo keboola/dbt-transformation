@@ -201,6 +201,10 @@ class DbtServiceTest extends TestCase
 
     public function testDbtRunWithVars(): void
     {
+        if (getenv('DBT_VERSION') === '1.4.9') {
+            $this->markTestSkipped('DBT 1.4 are not supporting debug mode to verify variables');
+        }
+
         $backend = 'snowflake';
         $command = DbtService::COMMAND_RUN . ' --vars \'{"var1": "value1", "var2": "value2"}\' --debug';
 

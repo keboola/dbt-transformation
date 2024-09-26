@@ -22,7 +22,7 @@ env:
     BIGQUERY_PROJECT_ID: devel-249608
     BIGQUERY_DATASET: dbt
     BIGQUERY_THREADS: 1
-    BIGQUERY_LOCATION: US
+    BIGQUERY_LOCATION: europe-central2
     BIGQUERY_KEY_CONTENT: ${{ secrets.BIGQUERY_KEY_CONTENT }}
 
     # Redshift
@@ -53,7 +53,7 @@ env:
 
     # BigQuery
     BQ_SCHEMA: "WORKSPACE_40431"
-    BQ_LOCATION: "US"
+    BQ_LOCATION: "europe-west3"
     BQ_CREDENTIALS_TYPE: "service_account"
     BQ_CREDENTIALS_PROJECT_ID: "kbc-euw3-55"
     BQ_CREDENTIALS_PRIVATE_KEY_ID: ${{ secrets.BQ_CREDENTIALS_PRIVATE_KEY_ID }}

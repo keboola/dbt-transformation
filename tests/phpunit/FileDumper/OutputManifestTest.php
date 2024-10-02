@@ -773,7 +773,7 @@ class OutputManifestTest extends TestCase
             ['destination' => 'out.test.beers_with_breweries', 'source' => 'beers_with_breweries'],
         ]);
 
-        $tableManifestPath1 = $this->dataDir . '/out/tables/out.test.beers_with_breweries.manifest';
+        $tableManifestPath1 = $this->dataDir . '/out/tables/OUT.TEST.BEERS_WITH_BREWERIES.manifest';
         $tableManifestPath2 = $this->dataDir . '/out/tables/beers.manifest';
         self::assertFileExists($tableManifestPath1);
         self::assertFileDoesNotExist($tableManifestPath2);

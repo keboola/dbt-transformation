@@ -6,7 +6,7 @@
         },
         {
             "key": "KBC.name",
-            "value": "OUT.C-TEST.FCT_MODEL"
+            "value": "out.c-test.fct_model"
         },
         {
             "key": "KBC.datatype.backend",

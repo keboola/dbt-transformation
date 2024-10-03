@@ -35,7 +35,11 @@ abstract class OutputManifest implements OutputManifestInterface
     }
 
     /**
-     * @param array<int, array<string, string>> $configuredOutputTables
+     * @param null[]|array<int, array{
+     *      destination: string,
+     *      source: string,
+     *      primary_key?: array<string>,
+     *  }> $configuredOutputTables
      * @throws \JsonException
      */
     public function dump(array $configuredOutputTables): void
@@ -44,6 +48,11 @@ abstract class OutputManifest implements OutputManifestInterface
         $dbtModelNames = array_keys($dbtMetadata);
 
         if ($configuredOutputTables !== []) {
+            /** @var array<int, array{
+             *     destination: string,
+             *     source: string,
+             *     primary_key?: array<string>
+             * }> $configuredOutputTables */
             $configuredOutputTablesSources = array_map(static function (array $item) {
                 return $item['source'];
             }, $configuredOutputTables);
@@ -65,7 +74,11 @@ abstract class OutputManifest implements OutputManifestInterface
      *      metadata: array<array{key: string, value: string}>,
      *      column_metadata: array<string, array<array{key: string, value: mixed}>>
      *  }> $dbtMetadata
-     * @param array<int, array<string, string>> $configuredOutputTables
+     * @param null[]|array<int, array{
+     *     destination: string,
+     *     source: string,
+     *     primary_key?: array<string>,
+     * }> $configuredOutputTables
      * @throws \Keboola\Component\Manifest\ManifestManager\Options\OptionsValidationException
      */
     protected function processTableDefinition(
@@ -74,9 +87,26 @@ abstract class OutputManifest implements OutputManifestInterface
         array $configuredOutputTables,
     ): void {
         $tableName = $tableDef->getTableName();
-        $realTableName = $this->getRealTableName($tableName, $configuredOutputTables);
+        $destinationTableName = $tableName;
+        $configuredPrimaryKeys = [];
+        if ($configuredOutputTables !== []) {
+            foreach ($configuredOutputTables as $configuredOutputTable) {
+                if (isset($configuredOutputTable['source']) && $configuredOutputTable['source'] === $tableName) {
+                    $destinationTableName = $configuredOutputTable['destination'];
+                    $configuredPrimaryKeys = $configuredOutputTable['primary_key'] ?? [];
+                    break;
+                }
+            }
+        }
+
+        $realTableName = $this->getRealTableName($destinationTableName);
         $dbtColumnsMetadata = $dbtMetadata[$tableName]['column_metadata'] ?? [];
-        $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
+
+        if ($configuredPrimaryKeys !== []) {
+            $dbtPrimaryKey = $configuredPrimaryKeys;
+        } else {
+            $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
+        }
 
         $columnsMetadata = $this->getColumnsMetadata($tableDef, $dbtColumnsMetadata);
         $tableMetadata = $this->getTableMetadata($tableName, $realTableName, $dbtMetadata);
@@ -167,7 +197,7 @@ abstract class OutputManifest implements OutputManifestInterface
             $schema[] = new ManifestOptionsSchema(
                 $columnName,
                 $dataTypes,
-                $isNullable,
+                $isPK === true ? false : $isNullable,
                 $isPK,
                 $description,
                 empty($metadata) ? null : $metadata,
@@ -244,20 +274,8 @@ abstract class OutputManifest implements OutputManifestInterface
      */
     abstract protected function getTables(array $dbtModelNames): array;
 
-    /**
-     * @param array<int, array<string, string>> $configuredOutputTables
-     */
-    protected function getRealTableName(string $tableName, array $configuredOutputTables): string
+    protected function getRealTableName(string $tableName): string
     {
-        if ($configuredOutputTables !== []) {
-            foreach ($configuredOutputTables as $configuredOutputTable) {
-                if ($configuredOutputTable['source'] === $tableName) {
-                    $tableName = $configuredOutputTable['destination'];
-                    break;
-                }
-            }
-        }
-
         return $this->quoteIdentifier || $this->backend === 'bigquery' ? $tableName : strtoupper($tableName);
     }
 }

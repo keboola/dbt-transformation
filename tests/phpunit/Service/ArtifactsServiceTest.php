@@ -122,7 +122,8 @@ class ArtifactsServiceTest extends TestCase
         $artifacts->downloadLastRun(Component::COMPONENT_ID, '456', 'default');
     }
 
-    public function testWriteResultsNoZip(): void
+    /** @dataProvider writeResultsCommandProvider */
+    public function testWriteResultsNoZip(string $step): void
     {
         $temp = new Temp();
         $tmpFolder = $temp->getTmpFolder();
@@ -130,13 +131,25 @@ class ArtifactsServiceTest extends TestCase
             'zip' => false,
         ]);
 
-        $artifacts->writeResults($this->getProjectPath(), 'dbt run');
+        $artifacts->writeResults($this->getProjectPath(), $step);
 
         self::assertFileExists($tmpFolder . '/artifacts/out/current/compiled_sql.json');
         self::assertFileExists($tmpFolder . '/artifacts/out/current/manifest.json');
         self::assertFileExists($tmpFolder . '/artifacts/out/current/run_results.json');
         self::assertFileExists($tmpFolder . '/artifacts/out/current/model_timing.json');
         self::assertFileExists($tmpFolder . '/artifacts/out/current/dbt.log');
+    }
+
+    /**
+     * @return array<string, array<string>>
+     */
+    public static function writeResultsCommandProvider(): array
+    {
+        return [
+            'dbt run' => ['dbt run'],
+            'dbt build' => ['dbt build'],
+            'dbt test' => ['dbt test'],
+        ];
     }
 
     public function testReadFromFileInStep(): void

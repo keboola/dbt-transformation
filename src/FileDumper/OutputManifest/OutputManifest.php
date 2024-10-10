@@ -35,17 +35,35 @@ abstract class OutputManifest implements OutputManifestInterface
     }
 
     /**
+     * @param null[]|array<int, array{
+     *      destination: string,
+     *      source: string,
+     *      primary_key?: array<string>,
+     *  }> $configuredOutputTables
      * @throws \JsonException
      */
-    public function dump(): void
+    public function dump(array $configuredOutputTables): void
     {
         $dbtMetadata = $this->dbtManifestParser->parse();
         $dbtModelNames = array_keys($dbtMetadata);
 
+        if ($configuredOutputTables !== []) {
+            /** @var array<int, array{
+             *     destination: string,
+             *     source: string,
+             *     primary_key?: array<string>
+             * }> $configuredOutputTables */
+            $configuredOutputTablesSources = array_map(static function (array $item) {
+                return $item['source'];
+            }, $configuredOutputTables);
+
+            $dbtModelNames = array_intersect($dbtModelNames, $configuredOutputTablesSources);
+        }
+
         $tableStructures = $this->getTables($dbtModelNames);
 
         foreach ($tableStructures as $tableDef) {
-            $this->processTableDefinition($tableDef, $dbtMetadata);
+            $this->processTableDefinition($tableDef, $dbtMetadata, $configuredOutputTables);
         }
     }
 
@@ -56,14 +74,39 @@ abstract class OutputManifest implements OutputManifestInterface
      *      metadata: array<array{key: string, value: string}>,
      *      column_metadata: array<string, array<array{key: string, value: mixed}>>
      *  }> $dbtMetadata
+     * @param null[]|array<int, array{
+     *     destination: string,
+     *     source: string,
+     *     primary_key?: array<string>,
+     * }> $configuredOutputTables
      * @throws \Keboola\Component\Manifest\ManifestManager\Options\OptionsValidationException
      */
-    protected function processTableDefinition(TableDefinitionInterface $tableDef, array $dbtMetadata): void
-    {
+    protected function processTableDefinition(
+        TableDefinitionInterface $tableDef,
+        array $dbtMetadata,
+        array $configuredOutputTables,
+    ): void {
         $tableName = $tableDef->getTableName();
-        $realTableName = $this->getRealTableName($tableName);
+        $destinationTableName = $tableName;
+        $configuredPrimaryKeys = [];
+        if ($configuredOutputTables !== []) {
+            foreach ($configuredOutputTables as $configuredOutputTable) {
+                if (isset($configuredOutputTable['source']) && $configuredOutputTable['source'] === $tableName) {
+                    $destinationTableName = $configuredOutputTable['destination'];
+                    $configuredPrimaryKeys = $configuredOutputTable['primary_key'] ?? [];
+                    break;
+                }
+            }
+        }
+
+        $realTableName = $this->getRealTableName($destinationTableName);
         $dbtColumnsMetadata = $dbtMetadata[$tableName]['column_metadata'] ?? [];
-        $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
+
+        if ($configuredPrimaryKeys !== []) {
+            $dbtPrimaryKey = $configuredPrimaryKeys;
+        } else {
+            $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
+        }
 
         $columnsMetadata = $this->getColumnsMetadata($tableDef, $dbtColumnsMetadata);
         $tableMetadata = $this->getTableMetadata($tableName, $realTableName, $dbtMetadata);
@@ -154,7 +197,7 @@ abstract class OutputManifest implements OutputManifestInterface
             $schema[] = new ManifestOptionsSchema(
                 $columnName,
                 $dataTypes,
-                $isNullable,
+                $isPK === true ? false : $isNullable,
                 $isPK,
                 $description,
                 empty($metadata) ? null : $metadata,

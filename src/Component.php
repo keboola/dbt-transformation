@@ -95,7 +95,7 @@ class Component extends BaseComponent
         }
 
         if (!$config->hasRemoteDwh()) {
-            $this->getOutputManifest($config->getWorkspaceCredentials())->dump();
+            $this->getOutputManifest($config->getWorkspaceCredentials())->dump($config->getExpectedOutputTables());
         }
     }
 

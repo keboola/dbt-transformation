@@ -1,4 +1,9 @@
 {
+  "artifacts": {
+    "options": {
+      "zip": false
+    }
+  },
   "authorization": {
     "workspace": {
       "host": "%env(string:SNOWFLAKE_HOST)%",

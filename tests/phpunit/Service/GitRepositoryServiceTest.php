@@ -232,7 +232,8 @@ class GitRepositoryServiceTest extends TestCase
                 . ' HTTP Basic: Access denied. If a password was provided for Git authentication, the password was'
                 . ' incorrect or you\'re required to use a token instead of a password. If a token was provided,'
                 . ' it was either incorrect, expired, or improperly scoped. See'
-                . ' https://gitlab.com/help/topics/git/troubleshooting_git#error-on-git-fetch-http-basic-access-denied',
+                . ' https://gitlab.com/help/topics/git/troubleshooting_git.md'
+                . '#error-on-git-fetch-http-basic-access-denied',
         ];
 
         yield 'bitbucket private repository wrong username' => [

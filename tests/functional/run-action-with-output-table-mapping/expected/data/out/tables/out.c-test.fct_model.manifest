@@ -1,0 +1,96 @@
+{
+    "metadata": [
+        {
+            "key": "KBC.description",
+            "value": ""
+        },
+        {
+            "key": "KBC.name",
+            "value": "out.c-test.fct_model"
+        },
+        {
+            "key": "KBC.datatype.backend",
+            "value": "snowflake"
+        }
+    ],
+    "columns": [
+        "id",
+        "col2",
+        "col3",
+        "col4"
+    ],
+    "column_metadata": {
+        "id": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": false
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
+            }
+        ],
+        "col2": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": false
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
+            }
+        ],
+        "col3": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": false
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
+            }
+        ],
+        "col4": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": false
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
+            }
+        ]
+    }
+}

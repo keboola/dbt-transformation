@@ -35,17 +35,26 @@ abstract class OutputManifest implements OutputManifestInterface
     }
 
     /**
+     * @param array<int, array<string, string>> $configuredOutputTables
      * @throws \JsonException
      */
-    public function dump(): void
+    public function dump(array $configuredOutputTables): void
     {
         $dbtMetadata = $this->dbtManifestParser->parse();
         $dbtModelNames = array_keys($dbtMetadata);
 
+        if ($configuredOutputTables !== []) {
+            $configuredOutputTablesSources = array_map(static function (array $item) {
+                return $item['source'];
+            }, $configuredOutputTables);
+
+            $dbtModelNames = array_intersect($dbtModelNames, $configuredOutputTablesSources);
+        }
+
         $tableStructures = $this->getTables($dbtModelNames);
 
         foreach ($tableStructures as $tableDef) {
-            $this->processTableDefinition($tableDef, $dbtMetadata);
+            $this->processTableDefinition($tableDef, $dbtMetadata, $configuredOutputTables);
         }
     }
 
@@ -56,12 +65,16 @@ abstract class OutputManifest implements OutputManifestInterface
      *      metadata: array<array{key: string, value: string}>,
      *      column_metadata: array<string, array<array{key: string, value: mixed}>>
      *  }> $dbtMetadata
+     * @param array<int, array<string, string>> $configuredOutputTables
      * @throws \Keboola\Component\Manifest\ManifestManager\Options\OptionsValidationException
      */
-    protected function processTableDefinition(TableDefinitionInterface $tableDef, array $dbtMetadata): void
-    {
+    protected function processTableDefinition(
+        TableDefinitionInterface $tableDef,
+        array $dbtMetadata,
+        array $configuredOutputTables,
+    ): void {
         $tableName = $tableDef->getTableName();
-        $realTableName = $this->getRealTableName($tableName);
+        $realTableName = $this->getRealTableName($tableName, $configuredOutputTables);
         $dbtColumnsMetadata = $dbtMetadata[$tableName]['column_metadata'] ?? [];
         $dbtPrimaryKey = $dbtMetadata[$tableName]['primary_key'] ?? [];
 
@@ -231,8 +244,20 @@ abstract class OutputManifest implements OutputManifestInterface
      */
     abstract protected function getTables(array $dbtModelNames): array;
 
-    protected function getRealTableName(string $tableName): string
+    /**
+     * @param array<int, array<string, string>> $configuredOutputTables
+     */
+    protected function getRealTableName(string $tableName, array $configuredOutputTables): string
     {
+        if ($configuredOutputTables !== []) {
+            foreach ($configuredOutputTables as $configuredOutputTable) {
+                if ($configuredOutputTable['source'] === $tableName) {
+                    $tableName = $configuredOutputTable['destination'];
+                    break;
+                }
+            }
+        }
+
         return $this->quoteIdentifier || $this->backend === 'bigquery' ? $tableName : strtoupper($tableName);
     }
 }

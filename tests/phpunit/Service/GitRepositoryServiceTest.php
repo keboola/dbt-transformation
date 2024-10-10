@@ -229,9 +229,10 @@ class GitRepositoryServiceTest extends TestCase
             'username' => getenv('GITLAB_USERNAME') ?: '',
             'password' => 'invalid',
             'errorMsg' => 'Failed to clone your repository "https://gitlab.com/keboola/dbt-test-project.git":'
-                . ' HTTP Basic: Access denied. The provided password or token is incorrect or your account has'
-                . ' 2FA enabled and you must use a personal access token instead of a password. See https://git'
-                . 'lab.com/help/topics/git/troubleshooting_git#error-on-git-fetch-http-basic-access-denied',
+                . ' HTTP Basic: Access denied. If a password was provided for Git authentication, the password was'
+                . ' incorrect or you\'re required to use a token instead of a password. If a token was provided,'
+                . ' it was either incorrect, expired, or improperly scoped. See'
+                . ' https://gitlab.com/help/topics/git/troubleshooting_git#error-on-git-fetch-http-basic-access-denied',
         ];
 
         yield 'bitbucket private repository wrong username' => [

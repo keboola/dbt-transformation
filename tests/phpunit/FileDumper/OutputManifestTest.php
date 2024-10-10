@@ -463,7 +463,7 @@ class OutputManifestTest extends TestCase
             true,
         );
 
-        $outputManifest->dump();
+        $outputManifest->dump([]);
 
         $tableManifestPath1 = $this->dataDir . '/out/tables/beers_with_breweries.manifest';
         $tableManifestPath2 = $this->dataDir . '/out/tables/beers.manifest';
@@ -565,7 +565,7 @@ class OutputManifestTest extends TestCase
             false,
         );
 
-        $outputManifest->dump();
+        $outputManifest->dump([]);
 
         $tableManifestPath1 = $this->dataDir . '/out/tables/BEERS_WITH_BREWERIES.manifest';
         $tableManifestPath2 = $this->dataDir . '/out/tables/BEERS.manifest';
@@ -667,7 +667,7 @@ class OutputManifestTest extends TestCase
             false,
         );
 
-        $outputManifest->dump();
+        $outputManifest->dump([]);
 
         $tableManifestPath1 = $this->dataDir . '/out/tables/BEERS_WITH_BREWERIES.manifest';
         $tableManifestPath2 = $this->dataDir . '/out/tables/BEERS.manifest';
@@ -744,6 +744,110 @@ class OutputManifestTest extends TestCase
             ],
         ];
         self::assertEqualsCanonicalizing($expectedColumnMetadata1, $manifest1['column_metadata']['BREWERY_NAME']);
+    }
+
+    public function testDumpJsonWithOutputTables(): void
+    {
+        $workspaceConfig = [
+            'host' => 'host',
+            'port' => 'port',
+            'warehouse' => 'warehouse',
+            'database' => 'database',
+            'schema' => 'schema',
+            'user' => 'user',
+            'password' => 'password',
+        ];
+
+        $manifestManager = new ManifestManager($this->dataDir);
+        $outputManifest = new OutputManifestSnowflake(
+            $workspaceConfig,
+            $this->getConnectionMock(),
+            $manifestManager,
+            $this->getDbtManifestParserMock(),
+            new NullLogger(),
+            true,
+            false,
+        );
+
+        $outputManifest->dump([
+            ['destination' => 'out.test.beers_with_breweries', 'source' => 'beers_with_breweries'],
+        ]);
+
+        $tableManifestPath1 = $this->dataDir . '/out/tables/OUT.TEST.BEERS_WITH_BREWERIES.manifest';
+        $tableManifestPath2 = $this->dataDir . '/out/tables/beers.manifest';
+        self::assertFileExists($tableManifestPath1);
+        self::assertFileDoesNotExist($tableManifestPath2);
+
+        /** @var array{
+         *     'primary_key': array<string>,
+         *     'columns': array<string>,
+         *     'metadata': array<int, array<string, string>>,
+         *     'column_metadata': array<string, array<string, string>>,
+         * } $manifest1
+         */
+        $manifest1 = (array) json_decode((string) file_get_contents($tableManifestPath1), true);
+
+        self::assertEquals([
+            'brewery_id',
+            'beer_id',
+            'beer_name',
+        ], $manifest1['primary_key']);
+
+        $expectedColumns1 = [
+            'brewery_id',
+            'beer_id',
+            'beer_name',
+            'brewery_name',
+            'brewery_db_only',
+        ];
+        self::assertEquals($expectedColumns1, $manifest1['columns']);
+        $expectedTableMetadata1 = [
+            [
+                'key' => 'KBC.description',
+                'value' => 'Beers joined with their breweries',
+            ],
+            [
+                'key' => 'meta.owner',
+                'value' => 'fisa@keboola.com',
+            ],
+            [
+                'key' => 'KBC.name',
+                'value' => 'OUT.TEST.BEERS_WITH_BREWERIES',
+            ],
+            [
+                'key' => 'KBC.datatype.backend',
+                'value' => 'snowflake',
+            ],
+        ];
+        self::assertEqualsCanonicalizing($expectedTableMetadata1, $manifest1['metadata']);
+
+        $expectedColumnMetadata1 = [
+            [
+                'key' => 'KBC.datatype.type',
+                'value' => 'VARCHAR',
+            ],
+            [
+                'key' => 'KBC.datatype.nullable',
+                'value' => true,
+            ],
+            [
+                'key' => 'KBC.datatype.basetype',
+                'value' => 'STRING',
+            ],
+            [
+                'key' => 'KBC.datatype.length',
+                'value' => '16777216',
+            ],
+            [
+                'key' => 'KBC.description',
+                'value' => 'Name of the brewery',
+            ],
+            [
+                'key' => 'dbt.meta',
+                'value' => '[]',
+            ],
+        ];
+        self::assertEqualsCanonicalizing($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
     }
 
     public function testGetPrimaryKeyColumnNames(): void

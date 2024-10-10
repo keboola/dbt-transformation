@@ -7,7 +7,11 @@ namespace DbtTransformation\FileDumper\OutputManifest;
 interface OutputManifestInterface
 {
     /**
-     * @param array<int, array<string, string>> $configuredOutputTables
+     * @param null[]|array<int, array{
+     *       destination: string,
+     *       source: string,
+     *       primary_key?: array<string>,
+     *   }> $configuredOutputTables
      */
     public function dump(array $configuredOutputTables): void;
 }

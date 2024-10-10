@@ -19,6 +19,9 @@
         "col3",
         "col4"
     ],
+    "primary_key": [
+        "id"
+    ],
     "column_metadata": {
         "id": [
             {

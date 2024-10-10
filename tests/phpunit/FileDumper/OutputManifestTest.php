@@ -770,12 +770,17 @@ class OutputManifestTest extends TestCase
         );
 
         $outputManifest->dump([
-            ['destination' => 'out.test.beers_with_breweries', 'source' => 'beers_with_breweries'],
+            [
+                'destination' => 'out.test.beers_with_breweries',
+                'source' => 'beers_with_breweries',
+                'primary_key' => ['brewery_id', 'beer_id'],
+            ],
         ]);
 
         $tableManifestPath1 = $this->dataDir . '/out/tables/OUT.TEST.BEERS_WITH_BREWERIES.manifest';
-        $tableManifestPath2 = $this->dataDir . '/out/tables/beers.manifest';
         self::assertFileExists($tableManifestPath1);
+
+        $tableManifestPath2 = $this->dataDir . '/out/tables/beers.manifest';
         self::assertFileDoesNotExist($tableManifestPath2);
 
         /** @var array{
@@ -790,7 +795,6 @@ class OutputManifestTest extends TestCase
         self::assertEquals([
             'brewery_id',
             'beer_id',
-            'beer_name',
         ], $manifest1['primary_key']);
 
         $expectedColumns1 = [
@@ -848,6 +852,36 @@ class OutputManifestTest extends TestCase
             ],
         ];
         self::assertEqualsCanonicalizing($expectedColumnMetadata1, $manifest1['column_metadata']['brewery_name']);
+
+        $expectedColumnMetadataBreweryID = [
+            [
+                'key' => 'KBC.datatype.nullable',
+                'value' => false,
+            ],
+            [
+                'key' => 'KBC.description',
+                'value' => 'The unique identifier for the brewery',
+            ],
+            [
+                'key' => 'KBC.datatype.basetype',
+                'value' => 'STRING',
+            ],
+            [
+                'key' => 'KBC.datatype.type',
+                'value' => 'VARCHAR',
+            ],
+            [
+                'key' => 'KBC.datatype.length',
+                'value' => '16777216',
+            ],
+            [
+                'key' => 'dbt.meta',
+                'value' => '{"primary-key":true,"dimension":{"sql":"${TABLE}.brewery_id"},
+                                    "meta":null,"metrics":{"num_unique_breweries":{"type":"count_distinct"}}}',
+            ],
+        ];
+
+        self::assertEqualsCanonicalizing($expectedColumnMetadataBreweryID, $manifest1['column_metadata']['brewery_id']);
     }
 
     public function testGetPrimaryKeyColumnNames(): void

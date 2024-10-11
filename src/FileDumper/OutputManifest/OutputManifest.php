@@ -117,7 +117,7 @@ abstract class OutputManifest implements OutputManifestInterface
             $tableMetadata,
             $columnsMetadata,
             $dbtPrimaryKey,
-            $destinationTableName
+            $destinationTableName,
         );
     }
 

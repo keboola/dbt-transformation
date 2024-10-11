@@ -87,12 +87,12 @@ abstract class OutputManifest implements OutputManifestInterface
         array $configuredOutputTables,
     ): void {
         $tableName = $tableDef->getTableName();
-//        $destinationTableName = $tableName;
+        $destinationTableName = null;
         $configuredPrimaryKeys = [];
         if ($configuredOutputTables !== []) {
             foreach ($configuredOutputTables as $configuredOutputTable) {
                 if (isset($configuredOutputTable['source']) && $configuredOutputTable['source'] === $tableName) {
-//                    $destinationTableName = $configuredOutputTable['destination'];
+                    $destinationTableName = $configuredOutputTable['destination'];
                     $configuredPrimaryKeys = $configuredOutputTable['primary_key'] ?? [];
                     break;
                 }
@@ -111,7 +111,14 @@ abstract class OutputManifest implements OutputManifestInterface
         $columnsMetadata = $this->getColumnsMetadata($tableDef, $dbtColumnsMetadata);
         $tableMetadata = $this->getTableMetadata($tableName, $realTableName, $dbtMetadata);
 
-        $this->createAndWriteTableManifest($tableDef, $realTableName, $tableMetadata, $columnsMetadata, $dbtPrimaryKey);
+        $this->createAndWriteTableManifest(
+            $tableDef,
+            $realTableName,
+            $tableMetadata,
+            $columnsMetadata,
+            $dbtPrimaryKey,
+            $destinationTableName
+        );
     }
 
     /**
@@ -160,6 +167,7 @@ abstract class OutputManifest implements OutputManifestInterface
         array $tableMetadata,
         object $columnsMetadata,
         array $dbtPrimaryKey,
+        ?string $destination = null,
     ): void {
         $tableManifestOptions = new ManifestOptions();
         $primaryKeys = self::getPrimaryKeyColumnNames(
@@ -205,6 +213,9 @@ abstract class OutputManifest implements OutputManifestInterface
         }
         $tableManifestOptions->setSchema($schema);
         $tableManifestOptions->setTableMetadata($tableMetadataKeyValue);
+        if ($destination) {
+            $tableManifestOptions->setDestination($destination);
+        }
 
         $this->manifestManager->writeTableManifest($realTableName, $tableManifestOptions, $this->legacyFormat);
     }

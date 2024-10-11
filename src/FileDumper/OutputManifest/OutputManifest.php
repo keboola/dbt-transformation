@@ -87,19 +87,19 @@ abstract class OutputManifest implements OutputManifestInterface
         array $configuredOutputTables,
     ): void {
         $tableName = $tableDef->getTableName();
-        $destinationTableName = $tableName;
+//        $destinationTableName = $tableName;
         $configuredPrimaryKeys = [];
         if ($configuredOutputTables !== []) {
             foreach ($configuredOutputTables as $configuredOutputTable) {
                 if (isset($configuredOutputTable['source']) && $configuredOutputTable['source'] === $tableName) {
-                    $destinationTableName = $configuredOutputTable['destination'];
+//                    $destinationTableName = $configuredOutputTable['destination'];
                     $configuredPrimaryKeys = $configuredOutputTable['primary_key'] ?? [];
                     break;
                 }
             }
         }
 
-        $realTableName = $this->getRealTableName($destinationTableName);
+        $realTableName = $this->getRealTableName($tableName);
         $dbtColumnsMetadata = $dbtMetadata[$tableName]['column_metadata'] ?? [];
 
         if ($configuredPrimaryKeys !== []) {

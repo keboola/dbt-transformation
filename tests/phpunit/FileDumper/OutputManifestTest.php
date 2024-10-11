@@ -777,7 +777,7 @@ class OutputManifestTest extends TestCase
             ],
         ]);
 
-        $tableManifestPath1 = $this->dataDir . '/out/tables/OUT.TEST.BEERS_WITH_BREWERIES.manifest';
+        $tableManifestPath1 = $this->dataDir . '/out/tables/BEERS_WITH_BREWERIES.manifest';
         self::assertFileExists($tableManifestPath1);
 
         $tableManifestPath2 = $this->dataDir . '/out/tables/beers.manifest';
@@ -816,7 +816,7 @@ class OutputManifestTest extends TestCase
             ],
             [
                 'key' => 'KBC.name',
-                'value' => 'OUT.TEST.BEERS_WITH_BREWERIES',
+                'value' => 'BEERS_WITH_BREWERIES',
             ],
             [
                 'key' => 'KBC.datatype.backend',

@@ -784,6 +784,7 @@ class OutputManifestTest extends TestCase
         self::assertFileDoesNotExist($tableManifestPath2);
 
         /** @var array{
+         *     'destination': string,
          *     'primary_key': array<string>,
          *     'columns': array<string>,
          *     'metadata': array<int, array<string, string>>,
@@ -792,6 +793,7 @@ class OutputManifestTest extends TestCase
          */
         $manifest1 = (array) json_decode((string) file_get_contents($tableManifestPath1), true);
 
+        self::assertSame('out.test.beers_with_breweries', $manifest1['destination']);
         self::assertEquals([
             'brewery_id',
             'beer_id',

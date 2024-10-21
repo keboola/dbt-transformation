@@ -136,4 +136,9 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
             'threads',
         ];
     }
+
+    public function getDwhLocation(): DwhLocationEnum
+    {
+        return DwhLocationEnum::LOCAL;
+    }
 }

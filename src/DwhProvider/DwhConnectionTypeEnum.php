@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
-enum DwhLocationEnum
+enum DwhConnectionTypeEnum
 {
     case LOCAL;
     case REMOTE;

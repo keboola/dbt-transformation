@@ -8,5 +8,5 @@ interface DwhProviderInterface
 {
     public function createDbtYamlFiles(): void;
 
-    public function getDwhLocation(): DwhLocationEnum;
+    public function getDwhLocation(): DwhConnectionTypeEnum;
 }

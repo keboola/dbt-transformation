@@ -9,7 +9,7 @@ use DbtTransformation\Configuration\SyncAction\DbtCompileDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtDocsDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
 use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
-use DbtTransformation\DwhProvider\DwhLocationEnum;
+use DbtTransformation\DwhProvider\DwhConnectionTypeEnum;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\Exception\ArtifactNotFoundException;
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
@@ -211,18 +211,18 @@ class Component extends BaseComponent
     /**
      * @throws \Keboola\Component\UserException
      */
-    protected function executeStep(string $step, DwhLocationEnum $dwhLocation): void
+    protected function executeStep(string $step, DwhConnectionTypeEnum $dwhLocation): void
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
-        $dbtService = new DbtService($this->projectPath);
+        $dbtService = new DbtService($this->projectPath, $dwhLocation);
         if ($step === DbtService::COMMAND_DEPS) {
             //some deps could be installed from git, so retry for "shallow file has changed" is needed
             /** @var string $output */
-            $output = $this->gitRetryProxy->call(function () use ($dbtService, $step, $dwhLocation): string {
-                 return $dbtService->runCommand($step, $dwhLocation);
+            $output = $this->gitRetryProxy->call(function () use ($dbtService, $step): string {
+                 return $dbtService->runCommand($step);
             });
         } else {
-            $output = $dbtService->runCommand($step, $dwhLocation);
+            $output = $dbtService->runCommand($step);
         }
 
         foreach (ParseDbtOutputHelper::getMessagesFromOutput($output) as $log) {

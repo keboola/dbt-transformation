@@ -137,7 +137,7 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
         ];
     }
 
-    public function getDwhLocation(): DwhConnectionTypeEnum
+    public function getDwhConnectionType(): DwhConnectionTypeEnum
     {
         return DwhConnectionTypeEnum::LOCAL;
     }

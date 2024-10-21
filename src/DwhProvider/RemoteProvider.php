@@ -59,7 +59,7 @@ abstract class RemoteProvider extends DwhProvider implements DwhProviderInterfac
      */
     abstract public static function getDbtParams(): array;
 
-    public function getDwhLocation(): DwhConnectionTypeEnum
+    public function getDwhConnectionType(): DwhConnectionTypeEnum
     {
         return DwhConnectionTypeEnum::REMOTE;
     }

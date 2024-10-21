@@ -89,7 +89,7 @@ class Component extends BaseComponent
         array_unshift($executeSteps, 'dbt deps');
 
         foreach ($executeSteps as $step) {
-            $this->executeStep($step, $provider->getDwhLocation());
+            $this->executeStep($step, $provider->getDwhConnectionType());
         }
         if ($config->showSqls()) {
             $this->logExecutedSqls();
@@ -211,10 +211,10 @@ class Component extends BaseComponent
     /**
      * @throws \Keboola\Component\UserException
      */
-    protected function executeStep(string $step, DwhConnectionTypeEnum $dwhLocation): void
+    protected function executeStep(string $step, DwhConnectionTypeEnum $dwhConnectionType): void
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
-        $dbtService = new DbtService($this->projectPath, $dwhLocation);
+        $dbtService = new DbtService($this->projectPath, $dwhConnectionType);
         if ($step === DbtService::COMMAND_DEPS) {
             //some deps could be installed from git, so retry for "shallow file has changed" is needed
             /** @var string $output */

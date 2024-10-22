@@ -20,6 +20,15 @@
         "warn_after": {"active": true, "count": 1, "period": "minute"},
         "error_after": {"active": true, "count": 2, "period": "minute"}
       }
+    },
+    "storage": {
+      "input": {
+        "tables": [
+          {
+            "source": "in.c-test-bucket.test"
+          }
+        ]
+      }
     }
   }
 }

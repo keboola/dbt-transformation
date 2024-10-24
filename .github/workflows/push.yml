@@ -224,10 +224,11 @@ jobs:
                 if: 'env.GCP_KBC_TOKEN && env.GCP_KBC_TEST_PROJECT_CONFIGS'
                 uses: keboola/action-run-configs-parallel@master
                 with:
-                  token: '${{ env.GCP_KBC_TOKEN }}'
-                  componentId: 'keboola.dbt-transformation-local-bigquery'
-                  tag: '${{ needs.build.outputs.app_image_tag }}-1.8.6'
-                  configs: '${{ env.GCP_KBC_TEST_PROJECT_CONFIGS }}'
+                    host: '${{ env.GCP_KBC_URL }}'
+                    token: '${{ env.GCP_KBC_TOKEN }}'
+                    componentId: 'keboola.dbt-transformation-local-bigquery'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-1.8.6'
+                    configs: '${{ env.GCP_KBC_TEST_PROJECT_CONFIGS }}'
     deploy:
         needs:
             - build

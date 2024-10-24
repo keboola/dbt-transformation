@@ -50,5 +50,5 @@ Executing command "dbt source freshness"
 Running with dbt=%A
 Found 2 models%S
 %AConcurrency: 1 threads (target='kbc_prod')%A
-1 of 2 START freshness of in.c-test-bucket.test %s [RUN]%A
-%aDone.
+1 of 1 START freshness of in.c-test-bucket.test %s [RUN]%A
+%ADone.

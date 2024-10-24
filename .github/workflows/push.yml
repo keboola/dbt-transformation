@@ -69,9 +69,11 @@ env:
 
     DOCKERHUB_USER: '${{ secrets.DOCKERHUB_USER }}'
     DOCKERHUB_TOKEN: '${{ secrets.DOCKERHUB_TOKEN }}'
-    KBC_STORAGE_TOKEN: '${{ secrets.KBC_STORAGE_TOKEN }}'
-    KBC_TEST_PROJECT_URL: ''
-    KBC_TEST_PROJECT_CONFIGS: ''
+    KBC_TEST_PROJECT_URL: 'https://connection.keboola.com/admin/projects/9317'
+    KBC_TEST_PROJECT_CONFIGS: '1192751064'
+    GCP_KBC_TEST_PROJECT_URL: 'https://connection.europe-west3.gcp.keboola.com/admin/projects/55'
+    GCP_KBC_TEST_PROJECT_CONFIGS: '49197'
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -210,13 +212,23 @@ jobs:
         steps:
             -
                 name: 'Run KBC test jobs'
-                if: 'env.KBC_STORAGE_TOKEN && env.KBC_TEST_PROJECT_CONFIGS'
+                if: 'env.KBC_TOKEN && env.KBC_TEST_PROJECT_CONFIGS'
                 uses: keboola/action-run-configs-parallel@master
                 with:
-                    token: '${{ env.KBC_STORAGE_TOKEN }}'
+                    token: '${{ env.KBC_TOKEN }}'
                     componentId: '${{ env.KBC_DEVELOPERPORTAL_APP }}'
-                    tag: '${{ needs.build.outputs.app_image_tag }}-1.5.0'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-1.8.6'
                     configs: '${{ env.KBC_TEST_PROJECT_CONFIGS }}'
+            -
+                name: 'Run KBC test jobs (GCP BQ)'
+                if: 'env.GCP_KBC_TOKEN && env.GCP_KBC_TEST_PROJECT_CONFIGS'
+                uses: keboola/action-run-configs-parallel@master
+                with:
+                    host: '${{ env.GCP_KBC_URL }}'
+                    token: '${{ env.GCP_KBC_TOKEN }}'
+                    componentId: 'keboola.dbt-transformation-local-bigquery'
+                    tag: '${{ needs.build.outputs.app_image_tag }}-1.8.6'
+                    configs: '${{ env.GCP_KBC_TEST_PROJECT_CONFIGS }}'
     deploy:
         needs:
             - build

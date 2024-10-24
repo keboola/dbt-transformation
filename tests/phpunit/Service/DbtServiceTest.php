@@ -165,24 +165,25 @@ class DbtServiceTest extends TestCase
 
         $stringsToFind = [
             '/Starting full parse./',
-            '/Found 2 models, 2 (data )?tests/',
+            '/Found 2 models/',
         ];
 
-        $foundedCount = 0;
+        $foundCount = 0;
         foreach ($parsedOutput as $line) {
             foreach ($stringsToFind as $stringToFind) {
                 if (preg_match($stringToFind, $line) === 1) {
-                    $foundedCount++;
+                    $foundCount++;
                 };
             }
         }
-        if ($foundedCount !== count($stringsToFind)) {
+        if ($foundCount !== count($stringsToFind)) {
             self::fail('Not all strings were found in output');
         }
 
         $compiledSql = DbtCompileHelper::getCompiledSqlFilesContent($this->getProjectPath() . '/target');
 
         $keys = array_keys($compiledSql);
+
         self::assertContains('source_not_null_in.c-test-bucket_test__id_.sql', $keys);
         self::assertContains('source_unique_in.c-test-bucket_test__id_.sql', $keys);
         self::assertContains('fct_model.sql', $keys);

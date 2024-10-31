@@ -126,4 +126,9 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
     {
         $this->temp->remove();
     }
+
+    public function getDwhConnectionType(): DwhConnectionTypeEnum
+    {
+        return DwhConnectionTypeEnum::LOCAL;
+    }
 }

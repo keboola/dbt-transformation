@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Service;
 
+use DbtTransformation\DwhProvider\DwhConnectionTypeEnum;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use Keboola\Component\UserException;
 use Symfony\Component\Console\Input\StringInput;
@@ -12,11 +13,16 @@ use Symfony\Component\Process\Process;
 
 class DbtService
 {
-    private const DISALLOWED_OPTIONS = [
+    private const DISALLOWED_OPTIONS_LOCAL_DWH = [
         '--profiles-dir',
         '--log-format',
         '--target',
         '-t',
+    ];
+
+    private const DISALLOWED_OPTIONS_REMOTE_DWH = [
+        '--profiles-dir',
+        '--log-format',
     ];
 
     public const COMMAND_COMPILE = 'dbt compile';
@@ -25,11 +31,10 @@ class DbtService
     public const COMMAND_RUN = 'dbt run';
     public const COMMAND_DEPS = 'dbt deps';
 
-    private string $projectPath;
-
-    public function __construct(string $projectPath)
-    {
-        $this->projectPath = $projectPath;
+    public function __construct(
+        private readonly string $projectPath,
+        private readonly DwhConnectionTypeEnum $dwhConnectionType,
+    ) {
     }
 
     /**
@@ -95,7 +100,12 @@ class DbtService
 
     private function findDisallowedOption(string $commandPart): ?string
     {
-        foreach (self::DISALLOWED_OPTIONS as $option) {
+        $disallowedOptions = match ($this->dwhConnectionType) {
+            DwhConnectionTypeEnum::LOCAL => self::DISALLOWED_OPTIONS_LOCAL_DWH,
+            DwhConnectionTypeEnum::REMOTE => self::DISALLOWED_OPTIONS_REMOTE_DWH,
+        };
+
+        foreach ($disallowedOptions as $option) {
             if (str_starts_with($commandPart, $option) !== false) {
                 return $option;
             }

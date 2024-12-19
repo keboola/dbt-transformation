@@ -2,10 +2,10 @@
   "parameters": {
     "git": {
       "repo": "https://github.com/keboola/dbt-test-project-public.git",
-      "branch": "branch-with-sources"
+      "branch": "branch-with-profiles-dir"
     },
     "dbt": {
-      "executeSteps": ["dbt run --target dev"]
+      "executeSteps": ["dbt run --target test --profiles-dir ./config"]
     },
     "remoteDwh": {
       "type": "snowflake",

@@ -1,0 +1,12 @@
+default:
+    target: prod
+    outputs:
+        prod:
+            type: postgres
+            host: prod-db.example.com
+            port: 5432
+            user: prod_user
+            password: prod_password
+            dbname: prod_database
+            schema: prod_schema
+            threads: 8

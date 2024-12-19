@@ -1,0 +1,22 @@
+config:
+    send_anonymous_usage_stats: false
+default:
+    target: dev
+    outputs:
+        prod:
+            type: postgres
+            host: prod-db.example.com
+            port: 5432
+            user: prod_user
+            password: prod_password
+            dbname: prod_database
+            schema: prod_schema
+            threads: 8
+        kbc_prod:
+            type: '{{ env_var("DBT_KBC_PROD_TYPE") }}'
+            method: '{{ env_var("DBT_KBC_PROD_METHOD") }}'
+            project: '{{ env_var("DBT_KBC_PROD_PROJECT") }}'
+            dataset: '{{ env_var("DBT_KBC_PROD_DATASET") }}'
+            threads: '{{ env_var("DBT_KBC_PROD_THREADS")| as_number }}'
+            keyfile: '{{ env_var("DBT_KBC_PROD_KEYFILE") }}'
+            location: '{{ env_var("DBT_KBC_PROD_LOCATION") }}'

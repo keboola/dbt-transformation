@@ -83,10 +83,16 @@ class Component extends BaseComponent
         $this->cloneRepository($config);
 
         $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
-        $provider->createDbtYamlFiles();
 
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');
+
+        if ($provider->getDwhConnectionType() === DwhConnectionTypeEnum::REMOTE) {
+            $profilesDir = $this->getProfilesPath($executeSteps);
+            $provider->createDbtYamlFiles($profilesDir);
+        } else {
+            $provider->createDbtYamlFiles($this->projectPath);
+        }
 
         foreach ($executeSteps as $step) {
             $this->executeStep($step, $provider->getDwhConnectionType());
@@ -450,6 +456,33 @@ class Component extends BaseComponent
         return (isset($rawConfig['parameters']['dbt']['executeSteps'])
             && !empty($rawConfig['parameters']['dbt']['executeSteps'])
             && !is_array($rawConfig['parameters']['dbt']['executeSteps'][0]));
+    }
+
+    /**
+     * @param string[] $executeSteps
+     */
+    private function getProfilesPath(array $executeSteps): string
+    {
+        $pattern = '/--profiles-dir\s+([^\s]+)/';
+        $profilesDir = '';
+
+        foreach ($executeSteps as $step) {
+            if (preg_match($pattern, $step, $matches)) {
+                if ($profilesDir !== '' && $profilesDir !== $matches[1]) {
+                    throw new UserException('Multiple different --profiles-dir options found in dbt commands.');
+                }
+
+                $profilesDir = $matches[1];
+            }
+        }
+
+        if (str_starts_with($profilesDir, '/')) {
+            throw new UserException('Absolute path in --profiles-dir option is not allowed.');
+        }
+
+        $profilesDir = ltrim($profilesDir, '.');
+
+        return $this->projectPath . $profilesDir;
     }
 
     public static function setEnvironment(): void

@@ -33,12 +33,13 @@ abstract class RemoteProvider extends DwhProvider implements DwhProviderInterfac
      * @param array<int, string> $configurationNames
      * @throws \Keboola\Component\UserException
      */
-    public function createDbtYamlFiles(array $configurationNames = []): void
+    public function createDbtYamlFiles(string $profilesPath, array $configurationNames = []): void
     {
         $this->setEnvVars();
 
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
+            $profilesPath,
             $this->getOutputs($configurationNames, $this->getDbtParams(), $this->projectIds),
         );
 

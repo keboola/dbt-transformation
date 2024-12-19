@@ -21,9 +21,10 @@ class DbtService
     ];
 
     private const DISALLOWED_OPTIONS_REMOTE_DWH = [
-        '--profiles-dir',
         '--log-format',
     ];
+
+    private const DEFAULT_TARGET = 'kbc_prod';
 
     public const COMMAND_COMPILE = 'dbt compile';
     public const COMMAND_DOCS_GENERATE = 'dbt docs generate';
@@ -40,10 +41,10 @@ class DbtService
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function runCommand(string $command, string $target = 'kbc_prod'): string
+    public function runCommand(string $command): string
     {
         try {
-            $command = $this->prepareCommand($command, $target);
+            $command = $this->prepareCommand($command);
             $process = new Process($command, $this->projectPath, getenv(), null, null);
             $process->mustRun();
             return $process->getOutput();
@@ -64,7 +65,7 @@ class DbtService
      * @return array<int, string>
      * @throws \Keboola\Component\UserException
      */
-    protected function prepareCommand(string $command, string $target): array
+    protected function prepareCommand(string $command): array
     {
         return [
             'dbt',
@@ -72,10 +73,6 @@ class DbtService
             'json',
             '--no-use-colors',
             ...$this->getCommandWithoutDbt($command),
-            '-t',
-            $target,
-            '--profiles-dir',
-            $this->projectPath,
         ];
     }
 
@@ -87,12 +84,30 @@ class DbtService
     {
         $stringInput = new StringInput($commandString);
         $command = $stringInput->getRawTokens(true);
+        $isTargetSet = false;
+        $isProfilesDirSet = false;
         foreach ($command as $commandPart) {
             $foundOption = $this->findDisallowedOption($commandPart);
             if ($foundOption !== null) {
                 throw new UserException("You cannot override option {$foundOption} in your dbt command. " .
                     'Please remove it.');
             }
+
+            if ($commandPart === '-t' || $commandPart === '--target') {
+                $isTargetSet = true;
+            } elseif ($commandPart === '--profiles-dir') {
+                $isProfilesDirSet = true;
+            }
+        }
+
+        if ($isTargetSet === false) {
+            $command[] = '-t';
+            $command[] = self::DEFAULT_TARGET;
+        }
+
+        if ($isProfilesDirSet === false) {
+            $command[] = '--profiles-dir';
+            $command[] = $this->projectPath;
         }
 
         return $command;

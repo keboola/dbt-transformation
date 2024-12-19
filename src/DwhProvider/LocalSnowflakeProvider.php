@@ -42,7 +42,7 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
      * @param array<int, string> $configurationNames
      * @throws \Keboola\Component\UserException
      */
-    public function createDbtYamlFiles(array $configurationNames = []): void
+    public function createDbtYamlFiles(string $profilesPath, array $configurationNames = []): void
     {
         $tablesData = [];
         if ($this->config->generateSources()) {
@@ -72,6 +72,7 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
 
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
+            $profilesPath,
             $this->getOutputs($configurationNames, self::getDbtParams(), $this->projectIds),
         );
 

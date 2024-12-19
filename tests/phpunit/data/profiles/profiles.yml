@@ -1,0 +1,21 @@
+default:
+    target: prod
+    outputs:
+        prod:
+            type: postgres
+            host: prod-db.example.com
+            port: 5432
+            user: prod_user
+            password: prod_password
+            dbname: prod_database
+            schema: prod_schema
+            threads: 8
+        kbc_prod:
+            type: should_be_overwritten
+            host: should_be_overwritten
+            port: should_be_overwritten
+            user: should_be_overwritten
+            password: should_be_overwritten
+            dbname: should_be_overwritten
+            schema: should_be_overwritten
+            threads: should_be_overwritten

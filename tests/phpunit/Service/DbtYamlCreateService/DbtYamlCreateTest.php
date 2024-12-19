@@ -41,6 +41,7 @@ class DbtYamlCreateTest extends TestCase
         $service = new DbtProfilesYaml();
         $service->dumpYaml(
             $this->dataDir,
+            $this->dataDir,
             LocalSnowflakeProvider::getOutputs(
                 ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
                 LocalSnowflakeProvider::getDbtParams(),
@@ -50,6 +51,64 @@ class DbtYamlCreateTest extends TestCase
         self::assertFileEquals(
             sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
+        );
+    }
+
+    public function testMergeProfilesYaml(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $fs->copy(
+            sprintf('%s/profiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteBigQueryProvider::getOutputs(
+                [],
+                RemoteBigQueryProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedRemoteBigQueryProfilesMerged.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+    }
+
+    public function testMergeProfilesYamlAtSpecifiedPath(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $fs->copy(
+            sprintf('%s/profiles/profiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles/profiles.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir . '/profiles',
+            RemoteBigQueryProvider::getOutputs(
+                [],
+                RemoteBigQueryProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/profiles/expectedProfiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles/profiles.yml', $this->dataDir),
         );
     }
 
@@ -72,6 +131,7 @@ class DbtYamlCreateTest extends TestCase
 
         $service = new DbtProfilesYaml();
         $service->dumpYaml(
+            $this->dataDir,
             $this->dataDir,
             RemoteBigQueryProvider::getOutputs(
                 [],
@@ -114,6 +174,7 @@ class DbtYamlCreateTest extends TestCase
 
         $service = new DbtProfilesYaml();
         $service->dumpYaml(
+            $this->dataDir,
             $this->dataDir,
             LocalSnowflakeProvider::getOutputs(
                 ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],

@@ -7,6 +7,7 @@ namespace DbtTransformation\Tests\Service;
 use ColinODell\PsrTestLogger\TestLogger;
 use DbtTransformation\Config;
 use DbtTransformation\Configuration\ConfigDefinition;
+use DbtTransformation\DwhProvider\DwhConnectionTypeEnum;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
@@ -31,7 +32,7 @@ class DbtServiceTest extends TestCase
         $this->gitRepositoryService = new GitRepositoryService($this->dataDir);
         $logger = new TestLogger();
 
-        $this->dbtService = new DbtService($this->getProjectPath());
+        $this->dbtService = new DbtService($this->getProjectPath(), DwhConnectionTypeEnum::LOCAL);
         $this->dwhProviderFactory = new DwhProviderFactory($logger);
     }
 
@@ -70,10 +71,11 @@ class DbtServiceTest extends TestCase
     /**
      * @dataProvider validDbtOptionsProvider
      */
-    public function testValidDbtOptions(string $command): void
+    public function testValidDbtOptions(string $command, DwhConnectionTypeEnum $dwhConnectionType): void
     {
+        $dbtService = new DbtService($this->getProjectPath(), $dwhConnectionType);
         try {
-            $this->dbtService->runCommand($command);
+            $dbtService->runCommand($command);
         } catch (UserException $e) {
             $this->fail('Command should not fail with valid options: ' . $e->getMessage());
         } catch (Throwable) {
@@ -85,43 +87,61 @@ class DbtServiceTest extends TestCase
     /**
      * @dataProvider invalidDbtOptionsProvider
      */
-    public function testInvalidDbtOptions(string $command, string $expectedExceptionMessage): void
-    {
+    public function testInvalidDbtOptions(
+        string $command,
+        DwhConnectionTypeEnum $dwhConnectionType,
+        string $expectedExceptionMessage,
+    ): void {
         $this->expectException(UserException::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $this->dbtService->runCommand($command);
+        $dbtService = new DbtService($this->getProjectPath(), $dwhConnectionType);
+        $dbtService->runCommand($command);
     }
 
     /**
-     * @return Generator<string, array{0: string}>
+     * @return Generator<string, array{0: string, 1: DwhConnectionTypeEnum}>
      */
     public function validDbtOptionsProvider(): Generator
     {
-        yield 'valid option resource-type' => ['dbt ls --resource-type model'];
-        yield 'valid option models' => ['dbt run --models my_model'];
+        yield 'valid option resource-type local' => ['dbt ls --resource-type model', DwhConnectionTypeEnum::LOCAL];
+        yield 'valid option models local' => ['dbt run --models my_model', DwhConnectionTypeEnum::LOCAL];
+        yield 'valid option resource-type remote' => ['dbt ls --resource-type model', DwhConnectionTypeEnum::REMOTE];
+        yield 'valid option models remote' => ['dbt run --models my_model', DwhConnectionTypeEnum::REMOTE];
+        yield 'valid option target remote' => ['dbt run --target dev', DwhConnectionTypeEnum::REMOTE];
+        yield 'valid option shorthand target remote' => ['dbt run -t dev', DwhConnectionTypeEnum::REMOTE];
+        yield 'valid option profiles-dir remote' => ['dbt run --profiles-dir dir', DwhConnectionTypeEnum::REMOTE];
     }
 
     /**
-     * @return Generator<string, array{0: string, 1: string}>
+     * @return Generator<string, array{0: string, 1: DwhConnectionTypeEnum, 2: string}>
      */
     public function invalidDbtOptionsProvider(): Generator
     {
-        yield 'invalid option profiles-dir' => [
+        yield 'invalid option profiles-dir local dwh' => [
             'dbt run --profiles-dir dir',
+            DwhConnectionTypeEnum::LOCAL,
             'You cannot override option --profiles-dir in your dbt command. Please remove it.',
         ];
-        yield 'invalid option log-format' => [
+        yield 'invalid option log-format local dwh' => [
             'dbt run --log-format json',
+            DwhConnectionTypeEnum::LOCAL,
             'You cannot override option --log-format in your dbt command. Please remove it.',
         ];
-        yield 'invalid option target' => [
+        yield 'invalid option target local dwh' => [
             'dbt run --target dev',
+            DwhConnectionTypeEnum::LOCAL,
             'You cannot override option --target in your dbt command. Please remove it.',
         ];
-        yield 'invalid option shorthand target' => [
+        yield 'invalid option shorthand target local dwh' => [
             'dbt run -t dev',
+            DwhConnectionTypeEnum::LOCAL,
             'You cannot override option -t in your dbt command. Please remove it.',
+        ];
+        yield 'invalid option log-format remote dwh' => [
+            'dbt run --log-format json',
+            DwhConnectionTypeEnum::REMOTE,
+            'You cannot override option --log-format in your dbt command. Please remove it.',
         ];
     }
 
@@ -137,7 +157,7 @@ class DbtServiceTest extends TestCase
         $config = $this->getConfig($backend, DbtService::COMMAND_DEBUG);
         $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
         $provider = $this->dwhProviderFactory->getProvider($config, $this->getProjectPath());
-        $provider->createDbtYamlFiles();
+        $provider->createDbtYamlFiles($this->getProjectPath());
 
         $output = $this->dbtService->runCommand(DbtService::COMMAND_DEBUG);
 
@@ -159,7 +179,7 @@ class DbtServiceTest extends TestCase
         $config = $this->getConfig($backend, DbtService::COMMAND_COMPILE);
         $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
         $provider = $this->dwhProviderFactory->getProvider($config, $this->getProjectPath());
-        $provider->createDbtYamlFiles();
+        $provider->createDbtYamlFiles($this->getProjectPath());
         $output = $this->dbtService->runCommand(DbtService::COMMAND_COMPILE);
         $parsedOutput = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output));
 
@@ -212,7 +232,7 @@ class DbtServiceTest extends TestCase
         $config = $this->getConfig($backend, $command);
         $this->gitRepositoryService->clone('https://github.com/keboola/dbt-test-project-public.git');
         $provider = $this->dwhProviderFactory->getProvider($config, $this->getProjectPath());
-        $provider->createDbtYamlFiles();
+        $provider->createDbtYamlFiles($this->getProjectPath());
 
         $output = $this->dbtService->runCommand($command);
 

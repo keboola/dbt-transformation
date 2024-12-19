@@ -9,6 +9,7 @@ use DbtTransformation\Configuration\SyncAction\DbtCompileDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtDocsDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
 use DbtTransformation\Configuration\SyncAction\GitRepositoryDefinition;
+use DbtTransformation\DwhProvider\DwhConnectionTypeEnum;
 use DbtTransformation\DwhProvider\DwhProviderFactory;
 use DbtTransformation\Exception\ArtifactNotFoundException;
 use DbtTransformation\FileDumper\OutputManifest\DbtManifestParser;
@@ -82,13 +83,19 @@ class Component extends BaseComponent
         $this->cloneRepository($config);
 
         $provider = $this->dwhProviderFactory->getProvider($config, $this->projectPath);
-        $provider->createDbtYamlFiles();
 
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');
 
+        if ($provider->getDwhConnectionType() === DwhConnectionTypeEnum::REMOTE) {
+            $profilesDir = $this->getProfilesPath($executeSteps);
+            $provider->createDbtYamlFiles($profilesDir);
+        } else {
+            $provider->createDbtYamlFiles($this->projectPath);
+        }
+
         foreach ($executeSteps as $step) {
-            $this->executeStep($step);
+            $this->executeStep($step, $provider->getDwhConnectionType());
         }
         if ($config->showSqls()) {
             $this->logExecutedSqls();
@@ -210,10 +217,10 @@ class Component extends BaseComponent
     /**
      * @throws \Keboola\Component\UserException
      */
-    protected function executeStep(string $step): void
+    protected function executeStep(string $step, DwhConnectionTypeEnum $dwhConnectionType): void
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
-        $dbtService = new DbtService($this->projectPath);
+        $dbtService = new DbtService($this->projectPath, $dwhConnectionType);
         if ($step === DbtService::COMMAND_DEPS) {
             //some deps could be installed from git, so retry for "shallow file has changed" is needed
             /** @var string $output */
@@ -449,6 +456,33 @@ class Component extends BaseComponent
         return (isset($rawConfig['parameters']['dbt']['executeSteps'])
             && !empty($rawConfig['parameters']['dbt']['executeSteps'])
             && !is_array($rawConfig['parameters']['dbt']['executeSteps'][0]));
+    }
+
+    /**
+     * @param string[] $executeSteps
+     */
+    private function getProfilesPath(array $executeSteps): string
+    {
+        $pattern = '/--profiles-dir\s+([^\s]+)/';
+        $profilesDir = '';
+
+        foreach ($executeSteps as $step) {
+            if (preg_match($pattern, $step, $matches)) {
+                if ($profilesDir !== '' && $profilesDir !== $matches[1]) {
+                    throw new UserException('Multiple different --profiles-dir options found in dbt commands.');
+                }
+
+                $profilesDir = $matches[1];
+            }
+        }
+
+        if (str_starts_with($profilesDir, '/')) {
+            throw new UserException('Absolute path in --profiles-dir option is not allowed.');
+        }
+
+        $profilesDir = ltrim($profilesDir, '.');
+
+        return $this->projectPath . $profilesDir;
     }
 
     public static function setEnvironment(): void

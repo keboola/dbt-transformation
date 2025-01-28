@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Service;
 
+use DbtTransformation\DwhProvider\DwhConnectionTypeEnum;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use Keboola\Component\UserException;
 use Symfony\Component\Console\Input\StringInput;
@@ -12,12 +13,18 @@ use Symfony\Component\Process\Process;
 
 class DbtService
 {
-    private const DISALLOWED_OPTIONS = [
+    private const DISALLOWED_OPTIONS_LOCAL_DWH = [
         '--profiles-dir',
         '--log-format',
         '--target',
         '-t',
     ];
+
+    private const DISALLOWED_OPTIONS_REMOTE_DWH = [
+        '--log-format',
+    ];
+
+    private const DEFAULT_TARGET = 'kbc_prod';
 
     public const COMMAND_COMPILE = 'dbt compile';
     public const COMMAND_DOCS_GENERATE = 'dbt docs generate';
@@ -25,20 +32,19 @@ class DbtService
     public const COMMAND_RUN = 'dbt run';
     public const COMMAND_DEPS = 'dbt deps';
 
-    private string $projectPath;
-
-    public function __construct(string $projectPath)
-    {
-        $this->projectPath = $projectPath;
+    public function __construct(
+        private readonly string $projectPath,
+        private readonly DwhConnectionTypeEnum $dwhConnectionType,
+    ) {
     }
 
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function runCommand(string $command, string $target = 'kbc_prod'): string
+    public function runCommand(string $command): string
     {
         try {
-            $command = $this->prepareCommand($command, $target);
+            $command = $this->prepareCommand($command);
             $process = new Process($command, $this->projectPath, getenv(), null, null);
             $process->mustRun();
             return $process->getOutput();
@@ -59,7 +65,7 @@ class DbtService
      * @return array<int, string>
      * @throws \Keboola\Component\UserException
      */
-    protected function prepareCommand(string $command, string $target): array
+    protected function prepareCommand(string $command): array
     {
         return [
             'dbt',
@@ -67,10 +73,6 @@ class DbtService
             'json',
             '--no-use-colors',
             ...$this->getCommandWithoutDbt($command),
-            '-t',
-            $target,
-            '--profiles-dir',
-            $this->projectPath,
         ];
     }
 
@@ -82,12 +84,30 @@ class DbtService
     {
         $stringInput = new StringInput($commandString);
         $command = $stringInput->getRawTokens(true);
+        $isTargetSet = false;
+        $isProfilesDirSet = false;
         foreach ($command as $commandPart) {
             $foundOption = $this->findDisallowedOption($commandPart);
             if ($foundOption !== null) {
                 throw new UserException("You cannot override option {$foundOption} in your dbt command. " .
                     'Please remove it.');
             }
+
+            if ($commandPart === '-t' || $commandPart === '--target') {
+                $isTargetSet = true;
+            } elseif ($commandPart === '--profiles-dir') {
+                $isProfilesDirSet = true;
+            }
+        }
+
+        if ($isTargetSet === false) {
+            $command[] = '-t';
+            $command[] = self::DEFAULT_TARGET;
+        }
+
+        if ($isProfilesDirSet === false) {
+            $command[] = '--profiles-dir';
+            $command[] = $this->projectPath;
         }
 
         return $command;
@@ -95,7 +115,12 @@ class DbtService
 
     private function findDisallowedOption(string $commandPart): ?string
     {
-        foreach (self::DISALLOWED_OPTIONS as $option) {
+        $disallowedOptions = match ($this->dwhConnectionType) {
+            DwhConnectionTypeEnum::LOCAL => self::DISALLOWED_OPTIONS_LOCAL_DWH,
+            DwhConnectionTypeEnum::REMOTE => self::DISALLOWED_OPTIONS_REMOTE_DWH,
+        };
+
+        foreach ($disallowedOptions as $option) {
             if (str_starts_with($commandPart, $option) !== false) {
                 return $option;
             }

@@ -54,10 +54,16 @@ abstract class OutputManifest implements OutputManifestInterface
              *     primary_key?: array<string>
              * }> $configuredOutputTables */
             $configuredOutputTablesSources = array_map(static function (array $item) {
-                return $item['source'];
+                return strtolower($item['source']);
             }, $configuredOutputTables);
 
-            $dbtModelNames = array_intersect($dbtModelNames, $configuredOutputTablesSources);
+            $filteredDbtModelNames = [];
+            foreach ($dbtModelNames as $modelName) {
+                if (in_array(strtolower($modelName), $configuredOutputTablesSources, true)) {
+                    $filteredDbtModelNames[] = $modelName;
+                }
+            }
+            $dbtModelNames = $filteredDbtModelNames;
         }
 
         $tableStructures = $this->getTables($dbtModelNames);
@@ -91,7 +97,8 @@ abstract class OutputManifest implements OutputManifestInterface
         $configuredPrimaryKeys = [];
         if ($configuredOutputTables !== []) {
             foreach ($configuredOutputTables as $configuredOutputTable) {
-                if (isset($configuredOutputTable['source']) && $configuredOutputTable['source'] === $tableName) {
+                if (isset($configuredOutputTable['source']) &&
+                    strtolower($configuredOutputTable['source']) === strtolower($tableName)) {
                     $destinationTableName = $configuredOutputTable['destination'];
                     $configuredPrimaryKeys = $configuredOutputTable['primary_key'] ?? [];
                     break;

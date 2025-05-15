@@ -1,0 +1,66 @@
+{
+    "destination": "out.c-dbt-transformation.fct_model",
+    "table_metadata": {
+        "KBC.description": "",
+        "KBC.name": "fct_model",
+        "KBC.datatype.backend": "snowflake"
+    },
+    "schema": [
+        {
+            "nullable": false,
+            "primary_key": false,
+            "name": "id",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                },
+                "snowflake": {
+                    "length": "16777216",
+                    "type": "VARCHAR"
+                }
+            }
+        },
+        {
+            "nullable": false,
+            "primary_key": false,
+            "name": "col2",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                },
+                "snowflake": {
+                    "length": "16777216",
+                    "type": "VARCHAR"
+                }
+            }
+        },
+        {
+            "nullable": false,
+            "primary_key": false,
+            "name": "col3",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                },
+                "snowflake": {
+                    "length": "16777216",
+                    "type": "VARCHAR"
+                }
+            }
+        },
+        {
+            "nullable": false,
+            "primary_key": false,
+            "name": "col4",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                },
+                "snowflake": {
+                    "length": "16777216",
+                    "type": "VARCHAR"
+                }
+            }
+        }
+    ]
+}

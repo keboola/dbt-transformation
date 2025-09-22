@@ -9,6 +9,7 @@ use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
 use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
 use Keboola\StorageApi\Client;
+use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -23,6 +24,7 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
     protected LoggerInterface $logger;
     /** @var array<int, int> */
     protected array $projectIds = [];
+    private Temp $temp;
 
     public function __construct(
         SnowflakeDbtSourcesYaml $createSourceFileService,
@@ -36,6 +38,7 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
         $this->logger = $logger;
         $this->config = $config;
         $this->projectPath = $projectPath;
+        $this->temp = new Temp('dbt-snowflake-local');
     }
 
     /**
@@ -101,7 +104,16 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
         $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+        if (!empty($workspace['#private_key'])) {
+            $tmpKeyFile = $this->temp->createFile('snowflake_rsa');
+            file_put_contents($tmpKeyFile->getPathname(), $workspace['#private_key']);
+            putenv(sprintf('DBT_KBC_PROD_PRIVATE_KEY_PATH=%s', $tmpKeyFile));
+            if (!empty($workspace['#private_key_passphrase'])) {
+                putenv(sprintf('DBT_KBC_PROD_PRIVATE_KEY_PASSPHRASE=%s', $workspace['#private_key_passphrase']));
+            }
+        } else {
+            putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+        }
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $this->config->getThreads()));
     }
 
@@ -116,7 +128,6 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
             'warehouse',
             'host',
             'user',
-            '#password',
             'threads',
         ];
     }
@@ -126,20 +137,35 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
      */
     public static function getDbtParams(): array
     {
-        return [
+        $params = [
             'type',
             'user',
-            'password',
             'schema',
             'warehouse',
             'database',
             'account',
             'threads',
         ];
+
+        if (getenv('DBT_KBC_PROD_PRIVATE_KEY_PATH') !== false) {
+            $params[] = 'private_key_path';
+            if (getenv('DBT_KBC_PROD_PRIVATE_KEY_PASSPHRASE') !== false) {
+                $params[] = 'private_key_passphrase';
+            }
+        } else {
+            $params[] = 'password';
+        }
+
+        return $params;
     }
 
     public function getDwhConnectionType(): DwhConnectionTypeEnum
     {
         return DwhConnectionTypeEnum::LOCAL;
+    }
+
+    public function __destruct()
+    {
+        $this->temp->remove();
     }
 }

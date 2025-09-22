@@ -6,6 +6,7 @@ namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
 use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
+use DbtTransformation\DwhProvider\RemoteSnowflakeProvider;
 use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
@@ -50,6 +51,102 @@ class DbtYamlCreateTest extends TestCase
 
         self::assertFileEquals(
             sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+    }
+
+    /**
+     * Ensure Snowflake private key auth results in private_key_path (+ passphrase) in profiles.yml
+     * @throws \Keboola\Component\UserException
+     */
+    public function testCreateProfileYamlWithSnowflakePrivateKey(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        // Trigger key-based params
+        putenv('DBT_KBC_PROD_PRIVATE_KEY_PATH=/tmp/key');
+        putenv('DBT_KBC_PROD_PRIVATE_KEY_PASSPHRASE=secret');
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedProfilesSnowflakeWithPrivateKey.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+    }
+
+    /**
+     * Remote Snowflake default (password)
+     * @throws \Keboola\Component\UserException
+     */
+    public function testCreateProfileYamlWithRemoteSnowflakePassword(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        // Ensure password mode
+        putenv('DBT_KBC_PROD_PRIVATE_KEY_PATH');
+        putenv('DBT_KBC_PROD_PRIVATE_KEY_PASSPHRASE');
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+    }
+
+    /**
+     * Remote Snowflake with private key
+     * @throws \Keboola\Component\UserException
+     */
+    public function testCreateProfileYamlWithRemoteSnowflakePrivateKey(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        // Trigger key-based params
+        putenv('DBT_KBC_PROD_PRIVATE_KEY_PATH=/tmp/key');
+        putenv('DBT_KBC_PROD_PRIVATE_KEY_PASSPHRASE=secret');
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedProfilesSnowflakeWithPrivateKey.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
     }

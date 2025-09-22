@@ -4,9 +4,26 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
+use DbtTransformation\Config;
+use DbtTransformation\FileDumper\DbtProfilesYaml;
+use Keboola\Temp\Temp;
+use Psr\Log\LoggerInterface;
+
 class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInterface
 {
     public const DWH_PROVIDER_TYPE = 'snowflake';
+
+    private Temp $temp;
+
+    public function __construct(
+        DbtProfilesYaml $createProfilesFileService,
+        LoggerInterface $logger,
+        Config $config,
+        string $projectPath,
+    ) {
+        parent::__construct($createProfilesFileService, $logger, $config, $projectPath);
+        $this->temp = new Temp('dbt-snowflake');
+    }
 
     public function setEnvVars(): void
     {
@@ -19,7 +36,17 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
         $account = str_replace(LocalSnowflakeProvider::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+        // Choose between password or private key
+        if (!empty($workspace['#private_key'])) {
+            $tmpKeyFile = $this->temp->createFile('snowflake_rsa');
+            file_put_contents($tmpKeyFile->getPathname(), $workspace['#private_key']);
+            putenv(sprintf('DBT_KBC_PROD_PRIVATE_KEY_PATH=%s', $tmpKeyFile));
+            if (!empty($workspace['#private_key_passphrase'])) {
+                putenv(sprintf('DBT_KBC_PROD_PRIVATE_KEY_PASSPHRASE=%s', $workspace['#private_key_passphrase']));
+            }
+        } else {
+            putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+        }
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
     }
 
@@ -28,16 +55,26 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
      */
     public static function getDbtParams(): array
     {
-        return [
+        $params = [
             'type',
             'user',
-            'password',
             'schema',
             'warehouse',
             'database',
             'account',
             'threads',
         ];
+
+        if (getenv('DBT_KBC_PROD_PRIVATE_KEY_PATH') !== false) {
+            $params[] = 'private_key_path';
+            if (getenv('DBT_KBC_PROD_PRIVATE_KEY_PASSPHRASE') !== false) {
+                $params[] = 'private_key_passphrase';
+            }
+        } else {
+            $params[] = 'password';
+        }
+
+        return $params;
     }
 
     /**
@@ -51,7 +88,6 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
             'warehouse',
             'host',
             'user',
-            '#password',
             'threads',
         ];
     }
@@ -60,5 +96,10 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
     {
         $dwhConfig = $this->config->getRemoteDwh();
         return sprintf('Remote %s DWH: %s', self::DWH_PROVIDER_TYPE, $dwhConfig['host']);
+    }
+
+    public function __destruct()
+    {
+        $this->temp->remove();
     }
 }

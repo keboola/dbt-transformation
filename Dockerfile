@@ -49,21 +49,21 @@ RUN apt-get update && \
             unixodbc-dev \
     && apt-get clean
 
-# Compile and install Python 3.8 from source
-RUN wget https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz && \
-    tar -xvf Python-3.8.12.tgz && \
-    cd Python-3.8.12 && \
+# Compile and install Python 3.9 from source
+RUN wget https://www.python.org/ftp/python/3.9.24/Python-3.9.24.tgz && \
+    tar -xvf Python-3.9.24.tgz && \
+    cd Python-3.9.24 && \
     ./configure --enable-optimizations && \
     make -j$(nproc) && \
     make altinstall && \
-    cd .. && rm -rf Python-3.8.12 && rm Python-3.8.12.tgz
+    cd .. && rm -rf Python-3.9.24 && rm Python-3.9.24.tgz
 
-# Set Python 3.8 as the default Python version
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.8 1
+# Set Python 3.9 as the default Python version
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.9 1
 
 # Install pip for the new Python version
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
-    python3.8 get-pip.py && rm get-pip.py
+    python3.9 get-pip.py && rm get-pip.py
 
 # Now, you can install dbt or any other packages using pip
 RUN pip3 install \

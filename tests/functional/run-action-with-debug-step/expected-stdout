@@ -5,8 +5,8 @@ Warning: No packages were found in packages.yml
 Executing command "dbt debug"
 Running with dbt=%A
 dbt version: %s
-python version: 3.8.12
-python path: /usr/local/bin/python3.8
+python version: 3.9.24
+python path: /usr/local/bin/python3.9
 os info: %A
 Configuration:
   profiles.yml file [OK found and valid]

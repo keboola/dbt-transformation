@@ -40,7 +40,7 @@ env:
     GITLAB_USERNAME: "dbt-test-project-user"
     GITLAB_PASSWORD: ${{ secrets.GITLAB_PAT }}
 
-    BITBUCKET_USERNAME: "dbt-test-project-user"
+    BITBUCKET_USERNAME: "Pepa-K"
     BITBUCKET_PASSWORD: ${{ secrets.BITBUCKET_PAT }}
 
     KBC_URL: "https://connection.keboola.com"

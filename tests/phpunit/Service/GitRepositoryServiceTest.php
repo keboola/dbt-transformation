@@ -205,7 +205,7 @@ class GitRepositoryServiceTest extends TestCase
         ];
 
         yield 'bitbucket private repository' => [
-            'url' => 'https://bitbucket.org/dbt-test-project-user/dbt-test-project.git',
+            'url' => 'https://bitbucket.org/kds_consulting_team/dbt-test-project.git',
             'username' => getenv('BITBUCKET_USERNAME') ?: '',
             'password' => getenv('BITBUCKET_PASSWORD') ?: '',
         ];
@@ -237,11 +237,10 @@ class GitRepositoryServiceTest extends TestCase
         ];
 
         yield 'bitbucket private repository wrong username' => [
-            'url' => 'https://bitbucket.org/dbt-test-project-user/dbt-test-project.git',
+            'url' => 'https://bitbucket.org/kds_consulting_team/dbt-test-project.git',
             'username' => 'dbt-invalid-user',
             'password' => getenv('BITBUCKET_PASSWORD') ?: '',
-            'errorMsg' => 'Failed to clone your repository "https://bitbucket.org/dbt-test-project-user/'
-                . 'dbt-test-project.git": Invalid credentials',
+            'errorMsg' => 'Failed to clone your repository "https://bitbucket.org/kds_consulting_team/dbt-test-project.git": You may not have access to this repository or it no longer exists in this workspace. If you think this repository exists and you have access, make sure you are authenticated.', // phpcs:ignore
         ];
 
         yield 'wrong url' => [

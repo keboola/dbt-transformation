@@ -40,7 +40,7 @@ env:
     GITLAB_USERNAME: "dbt-test-project-user"
     GITLAB_PASSWORD: ${{ secrets.GITLAB_PAT }}
 
-    BITBUCKET_USERNAME: "dbt-test-project-user"
+    BITBUCKET_USERNAME: "Pepa-K"
     BITBUCKET_PASSWORD: ${{ secrets.BITBUCKET_PAT }}
 
     KBC_URL: "https://connection.keboola.com"
@@ -133,7 +133,7 @@ jobs:
                     source_image: '${{ env.APP_IMAGE }}'
     tests:
         needs: build
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             max-parallel: 1

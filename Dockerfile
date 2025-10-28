@@ -62,7 +62,7 @@ RUN wget https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz && \
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.8 1
 
 # Install pip for the new Python version
-RUN wget https://bootstrap.pypa.io/get-pip.py && \
+RUN wget https://bootstrap.pypa.io/pip/3.8/get-pip.py && \
     python3.8 get-pip.py && rm get-pip.py
 
 # Now, you can install dbt or any other packages using pip

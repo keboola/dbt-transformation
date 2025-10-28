@@ -40,7 +40,7 @@ env:
     GITLAB_USERNAME: "dbt-test-project-user"
     GITLAB_PASSWORD: ${{ secrets.GITLAB_PAT }}
 
-    BITBUCKET_USERNAME: "dbt-test-project-user"
+    BITBUCKET_USERNAME: "Pepa-K"
     BITBUCKET_PASSWORD: ${{ secrets.BITBUCKET_PAT }}
 
     KBC_URL: "https://connection.keboola.com"
@@ -90,13 +90,11 @@ jobs:
                     - keboola.dbt-transformation-remote-mssql
                     - keboola.dbt-transformation-remote-bigquery
                     - keboola.dbt-transformation-remote-redshift
-                dbt_version: [ 1.8.6, 1.7.1, 1.6.8, 1.5.9, 1.4.9 ]
-                # MSSQL is not supported yet in dbt 1.7.1 and 1.6.8
+                dbt_version: [ 1.8.6, 1.7.1 ]
+                # MSSQL is not supported yet in dbt 1.7.1
                 exclude:
                     - APP_ID: keboola.dbt-transformation-remote-mssql
                       dbt_version: 1.7.1
-                    - APP_ID: keboola.dbt-transformation-remote-mssql
-                      dbt_version: 1.6.8
         steps:
             -
                 name: 'Check out the repo'
@@ -133,12 +131,12 @@ jobs:
                     source_image: '${{ env.APP_IMAGE }}'
     tests:
         needs: build
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             max-parallel: 1
             matrix:
-                dbt_version: [ 1.8.6, 1.7.1, 1.6.8, 1.5.9, 1.4.9 ]
+                dbt_version: [ 1.8.6, 1.7.1 ]
         steps:
             -
                 name: 'Check out the repo'

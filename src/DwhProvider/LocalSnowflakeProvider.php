@@ -108,22 +108,6 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
     /**
      * @return array<int, string>
      */
-    public static function getRequiredConnectionParams(): array
-    {
-        return [
-            'schema',
-            'database',
-            'warehouse',
-            'host',
-            'user',
-            '#password',
-            'threads',
-        ];
-    }
-
-    /**
-     * @return array<int, string>
-     */
     public static function getDbtParams(): array
     {
         return [

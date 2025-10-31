@@ -8,6 +8,7 @@ use DbtTransformation\Config;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
 use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
+use Keboola\Component\UserException;
 use Keboola\StorageApi\Client;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -44,6 +45,23 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
      */
     public function createDbtYamlFiles(string $profilesPath, array $configurationNames = []): void
     {
+        $workspace = $this->config->getAuthorization()['workspace'];
+        $hasPassword = isset($workspace['password']) || isset($workspace['#password']);
+        $hasPrivateKey = isset($workspace['private_key']) || isset($workspace['#private_key']);
+
+        if (!$hasPassword && !$hasPrivateKey) {
+            throw new UserException(
+                'Snowflake workspace configuration must include either password or private_key for authentication',
+            );
+        }
+
+        if ($hasPassword && $hasPrivateKey) {
+            throw new UserException(
+                'Snowflake workspace configuration cannot include both password and private_key - ' .
+                'choose one authentication method',
+            );
+        }
+
         $tablesData = [];
         if ($this->config->generateSources()) {
             $client = new Client([
@@ -101,7 +119,14 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
         $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+
+        if (isset($workspace['private_key']) || isset($workspace['#private_key'])) {
+            $privateKey = $workspace['private_key'] ?? $workspace['#private_key'];
+            putenv(sprintf('DBT_KBC_PROD_PRIVATE_KEY=%s', $privateKey));
+        } else {
+            putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+        }
+
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $this->config->getThreads()));
     }
 
@@ -110,16 +135,23 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
      */
     public static function getDbtParams(): array
     {
-        return [
+        $dbtParams = [
             'type',
             'user',
-            'password',
             'schema',
             'warehouse',
             'database',
             'account',
             'threads',
         ];
+
+        if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {
+            $dbtParams[] = 'private_key';
+        } else {
+            $dbtParams[] = 'password';
+        }
+
+        return $dbtParams;
     }
 
     public function getDwhConnectionType(): DwhConnectionTypeEnum

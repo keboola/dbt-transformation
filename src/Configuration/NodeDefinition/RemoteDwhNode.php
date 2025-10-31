@@ -17,6 +17,8 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 class RemoteDwhNode extends ArrayNodeDefinition
 {
     public const NODE_NAME = 'remoteDwh';
+    public const NODE_PASSWORD = '#password';
+    public const NODE_PRIVATE_KEY = '#privateKey';
 
     public function __construct(?NodeParentInterface $parent = null)
     {
@@ -44,6 +46,22 @@ class RemoteDwhNode extends ArrayNodeDefinition
                 return false;
             })
             ->thenInvalid('Missing required options for "%s"')
+            ->end()
+
+            ->validate()
+            ->ifTrue(function (array $v) {
+                if ($v['type'] !== RemoteSnowflakeProvider::DWH_PROVIDER_TYPE) {
+                    return false;
+                }
+
+                $hasPassword = array_key_exists('#password', $v);
+                $hasPrivateKey = array_key_exists('#privateKey', $v);
+
+                return $hasPassword === $hasPrivateKey;
+            })
+            ->thenInvalid(
+                'For Snowflake, you must provide either "#password" OR "#privateKey" (not both, not neither)',
+            )
             ->end();
         // @formatter:on
     }
@@ -66,8 +84,9 @@ class RemoteDwhNode extends ArrayNodeDefinition
                 ->scalarNode('user')
                     ->cannotBeEmpty()
                 ->end()
-                ->scalarNode('#password')
-                    ->cannotBeEmpty()
+                ->scalarNode(self::NODE_PASSWORD)
+                ->end()
+                ->scalarNode(self::NODE_PRIVATE_KEY)
                 ->end()
                 ->scalarNode('port')
                     ->cannotBeEmpty()

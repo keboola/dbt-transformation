@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DbtTransformation\DwhProvider;
 
+use DbtTransformation\Configuration\NodeDefinition\RemoteDwhNode;
+
 class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInterface
 {
     public const DWH_PROVIDER_TYPE = 'snowflake';
@@ -19,7 +21,13 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
         $account = str_replace(LocalSnowflakeProvider::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
-        putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));
+
+        if (isset($workspace[RemoteDwhNode::NODE_PRIVATE_KEY])) {
+            putenv(sprintf('DBT_KBC_PROD_PRIVATE_KEY=%s', $workspace[RemoteDwhNode::NODE_PRIVATE_KEY]));
+        } else {
+            putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace[RemoteDwhNode::NODE_PASSWORD]));
+        }
+
         putenv(sprintf('DBT_KBC_PROD_THREADS=%s', $workspace['threads']));
     }
 
@@ -28,16 +36,23 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
      */
     public static function getDbtParams(): array
     {
-        return [
+        $dbtParams = [
             'type',
             'user',
-            'password',
             'schema',
             'warehouse',
             'database',
             'account',
             'threads',
         ];
+
+        if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {
+            $dbtParams[] = 'private_key';
+        } else {
+            $dbtParams[] = 'password';
+        }
+
+        return $dbtParams;
     }
 
     /**
@@ -51,7 +66,6 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
             'warehouse',
             'host',
             'user',
-            '#password',
             'threads',
         ];
     }

@@ -233,6 +233,54 @@ class ConfigDefinitionTest extends TestCase
             ],
         ];
 
+        yield 'config with remote DWH snowflake with password' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'snowflake',
+                        'host' => 'account.snowflakecomputing.com',
+                        'user' => 'user',
+                        '#password' => 'pass',
+                        'database' => 'db',
+                        'warehouse' => 'wh',
+                        'schema' => 'schema',
+                        'threads' => '4',
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with remote DWH snowflake with private key' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'snowflake',
+                        'host' => 'account.snowflakecomputing.com',
+                        'user' => 'user',
+                        '#privateKey' => '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg...\n-----END PRIVATE KEY-----',
+                        'database' => 'db',
+                        'warehouse' => 'wh',
+                        'schema' => 'schema',
+                        'threads' => '4',
+                    ],
+                ],
+            ],
+        ];
+
         yield 'config with freshness' => [
             'configData' => [
                 'action' => 'run',
@@ -722,6 +770,58 @@ class ConfigDefinitionTest extends TestCase
             ],
             'expectedError' => 'The path "root.parameters.storage.input.tables.0.source" cannot contain an empty ' .
                 'value, but got "".',
+        ];
+
+        yield 'config with remote DWH snowflake with both password and private key' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'snowflake',
+                        'host' => 'account.snowflakecomputing.com',
+                        'user' => 'user',
+                        '#password' => 'pass',
+                        '#privateKey' => '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg...\n-----END PRIVATE KEY-----',
+                        'database' => 'db',
+                        'warehouse' => 'wh',
+                        'schema' => 'schema',
+                        'threads' => '4',
+                    ],
+                ],
+            ],
+            'expectedError' => 'For Snowflake, you must provide either "#password" OR "#privateKey" ' .
+                '(not both, not neither)',
+        ];
+
+        yield 'config with remote DWH snowflake with neither password nor private key' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'snowflake',
+                        'host' => 'account.snowflakecomputing.com',
+                        'user' => 'user',
+                        'database' => 'db',
+                        'warehouse' => 'wh',
+                        'schema' => 'schema',
+                        'threads' => '4',
+                    ],
+                ],
+            ],
+            'expectedError' => 'For Snowflake, you must provide either "#password" OR "#privateKey" ' .
+                '(not both, not neither)',
         ];
     }
 

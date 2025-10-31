@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1343a9beb17fabd4022d1f2c07a34a22",
+    "content-hash": "a93ce77b3735d5db938a7af7124911e3",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1675,20 +1675,21 @@
         },
         {
             "name": "keboola/db-adapter-snowflake",
-            "version": "1.4.0",
+            "version": "1.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "8d1548cc3724dc588b3fd38bb970072da6041158"
+                "reference": "f6a006bf507ed0493615530d4cf4f9bfb4b80e40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/8d1548cc3724dc588b3fd38bb970072da6041158",
-                "reference": "8d1548cc3724dc588b3fd38bb970072da6041158",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/f6a006bf507ed0493615530d4cf4f9bfb4b80e40",
+                "reference": "f6a006bf507ed0493615530d4cf4f9bfb4b80e40",
                 "shasum": ""
             },
             "require": {
                 "ext-odbc": "*",
+                "ext-openssl": "*",
                 "php": "^8.0"
             },
             "require-dev": {
@@ -1711,9 +1712,9 @@
                 "MIT"
             ],
             "support": {
-                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.4.0"
+                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.5.1"
             },
-            "time": "2023-06-02T07:06:55+00:00"
+            "time": "2025-04-28T10:43:58+00:00"
         },
         {
             "name": "keboola/php-component",
@@ -6948,7 +6949,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6956,6 +6957,6 @@
         "ext-json": "*",
         "ext-odbc": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

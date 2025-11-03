@@ -1,4 +1,4 @@
-Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-profiles-dir (14b29067edb4eaf5bda47bb9c1bb4a4ca75093ce)
+Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-profiles-dir (%s)
 Remote snowflake DWH: keboola.snowflakecomputing.com
 Executing command "dbt deps"
 Running with dbt=%A

@@ -772,33 +772,6 @@ class ConfigDefinitionTest extends TestCase
                 'value, but got "".',
         ];
 
-        yield 'config with remote DWH snowflake with both password and private key' => [
-            'configData' => [
-                'action' => 'run',
-                'parameters' => [
-                    'git' => [
-                        'repo' => 'https://github.com/my-repo',
-                    ],
-                    'dbt' => [
-                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
-                    ],
-                    'remoteDwh' => [
-                        'type' => 'snowflake',
-                        'host' => 'account.snowflakecomputing.com',
-                        'user' => 'user',
-                        '#password' => 'pass',
-                        '#privateKey' => '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg...\n-----END PRIVATE KEY-----',
-                        'database' => 'db',
-                        'warehouse' => 'wh',
-                        'schema' => 'schema',
-                        'threads' => '4',
-                    ],
-                ],
-            ],
-            'expectedError' => 'For Snowflake, you must provide either "#password" OR "#privateKey" ' .
-                '(not both, not neither)',
-        ];
-
         yield 'config with remote DWH snowflake with neither password nor private key' => [
             'configData' => [
                 'action' => 'run',
@@ -820,8 +793,7 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
-            'expectedError' => 'For Snowflake, you must provide either "#password" OR "#privateKey" ' .
-                '(not both, not neither)',
+            'expectedError' => 'For Snowflake, you must provide either "#password" OR "#privateKey"',
         ];
     }
 

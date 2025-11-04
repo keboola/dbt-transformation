@@ -47,17 +47,17 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
     {
         $workspace = $this->config->getAuthorization()['workspace'];
         $hasPassword = isset($workspace['password']) || isset($workspace['#password']);
-        $hasPrivateKey = isset($workspace['private_key']) || isset($workspace['#private_key']);
+        $hasPrivateKey = isset($workspace['privateKey']);
 
         if (!$hasPassword && !$hasPrivateKey) {
             throw new UserException(
-                'Snowflake workspace configuration must include either password or private_key for authentication',
+                'Snowflake workspace configuration must include either password or privateKey for authentication',
             );
         }
 
         if ($hasPassword && $hasPrivateKey) {
             throw new UserException(
-                'Snowflake workspace configuration cannot include both password and private_key - ' .
+                'Snowflake workspace configuration cannot include both password and privateKey - ' .
                 'choose one authentication method',
             );
         }
@@ -120,8 +120,8 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
 
-        if (isset($workspace['private_key']) || isset($workspace['#private_key'])) {
-            $privateKey = $workspace['private_key'] ?? $workspace['#private_key'];
+        $privateKey = $workspace['privateKey'] ?? null;
+        if ($privateKey !== null) {
             putenv(sprintf('DBT_KBC_PROD_PRIVATE_KEY=%s', $privateKey));
         } else {
             putenv(sprintf('DBT_KBC_PROD_PASSWORD=%s', $workspace['password'] ?? $workspace['#password']));

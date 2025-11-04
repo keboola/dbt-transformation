@@ -47,21 +47,30 @@ class RemoteDwhNode extends ArrayNodeDefinition
             })
             ->thenInvalid('Missing required options for "%s"')
             ->end()
-
             ->validate()
-            ->ifTrue(function (array $v) {
+            ->ifTrue(function (array $v): bool {
                 if ($v['type'] !== RemoteSnowflakeProvider::DWH_PROVIDER_TYPE) {
                     return false;
                 }
 
-                $hasPassword = array_key_exists('#password', $v);
-                $hasPrivateKey = array_key_exists('#privateKey', $v);
-
-                return $hasPassword === $hasPrivateKey;
+                return true;
             })
-            ->thenInvalid(
-                'For Snowflake, you must provide either "#password" OR "#privateKey" (not both, not neither)',
-            )
+            ->then(function (array $v): array {
+                $hasPrivateKey = array_key_exists(self::NODE_PRIVATE_KEY, $v);
+                $hasPassword = array_key_exists(self::NODE_PASSWORD, $v);
+
+                if (!$hasPrivateKey && !$hasPassword) {
+                    throw new InvalidConfigurationException(
+                        'For Snowflake, you must provide either "#password" OR "#privateKey"',
+                    );
+                }
+
+                if ($hasPrivateKey) {
+                    unset($v[self::NODE_PASSWORD]);
+                }
+
+                return $v;
+            })
             ->end();
         // @formatter:on
     }

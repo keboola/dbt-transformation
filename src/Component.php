@@ -134,8 +134,7 @@ class Component extends BaseComponent
                 $quoteIdentifier,
             );
         } else {
-            if (isset($workspaceCredentials['private_key'])) {
-                $workspaceCredentials['privateKey'] = $workspaceCredentials['private_key'];
+            if (isset($workspaceCredentials['privateKey'])) {
                 $workspaceCredentials['password'] = '';
             }
 

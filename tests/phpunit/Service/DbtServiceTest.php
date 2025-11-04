@@ -251,7 +251,7 @@ class DbtServiceTest extends TestCase
                 'database' => (string) getenv('SNOWFLAKE_DATABASE'),
                 'schema' => (string) getenv('SNOWFLAKE_SCHEMA'),
                 'user' => (string) getenv('SNOWFLAKE_USER'),
-                'private_key' => (string) getenv('SNOWFLAKE_PRIVATE_KEY'),
+                'privateKey' => (string) getenv('SNOWFLAKE_PRIVATE_KEY'),
             ];
         } else {
             return [

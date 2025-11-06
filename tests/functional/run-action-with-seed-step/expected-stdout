@@ -2,13 +2,14 @@ Successfully cloned repository https://github.com/keboola/dbt-test-project-publi
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
+Warning: No packages were found in packages.yml
 Executing command "dbt seed"
 Running with dbt=%A
-%s Starting full parse.
-Found 2 models%S
+%AStarting full parse.
+Found 2 models%A
 %AConcurrency: 4 threads (target='kbc_prod')%A
-1 of 1 START seed file %s.countries ........................... [RUN]
-1 of 1 OK loaded seed file %s.countries ....................... [INSERT %s in %ss]
+1 of 1 START seed file %s.countries %s [RUN]
+1 of 1 OK loaded seed file %s.countries %s [INSERT %s in %ss]
 %AFinished running 1 seed in 0 hours 0 minutes and %s seconds (%ss).%A
 Completed successfully%A
 Done. PASS=1 WARN=0 ERROR=0 SKIP=0 TOTAL=1

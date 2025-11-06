@@ -97,20 +97,6 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
     /**
      * @return array<int, string>
      */
-    public static function getConnectionParams(): array
-    {
-        return [
-            'type',
-            'method',
-            'project',
-            'dataset',
-            'keyfile',
-        ];
-    }
-
-    /**
-     * @return array<int, string>
-     */
     public static function getDbtParams(): array
     {
         return [

@@ -32,6 +32,8 @@ class DbtYamlCreateTest extends TestCase
      */
     public function testCreateProfileYaml(): void
     {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
         $fs = new Filesystem();
         $fs->copy(
             sprintf('%s/dbt_project.yml', $this->providerDataDir),
@@ -52,6 +54,39 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function testCreateProfileYamlPassword(): void
+    {
+        putenv('DBT_KBC_PROD_PASSWORD=password');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO', 'KBC_DEV_PADAK'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedProfilesPassword.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        putenv('DBT_KBC_PROD_PASSWORD');
     }
 
     public function testMergeProfilesYaml(): void

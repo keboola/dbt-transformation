@@ -6,7 +6,7 @@
       "database": "%env(string:SNOWFLAKE_DATABASE)%",
       "schema": "%env(string:SNOWFLAKE_SCHEMA)%",
       "user": "%env(string:SNOWFLAKE_USER)%",
-      "password": "%env(string:SNOWFLAKE_PASSWORD)%"
+      "privateKey": "%env(string:SNOWFLAKE_PRIVATE_KEY)%"
     }
   },
   "parameters": {

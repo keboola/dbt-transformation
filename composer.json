@@ -7,7 +7,7 @@
         "ext-json": "*",
         "ext-odbc": "*",
         "google/cloud-bigquery": "^1.28",
-        "keboola/db-adapter-snowflake": "^1.1",
+        "keboola/db-adapter-snowflake": "^1.5.1",
         "keboola/php-component": "^10.1",
         "keboola/retry": "^0.5",
         "keboola/storage-api-client": "^14.12",

@@ -134,9 +134,13 @@ class Component extends BaseComponent
                 $quoteIdentifier,
             );
         } else {
+            if (isset($workspaceCredentials['privateKey'])) {
+                $workspaceCredentials['password'] = '';
+            }
+
             $connectionConfig = array_intersect_key(
                 $workspaceCredentials,
-                array_flip(['host', 'warehouse', 'database', 'user', 'password']),
+                array_flip(['host', 'warehouse', 'database', 'user', 'password', 'privateKey']),
             );
             $connection = new Connection($connectionConfig);
             return new OutputManifestSnowflake(

@@ -9,14 +9,23 @@ env:
     KBC_DEVELOPERPORTAL_USERNAME: keboola+dbt_transformation_gha
     KBC_DEVELOPERPORTAL_PASSWORD: '${{ secrets.KBC_DEVELOPERPORTAL_PASSWORD }}'
 
-    # Snowflake Credentials
+    # Snowflake credentials
     SNOWFLAKE_HOST: "keboola.snowflakecomputing.com"
     SNOWFLAKE_PORT: 443
-    SNOWFLAKE_WAREHOUSE: "KEBOOLA_PROD_SMALL"
+    SNOWFLAKE_USER: "SAPI_WORKSPACE_1276600464"
+    SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
     SNOWFLAKE_DATABASE: "SAPI_9317"
-    SNOWFLAKE_SCHEMA: "WORKSPACE_964066099"
-    SNOWFLAKE_USER: "SAPI_WORKSPACE_964066099"
-    SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+    SNOWFLAKE_SCHEMA: "WORKSPACE_1276600464"
+    SNOWFLAKE_WAREHOUSE: "KEBOOLA_PROD_SMALL"
+
+    # Snowflake legacy credentials
+    SNOWFLAKE_LEGACY_HOST: "keboola.snowflakecomputing.com"
+    SNOWFLAKE_LEGACY_PORT: 443
+    SNOWFLAKE_LEGACY_USER: "SAPI_WORKSPACE_1276599905"
+    SNOWFLAKE_LEGACY_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+    SNOWFLAKE_LEGACY_DATABASE: "SAPI_9317"
+    SNOWFLAKE_LEGACY_SCHEMA: "WORKSPACE_1276599905"
+    SNOWFLAKE_LEGACY_WAREHOUSE: "KEBOOLA_PROD_SMALL"
 
     # BigQuery
     BIGQUERY_PROJECT_ID: devel-249608
@@ -164,7 +173,14 @@ jobs:
                     -e SNOWFLAKE_DATABASE \
                     -e SNOWFLAKE_SCHEMA \
                     -e SNOWFLAKE_USER \
-                    -e SNOWFLAKE_PASSWORD \
+                    -e SNOWFLAKE_PRIVATE_KEY \
+                    -e SNOWFLAKE_LEGACY_HOST \
+                    -e SNOWFLAKE_LEGACY_PORT \
+                    -e SNOWFLAKE_LEGACY_WAREHOUSE \
+                    -e SNOWFLAKE_LEGACY_DATABASE \
+                    -e SNOWFLAKE_LEGACY_SCHEMA \
+                    -e SNOWFLAKE_LEGACY_USER \
+                    -e SNOWFLAKE_LEGACY_PASSWORD \
                     -e BIGQUERY_PROJECT_ID \
                     -e BIGQUERY_DATASET \
                     -e BIGQUERY_LOCATION \

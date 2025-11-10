@@ -31,7 +31,9 @@ class DwhProviderFactory
 
     public function getProvider(Config $config, string $projectPath): DwhProviderInterface
     {
-        if ($config->getEnvKbcComponentId() === 'keboola.dbt-transformation') {
+        if ($config->getEnvKbcComponentId() === 'keboola.dbt-transformation'
+            || $config->getEnvKbcComponentId() === 'keboola-test.dbt-core-key-pair'
+        ) {
             return new LocalSnowflakeProvider(
                 new SnowflakeDbtSourcesYaml(),
                 new DbtProfilesYaml(),

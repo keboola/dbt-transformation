@@ -9,9 +9,11 @@ use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
 use Keboola\Component\UserException;
 use Psr\Log\LoggerInterface;
+use SplFileObject;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 class DbtService
 {
@@ -144,17 +146,17 @@ class DbtService
         }
 
         $this->logger->error('DBT command failed. Dumping dbt.log contents:');
-        
+
         try {
             $parseLogFileHelper = new ParseLogFileHelper($dbtLogPath);
-            $file = new \SplFileObject($dbtLogPath);
-            
+            $file = new SplFileObject($dbtLogPath);
+
             while (!$file->eof()) {
                 $line = trim($file->fgets() ?: '');
                 if ($line === '') {
                     continue;
                 }
-                
+
                 $logEntry = json_decode($line, true);
                 if (is_array($logEntry) && isset($logEntry['msg'])) {
                     $level = $logEntry['level'] ?? 'info';
@@ -164,7 +166,7 @@ class DbtService
                     $this->logger->error($line);
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->error('Failed to parse dbt.log file: ' . $e->getMessage());
         }
     }

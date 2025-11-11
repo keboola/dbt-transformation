@@ -1,0 +1,20 @@
+{
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project-public.git",
+      "branch": "branch-with-sources"
+    },
+    "dbt": {
+      "executeSteps": ["dbt run"]
+    },
+    "remoteDwh": {
+      "type": "snowflake",
+      "host": "%env(string:SNOWFLAKE_LEGACY_HOST)%",
+      "warehouse": "%env(string:SNOWFLAKE_LEGACY_WAREHOUSE)%",
+      "database": "%env(string:SNOWFLAKE_LEGACY_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_LEGACY_SCHEMA)%",
+      "user": "%env(string:SNOWFLAKE_LEGACY_USER)%",
+      "#password": "%env(string:SNOWFLAKE_LEGACY_PASSWORD)%"
+    }
+  }
+}

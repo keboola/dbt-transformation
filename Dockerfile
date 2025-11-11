@@ -67,6 +67,7 @@ RUN wget https://bootstrap.pypa.io/pip/3.8/get-pip.py && \
 
 # Now, you can install dbt or any other packages using pip
 RUN pip3 install \
+    "importlib-metadata<5.0" \
     dbt-core==$DBT_VERSION \
     dbt-snowflake \
     dbt-postgres \

@@ -1,0 +1,17 @@
+Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-sources (fe39bd0645d0578f63faeb750d74dd520a5ecadc)
+Remote snowflake DWH: keboola.snowflakecomputing.com
+Executing command "dbt deps"
+Running with dbt=%A
+Warning: No packages were found in packages.yml
+Executing command "dbt run"
+Running with dbt=%A
+%s Starting full parse.
+Found 2 models%S
+%AConcurrency: 4 threads (target='kbc_prod')%A
+1 of 2 START %Sview model WORKSPACE_%s.stg_model %s [RUN]
+1 of 2 OK created %Sview model WORKSPACE_%s.stg_model %s [SUCCESS 1 in %ss]
+2 of 2 START %Sview model WORKSPACE_%s.fct_model %s [RUN]
+2 of 2 OK created %Sview model WORKSPACE_%s.fct_model %s [SUCCESS 1 in %ss]
+%AFinished running 2 view models in %s hours %s minutes and %s seconds (%ss).%A
+Completed successfully%A
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2

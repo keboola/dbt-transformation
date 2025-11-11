@@ -224,7 +224,7 @@ class Component extends BaseComponent
     protected function executeStep(string $step, DwhConnectionTypeEnum $dwhConnectionType): void
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
-        $dbtService = new DbtService($this->projectPath, $dwhConnectionType);
+        $dbtService = new DbtService($this->projectPath, $dwhConnectionType, $this->getLogger());
         if ($step === DbtService::COMMAND_DEPS) {
             //some deps could be installed from git, so retry for "shallow file has changed" is needed
             /** @var string $output */

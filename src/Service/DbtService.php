@@ -6,7 +6,9 @@ namespace DbtTransformation\Service;
 
 use DbtTransformation\DwhProvider\DwhConnectionTypeEnum;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
+use DbtTransformation\Helper\ParseLogFileHelper;
 use Keboola\Component\UserException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -35,6 +37,7 @@ class DbtService
     public function __construct(
         private readonly string $projectPath,
         private readonly DwhConnectionTypeEnum $dwhConnectionType,
+        private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -49,6 +52,7 @@ class DbtService
             $process->mustRun();
             return $process->getOutput();
         } catch (ProcessFailedException $e) {
+            $this->dumpDbtLogsOnError();
             $output = $e->getProcess()->getOutput();
             if ($output === '') {
                 throw new UserException($e->getProcess()->getErrorOutput());
@@ -126,5 +130,42 @@ class DbtService
             }
         }
         return null;
+    }
+
+    private function dumpDbtLogsOnError(): void
+    {
+        if ($this->logger === null) {
+            return;
+        }
+
+        $dbtLogPath = sprintf('%s/logs/dbt.log', $this->projectPath);
+        if (!file_exists($dbtLogPath)) {
+            return;
+        }
+
+        $this->logger->error('DBT command failed. Dumping dbt.log contents:');
+        
+        try {
+            $parseLogFileHelper = new ParseLogFileHelper($dbtLogPath);
+            $file = new \SplFileObject($dbtLogPath);
+            
+            while (!$file->eof()) {
+                $line = trim($file->fgets() ?: '');
+                if ($line === '') {
+                    continue;
+                }
+                
+                $logEntry = json_decode($line, true);
+                if (is_array($logEntry) && isset($logEntry['msg'])) {
+                    $level = $logEntry['level'] ?? 'info';
+                    $message = $logEntry['msg'];
+                    $this->logger->error(sprintf('[%s] %s', strtoupper($level), $message));
+                } else {
+                    $this->logger->error($line);
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to parse dbt.log file: ' . $e->getMessage());
+        }
     }
 }

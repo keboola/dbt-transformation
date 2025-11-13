@@ -26,21 +26,7 @@ Connection:
   warehouse: KEBOOLA_PROD_SMALL
   role: None
   schema: WORKSPACE_%s
-  authenticator: None
-  oauth_client_id: None
-  query_tag: None
-  client_session_keep_alive: False
-  host: None
-  port: None
-  proxy_host: None
-  proxy_port: None
-  protocol: None
-  connect_retries: 1
-  connect_timeout: None
-  retry_on_database_errors: False
-  retry_all: False
-  insecure_mode: False
-  reuse_connections: None
+  %A
 Registered adapter: snowflake=%A
   Connection test: [OK connection ok]%A
 All checks passed!

@@ -2,19 +2,32 @@ Successfully cloned repository https://github.com/keboola/dbt-test-project-publi
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
+Warning: No packages were found in packages.yml
 Executing command "dbt debug"
 Running with dbt=%A
-dbt version: %s
-python version: 3.8.12
-python path: /usr/local/bin/python3.8
+dbt version: %A
+python version: 3.11.9
+python path: /usr/local/bin/python3.11
 os info: %A
+Using profiles dir at %A
+Using profiles.yml file at %A
+Using dbt_project.yml file at %A
+adapter type: snowflake
+adapter version: %A
 Configuration:
   profiles.yml file [OK found and valid]
-  dbt_project.yml file [OK found and valid]%A
+  dbt_project.yml file [OK found and valid]
 Required dependencies:
  - git [OK found]%A
 Connection:
   account: keboola
   user: SAPI_WORKSPACE_%s
-  database: SAPI_9317%A
-All checks passed!%A
+  database: SAPI_9317
+  warehouse: KEBOOLA_PROD_SMALL
+  role: None
+  schema: WORKSPACE_%s
+  %A
+Registered adapter: snowflake=%A
+  Connection test: [OK connection ok]%A
+All checks passed!
+%A

@@ -1,0 +1,1 @@
+Encountered an error: Parsing Error   Env var required but not provided: 'DBT_KBC_PROD_PRIVATE_KEY'

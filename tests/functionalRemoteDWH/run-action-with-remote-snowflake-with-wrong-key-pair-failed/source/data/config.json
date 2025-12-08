@@ -1,0 +1,20 @@
+{
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project-public.git",
+      "branch": "branch-with-profiles-yml"
+    },
+    "dbt": {
+      "executeSteps": ["dbt run --target test"]
+    },
+    "remoteDwh": {
+      "type": "snowflake",
+      "host": "%env(string:SNOWFLAKE_HOST)%",
+      "warehouse": "%env(string:SNOWFLAKE_WAREHOUSE)%",
+      "database": "%env(string:SNOWFLAKE_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_SCHEMA)%",
+      "user": "%env(string:SNOWFLAKE_USER)%",
+      "#privateKey": "-----BEGIN PRIVATE KEY-----\nMIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAILSBTGk+e5vW5K0\nyBoHlmEqH2WgF2apwnsQ056D+fafeGfBYCUP5WR2n1JBImG7INA8EPTaCwgY9scd\n0wQlc+LdClPAMcYxOMkqZ5R8jtlIcZMAvtpbE3dy3xr/UVE37mXlQfZbTWuZtal2\nhY3k7sLZIItQbqb0cdeBGNSmjmylAgMBAAECgYAhY6dNt3TPBX8S369e7WbVX+Hp\nl0XBvzxTGsVYZQjsiGE74iA+9WKwFJKvdM5osVE7tMkDJY/BPlXmFlegbEq6Uk/j\nUIlbSUd0cBh2oRLLc+gpJM4xbHLQOzopR+lcd0vAgp413MSDBELkBc631KOclATK\n5ckgEnqGyaVx1MmfgQJBAN4zCX9/ku/MwdkLvj9uO5pyG6ZZWTZIZwPw1pze1+zf\n2e4dj44IT5PGQzNXkO6oxLHOujIkhz3WahrH87qFnQUCQQCWuHjo8c8P2rc8WNdk\nylnmcnrAUek8W9Hp1gBmgiPSf8nWEr9+CEbo/t45dxajPTw4Kg6KyJKYfmvKQFuN\n36MhAkEA0SnB+x8gNlPM9n+zawpdWRmpJYJeFFc7gd4oaCrtn7Fo+FkjVVRFdJnh\nkGcRq1d7MNWlOKZiGLfJ0cP/jslP8QJAIeDHNL0dqNeltkfV6o7dVEJJOy9uOKX+\n8gurPV9lQ+x7ZsYCCwc7QSYAt3QAP6MFBS7W4/Uflm1cNzLuIV6yYQJAXfD6fArR\nW6xcZG9/V/z+yfDLWQnfnfGvtDey5SjtBJMLikYUYBiio1RhBLSDZDL90jIwk2J+\n9f+h0XRNFk7c4A==\n-----END PRIVATE KEY-----\n"
+    }
+  }
+}

@@ -22,7 +22,7 @@ COPY docker/php-prod.ini /usr/local/etc/php/php.ini
 COPY docker/composer-install.sh /tmp/composer-install.sh
 
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --fix-missing \
             wget \
             build-essential \
             libssl-dev \
@@ -50,7 +50,7 @@ RUN apt-get update && \
     && apt-get clean
 
 # Compile and install Python 3.11 from source
-RUN wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
+RUN wget --tries=3 --timeout=30 --retry-connrefused https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
     tar -xvf Python-3.11.9.tgz && \
     cd Python-3.11.9 && \
     ./configure --enable-optimizations && \
@@ -62,7 +62,7 @@ RUN wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.11 1
 
 # Install pip for the new Python version
-RUN wget https://bootstrap.pypa.io/get-pip.py && \
+RUN wget --tries=3 --timeout=30 --retry-connrefused https://bootstrap.pypa.io/get-pip.py && \
     python3.11 get-pip.py && rm get-pip.py
 
 # Now, you can install dbt or any other packages using pip

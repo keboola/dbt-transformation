@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 php:8.3-cli-bullseye
 
-ARG DBT_VERSION=1.8.6
+ARG DBT_VERSION=1.11.2
 ENV DBT_VERSION=${DBT_VERSION}
 
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
@@ -72,8 +72,7 @@ RUN pip3 install \
     dbt-postgres \
     dbt-redshift \
     dbt-bigquery \
-    dbt-sqlserver \
-    protobuf==4.25.3 # dbt requires protobuf < 5
+    dbt-sqlserver
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \

@@ -22,7 +22,7 @@ Required dependencies:
 Connection:
   account: keboola
   user: SAPI_WORKSPACE_%s
-  database: SAPI_9317
+  database: %s
   warehouse: KEBOOLA_PROD_SMALL
   role: None
   schema: WORKSPACE_%s

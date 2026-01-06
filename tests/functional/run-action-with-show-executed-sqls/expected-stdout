@@ -13,8 +13,8 @@ Found 2 models%A
 2 of 2 OK created %Sview model %s.fct_model %s [SUCCESS 1 in %ss]
 %AFinished running 2 view models in %s hours %s minutes and %s seconds (%ss).%A
 Completed successfully%A
-Done. PASS=2 WARN=0 ERROR=0 SKIP=0%s TOTAL=2
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0%sTOTAL=2
 Executed SQLs:
 %A
-create or replace%w view "%s"."%s"."stg_model"       as (     with source as (                  select * from "%s"."%s"."test"              ),          renamed as (                  select             "id",             "col2",             "col3",             "col4"         from source          )          select * from renamed   );
-create or replace%w view "%s"."%s"."fct_model"       as (     -- Use the `ref` function to select from other models  select * from "%s"."%s"."stg_model" where "id" = 1   );
+create or replace   view "%s"."%s"."stg_model"%w as (     with source as (                  select * from "%s"."%s"."test"              ),          renamed as (                  select             "id",             "col2",             "col3",             "col4"         from source          )          select * from renamed   )%w;
+create or replace   view "%s"."%s"."fct_model"%w as (     -- Use the `ref` function to select from other models  select * from "%s"."%s"."stg_model" where "id" = 1   )%A

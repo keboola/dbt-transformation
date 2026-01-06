@@ -65,6 +65,11 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python
 RUN wget --tries=3 --timeout=30 --retry-connrefused https://bootstrap.pypa.io/get-pip.py && \
     python3.11 get-pip.py && rm get-pip.py
 
+# Conditional protobuf installation for dbt 1.7.1
+RUN if [ "$DBT_VERSION" = "1.7.1" ]; then \
+        pip3 install protobuf==4.25.3; \
+    fi
+
 # Now, you can install dbt or any other packages using pip
 RUN pip3 install \
     dbt-core==$DBT_VERSION \

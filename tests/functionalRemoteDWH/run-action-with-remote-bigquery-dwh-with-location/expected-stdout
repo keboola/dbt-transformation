@@ -14,4 +14,4 @@ Found 2 models%S
 2 of 2 OK created %Stable model %s.fct_model %s [CREATE TABLE (1.0 rows, %s Bytes processed) in %ss]
 %AFinished running 2 table models in %s hours %s minutes and %s seconds (%ss).%A
 Completed successfully%A
-Done. PASS=2 WARN=0 ERROR=0 SKIP=0 TOTAL=2
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0%sTOTAL=2

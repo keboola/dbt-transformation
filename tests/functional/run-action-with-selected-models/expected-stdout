@@ -11,4 +11,4 @@ Found 2 models%S
 1 of 1 OK created %Sview model %s.stg_model %s [SUCCESS 1 in %ss]
 %AFinished running 1 view model in %s hours %s minutes and %s seconds (%ss).%A
 Completed successfully%A
-Done. PASS=1 WARN=0 ERROR=0 SKIP=0 TOTAL=1
+Done. PASS=1 WARN=0 ERROR=0 SKIP=0%sTOTAL=1

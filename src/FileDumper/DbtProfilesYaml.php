@@ -5,10 +5,19 @@ declare(strict_types=1);
 namespace DbtTransformation\FileDumper;
 
 use Keboola\Component\UserException;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 class DbtProfilesYaml extends FilesystemAwareDumper
 {
+    private ?LoggerInterface $logger;
+
+    public function __construct(?LoggerInterface $logger = null)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * @param array<string, array<string, string>> $outputs
      * @throws UserException
@@ -24,13 +33,22 @@ class DbtProfilesYaml extends FilesystemAwareDumper
             throw new UserException('Missing key "profile" in "dbt_project.yml"');
         }
 
-        if ($this->filesystem->exists(sprintf('%s/profiles.yml', $profilesPath))) {
-            $profiles = (array) Yaml::parseFile(sprintf('%s/profiles.yml', $profilesPath));
-            if (array_key_exists($dbtProjectYaml['profile'], $profiles)
-                && is_array($profiles[$dbtProjectYaml['profile']])
-                && array_key_exists('outputs', $profiles[$dbtProjectYaml['profile']])
-            ) {
-                $outputs = array_merge($profiles[$dbtProjectYaml['profile']]['outputs'], $outputs);
+        $existingProfilesPath = sprintf('%s/profiles.yml', $profilesPath);
+        if ($this->filesystem->exists($existingProfilesPath)) {
+            try {
+                $profiles = (array) Yaml::parseFile($existingProfilesPath);
+                if (array_key_exists($dbtProjectYaml['profile'], $profiles)
+                    && is_array($profiles[$dbtProjectYaml['profile']])
+                    && array_key_exists('outputs', $profiles[$dbtProjectYaml['profile']])
+                ) {
+                    $outputs = array_merge($profiles[$dbtProjectYaml['profile']]['outputs'], $outputs);
+                }
+            } catch (ParseException $e) {
+                $this->logger?->warning(sprintf(
+                    'Could not parse existing profiles.yml (possibly contains Jinja templating): %s. ' .
+                    'Existing outputs will not be merged.',
+                    $e->getMessage(),
+                ));
             }
         }
 

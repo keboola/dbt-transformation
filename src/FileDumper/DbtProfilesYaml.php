@@ -15,6 +15,7 @@ class DbtProfilesYaml extends FilesystemAwareDumper
 
     public function __construct(?LoggerInterface $logger = null)
     {
+        parent::__construct();
         $this->logger = $logger;
     }
 

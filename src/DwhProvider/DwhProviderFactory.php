@@ -34,7 +34,7 @@ class DwhProviderFactory
         if ($config->getEnvKbcComponentId() === 'keboola.dbt-transformation') {
             return new LocalSnowflakeProvider(
                 new SnowflakeDbtSourcesYaml(),
-                new DbtProfilesYaml(),
+                new DbtProfilesYaml($this->logger),
                 $this->logger,
                 $config,
                 $projectPath,
@@ -42,7 +42,7 @@ class DwhProviderFactory
         } elseif ($config->getEnvKbcComponentId() === 'keboola.dbt-transformation-local-bigquery') {
             return new LocalBigQueryProvider(
                 new BigQueryDbtSourcesYaml(),
-                new DbtProfilesYaml(),
+                new DbtProfilesYaml($this->logger),
                 $this->logger,
                 $config,
                 $projectPath,
@@ -59,7 +59,7 @@ class DwhProviderFactory
                 default => throw new RuntimeException(sprintf('Remote DWH type "%s" not supported', $type)),
             };
 
-            return new $provider(new DbtProfilesYaml(), $this->logger, $config, $projectPath);
+            return new $provider(new DbtProfilesYaml($this->logger), $this->logger, $config, $projectPath);
         }
     }
 }

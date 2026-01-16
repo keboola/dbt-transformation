@@ -10,11 +10,15 @@ use Symfony\Component\Yaml\Yaml;
 class DbtProfilesYaml extends FilesystemAwareDumper
 {
     /**
-     * @param array<string, array<string, string>> $outputs
+     * @param array<string, array<string, string|bool>> $outputs
      * @throws UserException
      */
-    public function dumpYaml(string $projectPath, string $profilesPath, array $outputs): void
-    {
+    public function dumpYaml(
+        string $projectPath,
+        string $profilesPath,
+        array $outputs,
+        bool $addOcspFailOpen = false,
+    ): void {
         $dbtProjectYamlPath = sprintf('%s/dbt_project.yml', $projectPath);
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
             throw new UserException('Missing file "dbt_project.yml" in your project root');
@@ -31,6 +35,18 @@ class DbtProfilesYaml extends FilesystemAwareDumper
                 && array_key_exists('outputs', $profiles[$dbtProjectYaml['profile']])
             ) {
                 $outputs = array_merge($profiles[$dbtProjectYaml['profile']]['outputs'], $outputs);
+            }
+        }
+
+        if ($addOcspFailOpen) {
+            foreach ($outputs as $outputName => $outputConfig) {
+                if (!is_array($outputConfig)) {
+                    continue;
+                }
+                if (!array_key_exists('ocsp_fail_open', $outputConfig)) {
+                    $outputConfig['ocsp_fail_open'] = true;
+                    $outputs[$outputName] = $outputConfig;
+                }
             }
         }
 

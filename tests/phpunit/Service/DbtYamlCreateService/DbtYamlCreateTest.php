@@ -6,6 +6,7 @@ namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
 use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
+use DbtTransformation\DwhProvider\RemoteSnowflakeProvider;
 use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
@@ -116,6 +117,75 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/expectedRemoteBigQueryProfilesMerged.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function testCreateProfileYamlWithRemoteSnowflakeAddsOcspFailOpen(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                [],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+            true,
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedRemoteSnowflakeProfiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function testMergeProfilesYamlWithRemoteSnowflakeAddsOcspFailOpen(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $fs->copy(
+            sprintf('%s/profiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                [],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+            true,
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedRemoteSnowflakeProfilesMerged.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }
 
     public function testMergeProfilesYamlAtSpecifiedPath(): void

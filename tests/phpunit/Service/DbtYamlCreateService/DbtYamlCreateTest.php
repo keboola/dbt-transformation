@@ -140,11 +140,46 @@ class DbtYamlCreateTest extends TestCase
                 [],
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
-            true,
+            ['ocsp_fail_open' => true],
         );
 
         self::assertFileEquals(
             sprintf('%s/expectedRemoteSnowflakeProfiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function testCreateProfileYamlWithRemoteSnowflakeAdditionalOptions(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                [],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+            [
+                'ocsp_fail_open' => true,
+                'foo' => 'bar',
+            ],
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedRemoteSnowflakeProfilesWithAdditionalOptions.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
 
@@ -177,7 +212,7 @@ class DbtYamlCreateTest extends TestCase
                 [],
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
-            true,
+            ['ocsp_fail_open' => true],
         );
 
         self::assertFileEquals(

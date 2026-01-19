@@ -1,0 +1,16 @@
+config:
+    send_anonymous_usage_stats: false
+default:
+    target: dev
+    outputs:
+        kbc_prod:
+            type: '{{ env_var("DBT_KBC_PROD_TYPE") }}'
+            user: '{{ env_var("DBT_KBC_PROD_USER") }}'
+            schema: '{{ env_var("DBT_KBC_PROD_SCHEMA") }}'
+            warehouse: '{{ env_var("DBT_KBC_PROD_WAREHOUSE") }}'
+            database: '{{ env_var("DBT_KBC_PROD_DATABASE") }}'
+            account: '{{ env_var("DBT_KBC_PROD_ACCOUNT") }}'
+            threads: '{{ env_var("DBT_KBC_PROD_THREADS")| as_number }}'
+            private_key: '{{ env_var("DBT_KBC_PROD_PRIVATE_KEY") }}'
+            ocsp_fail_open: true
+            foo: bar

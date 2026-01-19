@@ -11,13 +11,14 @@ class DbtProfilesYaml extends FilesystemAwareDumper
 {
     /**
      * @param array<string, array<string, string|bool>> $outputs
+     * @param array<string, string|bool|int|float> $additionalOptions
      * @throws UserException
      */
     public function dumpYaml(
         string $projectPath,
         string $profilesPath,
         array $outputs,
-        bool $addOcspFailOpen = false,
+        array $additionalOptions = [],
     ): void {
         $dbtProjectYamlPath = sprintf('%s/dbt_project.yml', $projectPath);
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
@@ -38,15 +39,17 @@ class DbtProfilesYaml extends FilesystemAwareDumper
             }
         }
 
-        if ($addOcspFailOpen) {
+        if ($additionalOptions !== []) {
             foreach ($outputs as $outputName => $outputConfig) {
                 if (!is_array($outputConfig)) {
                     continue;
                 }
-                if (!array_key_exists('ocsp_fail_open', $outputConfig)) {
-                    $outputConfig['ocsp_fail_open'] = true;
-                    $outputs[$outputName] = $outputConfig;
+                foreach ($additionalOptions as $optionName => $optionValue) {
+                    if (!array_key_exists($optionName, $outputConfig)) {
+                        $outputConfig[$optionName] = $optionValue;
+                    }
                 }
+                $outputs[$outputName] = $outputConfig;
             }
         }
 

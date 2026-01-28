@@ -260,7 +260,7 @@ jobs:
         steps:
             - name: 'Determine tag version'
               run: |
-                  echo "DEPLOY_TAG=${{ needs.build.outputs.app_image_tag }}-1.11.2" >> $GITHUB_ENV
+                  echo "DEPLOY_TAG=${{ needs.build.outputs.app_image_tag }}-1.8.6" >> $GITHUB_ENV
             - name: 'Set tag in the Developer Portal'
               uses: keboola/action-set-tag-developer-portal@master
               with:

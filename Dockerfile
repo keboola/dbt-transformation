@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 php:8.3-cli-bullseye
 
-ARG DBT_VERSION=1.11.2
+ARG DBT_VERSION=1.8.6
 ENV DBT_VERSION=${DBT_VERSION}
 
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"

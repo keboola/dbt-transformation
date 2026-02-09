@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 php:8.3-cli-bullseye
+FROM --platform=linux/amd64 php:8.3-cli-trixie
 
 ARG DBT_VERSION=1.8.6
 ENV DBT_VERSION=${DBT_VERSION}
@@ -6,8 +6,8 @@ ENV DBT_VERSION=${DBT_VERSION}
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG SNOWFLAKE_ODBC_VERSION=3.4.1
-ARG SNOWFLAKE_GPG_KEY=630D9F3CAB551AF3
+ARG SNOWFLAKE_ODBC_VERSION=3.10.0
+ARG SNOWFLAKE_GPG_KEY=2A3149C82551A34A
 
 ENV LANGUAGE=en_US.UTF-8
 ENV LANG=en_US.UTF-8
@@ -74,15 +74,20 @@ RUN pip3 install \
     dbt-bigquery \
     dbt-sqlserver
 
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
-    && apt-get update \
-    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
-    && rm -r /var/lib/apt/lists/* \
-	&& sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
-	&& locale-gen \
-	&& chmod +x /tmp/composer-install.sh \
-	&& /tmp/composer-install.sh
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y curl ca-certificates gnupg; \
+    install -m 0755 -d /etc/apt/keyrings; \
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg; \
+    chmod a+r /etc/apt/keyrings/microsoft.gpg; \
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/microsoft-prod.list; \
+    apt-get update; \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18; \
+    rm -rf /var/lib/apt/lists/*; \
+    sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen; \
+    locale-gen; \
+    chmod +x /tmp/composer-install.sh; \
+    /tmp/composer-install.sh
 
 # Snowflake ODBC
 # https://github.com/docker-library/php/issues/103#issuecomment-353674490
@@ -107,6 +112,8 @@ ADD docker/snowflake/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowf
 RUN mkdir -p ~/.gnupg \
     && chmod 700 ~/.gnupg \
     && echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf \
+    && mkdir -p /etc/gnupg \
+    && echo "allow-weak-digest-algos" >> /etc/gnupg/gpg.conf \
     && mkdir -p /usr/share/debsig/keyrings/$SNOWFLAKE_GPG_KEY \
     && if ! gpg --keyserver hkp://keys.gnupg.net --recv-keys $SNOWFLAKE_GPG_KEY; then \
         gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_GPG_KEY;  \

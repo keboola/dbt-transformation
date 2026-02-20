@@ -12,4 +12,4 @@ default:
             account: '{{ env_var("DBT_KBC_PROD_ACCOUNT") }}'
             threads: '{{ env_var("DBT_KBC_PROD_THREADS")| as_number }}'
             private_key: '{{ env_var("DBT_KBC_PROD_PRIVATE_KEY") }}'
-            ocsp_fail_open: true
+            insecure_mode: true

@@ -22,7 +22,7 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
             $this->projectPath,
             $profilesPath,
             $this->getOutputs($configurationNames, $this->getDbtParams(), $this->projectIds),
-            ['ocsp_fail_open' => true],
+            ['insecure_mode' => true],
         );
 
         $this->logger->info($this->getConnectionLogMessage());

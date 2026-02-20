@@ -122,7 +122,7 @@ class DbtYamlCreateTest extends TestCase
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function testCreateProfileYamlWithRemoteSnowflakeAddsOcspFailOpen(): void
+    public function testCreateProfileYamlWithRemoteSnowflakeAddsInsecureMode(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
 
@@ -140,7 +140,7 @@ class DbtYamlCreateTest extends TestCase
                 [],
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
-            ['ocsp_fail_open' => true],
+            ['insecure_mode' => true],
         );
 
         self::assertFileEquals(
@@ -173,7 +173,7 @@ class DbtYamlCreateTest extends TestCase
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
             [
-                'ocsp_fail_open' => true,
+                'insecure_mode' => true,
                 'foo' => 'bar',
             ],
         );
@@ -189,7 +189,7 @@ class DbtYamlCreateTest extends TestCase
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function testMergeProfilesYamlWithRemoteSnowflakeAddsOcspFailOpen(): void
+    public function testMergeProfilesYamlWithRemoteSnowflakeAddsInsecureMode(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
 
@@ -212,7 +212,7 @@ class DbtYamlCreateTest extends TestCase
                 [],
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
-            ['ocsp_fail_open' => true],
+            ['insecure_mode' => true],
         );
 
         self::assertFileEquals(

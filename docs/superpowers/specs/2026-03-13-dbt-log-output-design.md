@@ -36,19 +36,45 @@ class DbtLogService
 
 **Behavior of `log()`:**
 1. If file does not exist, return (no-op)
-2. Open file, seek to `$offset`
-3. Read remaining content line by line
-4. For each non-empty line, call `$this->logger->info($line)`
-5. Update `$offset` to current file position
-6. Close file
+2. If file size < `$offset`, reset `$offset` to 0 (handles file truncation/recreation between steps)
+3. Open file, seek to `$offset`. If `fopen` fails, treat as missing file (no-op).
+4. Read remaining content line by line
+5. For each non-empty line, call `$this->logger->info($line)`
+6. Update `$offset` to current file position
+7. Close file
+
+**Design note:** Lines are output as raw JSON (NDJSON). This was a deliberate choice — the raw format preserves all dbt metadata and is useful for machine parsing and debugging. The `finally` block provides best-effort log capture; some trailing lines may be lost if dbt crashes without flushing its buffers.
 
 ### Component Integration
 
 **In `Component::execute()`:**
-1. Instantiate `DbtLogService` before the execute steps loop, pointing at `{projectPath}/logs/dbt.log`
-2. Wrap the step loop in `try/finally`
-3. After each `executeStep()` call: if `showDbtLog` is enabled, call `$dbtLogService->log()`
-4. In the `finally` block: if `showDbtLog` is enabled, call `$dbtLogService->log()` to capture lines from failed runs
+
+Pseudo-code showing the modified execute flow:
+
+```php
+// ... existing setup: clone repo, create provider, prepare profiles ...
+
+$dbtLogService = new DbtLogService($this->getLogger(), $projectPath . '/logs/dbt.log');
+
+// dbt deps is prepended to executeSteps before this point
+try {
+    foreach ($executeSteps as $step) {
+        $this->executeStep($step, ...);
+
+        if ($this->getConfig()->getShowDbtLog()) {
+            $dbtLogService->log();
+        }
+    }
+} finally {
+    if ($this->getConfig()->getShowDbtLog()) {
+        $dbtLogService->log();  // capture lines from failed step
+    }
+}
+
+// ... existing post-loop logic: showExecutedSqls, output manifest ...
+```
+
+The `try/finally` wraps only the step loop. Post-loop logic (`showExecutedSqls`, output manifest) remains outside and runs normally on success. On failure, the `finally` block ensures dbt.log lines from the failing step are captured before the exception propagates.
 
 ### Config Changes
 
@@ -65,6 +91,7 @@ class DbtLogService
 3. **Missing file** — call `log()` with non-existent path, no error thrown
 4. **Empty file** — call `log()` on empty file, no lines logged
 5. **Multi-step simulation** — append lines between multiple `log()` calls, verify correct incremental output
+6. **File truncation** — write lines, call `log()`, truncate/recreate file with new content, call `log()` again, verify offset resets and new content is logged
 
 ### Config Tests
 

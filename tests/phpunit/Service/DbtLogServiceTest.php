@@ -30,7 +30,9 @@ class DbtLogServiceTest extends TestCase
     public function testReadsAllLines(): void
     {
         $logFile = $this->tmpDir . '/dbt.log';
-        file_put_contents($logFile, '{"level":"info","msg":"Starting"}' . "\n" . '{"level":"info","msg":"Done"}' . "\n");
+        $content = '{"level":"info","msg":"Starting"}' . "\n"
+            . '{"level":"info","msg":"Done"}' . "\n";
+        file_put_contents($logFile, $content);
 
         $logger = new TestLogger();
         $service = new DbtLogService($logger, $logFile);
@@ -125,7 +127,9 @@ class DbtLogServiceTest extends TestCase
     public function testSkipsEmptyLines(): void
     {
         $logFile = $this->tmpDir . '/dbt.log';
-        file_put_contents($logFile, '{"level":"info","msg":"Line 1"}' . "\n\n\n" . '{"level":"info","msg":"Line 2"}' . "\n");
+        $content = '{"level":"info","msg":"Line 1"}' . "\n\n\n"
+            . '{"level":"info","msg":"Line 2"}' . "\n";
+        file_put_contents($logFile, $content);
 
         $logger = new TestLogger();
         $service = new DbtLogService($logger, $logFile);

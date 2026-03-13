@@ -37,6 +37,13 @@ class ConfigDefinition extends BaseConfigDefinition
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
             ->children()
+            ->booleanNode('showDbtLog')
+            ->defaultFalse()
+            ->end();
+
+        /** @noinspection NullPointerExceptionInspection */
+        $parametersNode
+            ->children()
             ->booleanNode('generateSources')
             ->defaultTrue()
             ->end();

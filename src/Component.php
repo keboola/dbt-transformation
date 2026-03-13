@@ -21,6 +21,7 @@ use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
 use DbtTransformation\Service\ArtifactsService;
+use DbtTransformation\Service\DbtLogService;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
 use ErrorException;
@@ -94,8 +95,20 @@ class Component extends BaseComponent
             $provider->createDbtYamlFiles($this->projectPath);
         }
 
-        foreach ($executeSteps as $step) {
-            $this->executeStep($step, $provider->getDwhConnectionType());
+        $dbtLogService = new DbtLogService($this->getLogger(), $this->projectPath . '/logs/dbt.log');
+
+        try {
+            foreach ($executeSteps as $step) {
+                $this->executeStep($step, $provider->getDwhConnectionType());
+
+                if ($config->showDbtLog()) {
+                    $dbtLogService->log();
+                }
+            }
+        } finally {
+            if ($config->showDbtLog()) {
+                $dbtLogService->log();
+            }
         }
         if ($config->showSqls()) {
             $this->logExecutedSqls();

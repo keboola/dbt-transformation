@@ -10,7 +10,7 @@ use Symfony\Component\Yaml\Yaml;
 class DbtProfilesYaml extends FilesystemAwareDumper
 {
     /**
-     * @param array<string, array<string, string>> $outputs
+     * @param array<string, array<string, string|bool>> $outputs
      * @throws UserException
      */
     public function dumpYaml(string $projectPath, string $profilesPath, array $outputs): void

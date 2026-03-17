@@ -10,6 +10,29 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
 {
     public const DWH_PROVIDER_TYPE = 'snowflake';
 
+    /**
+     * @param array<int, string> $configurationNames
+     * @throws \Keboola\Component\UserException
+     */
+    public function createDbtYamlFiles(string $profilesPath, array $configurationNames = []): void
+    {
+        $this->setEnvVars();
+
+        $outputs = $this->getOutputs($configurationNames, $this->getDbtParams(), $this->projectIds);
+
+        foreach ($outputs as $outputName => $outputConfig) {
+            $outputs[$outputName]['insecure_mode'] = true;
+        }
+
+        $this->createProfilesFileService->dumpYaml(
+            $this->projectPath,
+            $profilesPath,
+            $outputs,
+        );
+
+        $this->logger->info($this->getConnectionLogMessage());
+    }
+
     public function setEnvVars(): void
     {
         $workspace = $this->config->getRemoteDwh();

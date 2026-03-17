@@ -6,6 +6,7 @@ namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
 use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
+use DbtTransformation\DwhProvider\RemoteSnowflakeProvider;
 use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
@@ -194,6 +195,43 @@ class DbtYamlCreateTest extends TestCase
                 $this->providerDataDir,
             ),
         ];
+    }
+
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    public function testCreateProfileYamlWithRemoteSnowflakeAddsInsecureMode(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $outputs = RemoteSnowflakeProvider::getOutputs(
+            [],
+            RemoteSnowflakeProvider::getDbtParams(),
+        );
+
+        foreach ($outputs as $outputName => $outputConfig) {
+            $outputs[$outputName]['insecure_mode'] = true;
+        }
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            $outputs,
+        );
+
+        self::assertFileEquals(
+            sprintf('%s/expectedRemoteSnowflakeProfiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }
 
     /**

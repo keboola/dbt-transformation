@@ -41,6 +41,7 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+        putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
         $account = str_replace(LocalSnowflakeProvider::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
@@ -67,6 +68,7 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
             'database',
             'account',
             'threads',
+            'host'
         ];
 
         if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {

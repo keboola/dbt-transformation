@@ -70,7 +70,6 @@ RUN wget --tries=3 --timeout=30 --retry-connrefused https://bootstrap.pypa.io/ge
 RUN pip3 install \
     dbt-core==$DBT_VERSION \
     dbt-snowflake \
-    "snowflake-connector-python<4.0.0" \
     dbt-postgres \
     dbt-redshift \
     dbt-bigquery \

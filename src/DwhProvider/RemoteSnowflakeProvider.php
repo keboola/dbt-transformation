@@ -18,11 +18,16 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
     {
         $this->setEnvVars();
 
+        $workspace = $this->config->getRemoteDwh();
+
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
             $profilesPath,
             $this->getOutputs($configurationNames, $this->getDbtParams(), $this->projectIds),
-            ['insecure_mode' => true],
+            [
+                'host' => $workspace['host'],
+                'insecure_mode' => true,
+            ],
         );
 
         $this->logger->info($this->getConnectionLogMessage());

@@ -219,7 +219,10 @@ class DbtYamlCreateTest extends TestCase
                 [],
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
-            ['insecure_mode' => true],
+            [
+                'host' => 'test.snowflakecomputing.com',
+                'insecure_mode' => true,
+            ],
         );
 
         self::assertFileEquals(
@@ -230,7 +233,7 @@ class DbtYamlCreateTest extends TestCase
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }
 
-    public function testMergedProfilesGetInsecureMode(): void
+    public function testMergedProfilesGetAdditionalOptions(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
 
@@ -252,14 +255,19 @@ class DbtYamlCreateTest extends TestCase
                 [],
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
-            ['insecure_mode' => true],
+            [
+                'host' => 'test.snowflakecomputing.com',
+                'insecure_mode' => true,
+            ],
         );
 
         $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
 
-        // Merged output (from existing profiles.yml) also gets insecure_mode
+        // Merged output (from existing profiles.yml) gets host and insecure_mode
+        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['prod']['host']);
         self::assertTrue($result['default']['outputs']['prod']['insecure_mode']);
-        // Generated output gets insecure_mode
+        // Generated output gets host and insecure_mode
+        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['kbc_prod']['host']);
         self::assertTrue($result['default']['outputs']['kbc_prod']['insecure_mode']);
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');

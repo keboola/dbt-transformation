@@ -20,6 +20,7 @@ use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
+use DbtTransformation\Helper\ProfilesHelper;
 use DbtTransformation\Service\ArtifactsService;
 use DbtTransformation\Service\DbtLogService;
 use DbtTransformation\Service\DbtService;
@@ -91,8 +92,10 @@ class Component extends BaseComponent
         if ($provider->getDwhConnectionType() === DwhConnectionTypeEnum::REMOTE) {
             $profilesDir = $this->getProfilesPath($executeSteps);
             $provider->createDbtYamlFiles($profilesDir);
+            $this->logProfilesYaml($profilesDir);
         } else {
             $provider->createDbtYamlFiles($this->projectPath);
+            $this->logProfilesYaml($this->projectPath);
         }
 
         $dbtLogService = new DbtLogService($this->getLogger(), $this->projectPath . '/logs/dbt.log');
@@ -220,6 +223,22 @@ class Component extends BaseComponent
             $branch['name'],
             $branch['ref'],
         ));
+    }
+
+    protected function logProfilesYaml(string $profilesDir): void
+    {
+        $profilesPath = sprintf('%s/profiles.yml', $profilesDir);
+        if (!file_exists($profilesPath)) {
+            return;
+        }
+
+        $profiles = Yaml::parseFile($profilesPath);
+        if (!is_array($profiles)) {
+            return;
+        }
+
+        $masked = ProfilesHelper::maskSensitiveValues($profiles);
+        $this->getLogger()->info(sprintf("Generated profiles.yml:\n%s", Yaml::dump($masked, 5)));
     }
 
     protected function logExecutedSqls(): void

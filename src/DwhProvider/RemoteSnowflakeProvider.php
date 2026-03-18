@@ -18,16 +18,11 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
     {
         $this->setEnvVars();
 
-        $outputs = $this->getOutputs($configurationNames, $this->getDbtParams(), $this->projectIds);
-
-        foreach ($outputs as $outputName => $outputConfig) {
-            $outputs[$outputName]['insecure_mode'] = true;
-        }
-
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
             $profilesPath,
-            $outputs,
+            $this->getOutputs($configurationNames, $this->getDbtParams(), $this->projectIds),
+            ['insecure_mode' => true],
         );
 
         $this->logger->info($this->getConnectionLogMessage());
@@ -68,7 +63,7 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
             'database',
             'account',
             'threads',
-            'host'
+            'host',
         ];
 
         if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {

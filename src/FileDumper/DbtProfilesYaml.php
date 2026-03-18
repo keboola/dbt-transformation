@@ -11,10 +11,15 @@ class DbtProfilesYaml extends FilesystemAwareDumper
 {
     /**
      * @param array<string, array<string, string|bool>> $outputs
+     * @param array<string, string|bool|int|float> $additionalOptions Options injected into every output after merge
      * @throws UserException
      */
-    public function dumpYaml(string $projectPath, string $profilesPath, array $outputs): void
-    {
+    public function dumpYaml(
+        string $projectPath,
+        string $profilesPath,
+        array $outputs,
+        array $additionalOptions = [],
+    ): void {
         $dbtProjectYamlPath = sprintf('%s/dbt_project.yml', $projectPath);
         if (!$this->filesystem->exists($dbtProjectYamlPath)) {
             throw new UserException('Missing file "dbt_project.yml" in your project root');
@@ -31,6 +36,14 @@ class DbtProfilesYaml extends FilesystemAwareDumper
                 && array_key_exists('outputs', $profiles[$dbtProjectYaml['profile']])
             ) {
                 $outputs = array_merge($profiles[$dbtProjectYaml['profile']]['outputs'], $outputs);
+            }
+        }
+
+        if ($additionalOptions !== []) {
+            foreach ($outputs as $outputName => $outputConfig) {
+                if (is_array($outputConfig)) {
+                    $outputs[$outputName] = array_merge($outputConfig, $additionalOptions);
+                }
             }
         }
 

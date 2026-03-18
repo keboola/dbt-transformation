@@ -15,6 +15,7 @@ use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Yaml;
 
 class DbtYamlCreateTest extends TestCase
 {
@@ -210,26 +211,56 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/dbt_project.yml', $this->dataDir),
         );
 
-        $outputs = RemoteSnowflakeProvider::getOutputs(
-            [],
-            RemoteSnowflakeProvider::getDbtParams(),
-        );
-
-        foreach ($outputs as $outputName => $outputConfig) {
-            $outputs[$outputName]['insecure_mode'] = true;
-        }
-
         $service = new DbtProfilesYaml();
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,
-            $outputs,
+            RemoteSnowflakeProvider::getOutputs(
+                [],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+            ['insecure_mode' => true],
         );
 
         self::assertFileEquals(
             sprintf('%s/expectedRemoteSnowflakeProfiles.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    }
+
+    public function testMergedProfilesGetInsecureMode(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+        $fs->copy(
+            sprintf('%s/profiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                [],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+            ['insecure_mode' => true],
+        );
+
+        $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+
+        // Merged output (from existing profiles.yml) also gets insecure_mode
+        self::assertTrue($result['default']['outputs']['prod']['insecure_mode']);
+        // Generated output gets insecure_mode
+        self::assertTrue($result['default']['outputs']['kbc_prod']['insecure_mode']);
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }

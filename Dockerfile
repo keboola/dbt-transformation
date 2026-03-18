@@ -16,13 +16,13 @@ ENV LC_ALL=en_US.UTF-8
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_PROCESS_TIMEOUT 3600
 ENV SNOWFLAKE_INSECURE_MODE=true
-ENV SNOWFLAKE_LOG_LEVEL=DEBUG
-ENV SNOWFLAKE_LOG_FILE=/tmp/snowflake_connector.log
 
 WORKDIR /code/
 
 COPY docker/php-prod.ini /usr/local/etc/php/php.ini
 COPY docker/composer-install.sh /tmp/composer-install.sh
+COPY docker/snowflake_logging.py /usr/local/lib/snowflake_logging.py
+ENV PYTHONSTARTUP=/usr/local/lib/snowflake_logging.py
 
 RUN apt-get update && \
     apt-get install -y --fix-missing \

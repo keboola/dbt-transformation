@@ -89,6 +89,8 @@ class Component extends BaseComponent
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');
 
+        $isDebugMode = getenv('KBC_COMPONENT_RUN_MODE') === 'debug';
+
         if ($provider->getDwhConnectionType() === DwhConnectionTypeEnum::REMOTE) {
             $profilesDir = $this->getProfilesPath($executeSteps);
             $provider->createDbtYamlFiles($profilesDir);
@@ -104,12 +106,12 @@ class Component extends BaseComponent
             foreach ($executeSteps as $step) {
                 $this->executeStep($step, $provider->getDwhConnectionType());
 
-                if ($config->showDbtLog()) {
+                if ($isDebugMode) {
                     $dbtLogService->log();
                 }
             }
         } finally {
-            if ($config->showDbtLog()) {
+            if ($isDebugMode) {
                 $dbtLogService->log();
             }
         }

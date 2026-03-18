@@ -144,7 +144,6 @@ class ConfigDefinitionTest extends TestCase
                     'dbt' => [
                         'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
-                    'showDbtLog' => true,
                 ],
             ],
         ];
@@ -832,10 +831,6 @@ class ConfigDefinitionTest extends TestCase
             $configData['parameters']['showExecutedSqls'] = false;
         }
 
-        if (!array_key_exists('showDbtLog', $configData['parameters'])) {
-            $configData['parameters']['showDbtLog'] = false;
-        }
-
         if (empty($configData['parameters']['dbt']['modelNames'])) {
             $configData['parameters']['dbt']['modelNames'] = [];
         }
@@ -854,30 +849,5 @@ class ConfigDefinitionTest extends TestCase
         }
 
         return $configData;
-    }
-
-    public function testShowDbtLogDefaultsFalse(): void
-    {
-        $config = new Config([
-            'action' => 'run',
-            'parameters' => [
-                'git' => ['repo' => 'https://github.com/my-repo'],
-                'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
-            ],
-        ], new ConfigDefinition());
-        $this->assertFalse($config->showDbtLog());
-    }
-
-    public function testShowDbtLogReturnsTrue(): void
-    {
-        $config = new Config([
-            'action' => 'run',
-            'parameters' => [
-                'git' => ['repo' => 'https://github.com/my-repo'],
-                'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
-                'showDbtLog' => true,
-            ],
-        ], new ConfigDefinition());
-        $this->assertTrue($config->showDbtLog());
     }
 }

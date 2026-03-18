@@ -56,11 +56,6 @@ class Config extends BaseConfig
         return (bool) $this->getValue(['parameters', 'showExecutedSqls']);
     }
 
-    public function showDbtLog(): bool
-    {
-        return (bool) $this->getValue(['parameters', 'showDbtLog']);
-    }
-
     public function generateSources(): bool
     {
         return (bool) $this->getValue(['parameters', 'generateSources']);

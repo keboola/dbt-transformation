@@ -11,5 +11,6 @@ default:
             database: '{{ env_var("DBT_KBC_PROD_DATABASE") }}'
             account: '{{ env_var("DBT_KBC_PROD_ACCOUNT") }}'
             threads: '{{ env_var("DBT_KBC_PROD_THREADS")| as_number }}'
+            host: '{{ env_var("DBT_KBC_PROD_HOST") }}'
             private_key: '{{ env_var("DBT_KBC_PROD_PRIVATE_KEY") }}'
             insecure_mode: true

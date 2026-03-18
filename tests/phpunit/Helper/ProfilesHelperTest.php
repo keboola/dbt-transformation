@@ -119,4 +119,87 @@ class ProfilesHelperTest extends TestCase
     {
         self::assertSame([], ProfilesHelper::maskSensitiveValues([]));
     }
+
+    public function testResolvesEnvVars(): void
+    {
+        putenv('DBT_KBC_PROD_TYPE=snowflake');
+        putenv('DBT_KBC_PROD_ACCOUNT=my-account');
+        putenv('DBT_KBC_PROD_THREADS=4');
+
+        $data = [
+            'type' => '{{ env_var("DBT_KBC_PROD_TYPE") }}',
+            'account' => '{{ env_var("DBT_KBC_PROD_ACCOUNT") }}',
+            'threads' => '{{ env_var("DBT_KBC_PROD_THREADS")| as_number }}',
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+
+        self::assertSame('snowflake', $resolved['type']);
+        self::assertSame('my-account', $resolved['account']);
+        self::assertSame(4, $resolved['threads']);
+
+        putenv('DBT_KBC_PROD_TYPE');
+        putenv('DBT_KBC_PROD_ACCOUNT');
+        putenv('DBT_KBC_PROD_THREADS');
+    }
+
+    public function testResolvesNestedEnvVars(): void
+    {
+        putenv('DBT_KBC_PROD_TYPE=snowflake');
+        putenv('DBT_KBC_PROD_PASSWORD=secret');
+
+        $data = [
+            'outputs' => [
+                'kbc_prod' => [
+                    'type' => '{{ env_var("DBT_KBC_PROD_TYPE") }}',
+                    'password' => '{{ env_var("DBT_KBC_PROD_PASSWORD") }}',
+                    'insecure_mode' => true,
+                ],
+            ],
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+
+        self::assertSame('snowflake', $resolved['outputs']['kbc_prod']['type']);
+        self::assertSame('secret', $resolved['outputs']['kbc_prod']['password']);
+        self::assertTrue($resolved['outputs']['kbc_prod']['insecure_mode']);
+
+        putenv('DBT_KBC_PROD_TYPE');
+        putenv('DBT_KBC_PROD_PASSWORD');
+    }
+
+    public function testKeepsUnresolvableEnvVars(): void
+    {
+        $data = [
+            'type' => '{{ env_var("DBT_NONEXISTENT_VAR") }}',
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+
+        self::assertSame('{{ env_var("DBT_NONEXISTENT_VAR") }}', $resolved['type']);
+    }
+
+    public function testResolveAndMaskCombined(): void
+    {
+        putenv('DBT_KBC_PROD_TYPE=snowflake');
+        putenv('DBT_KBC_PROD_ACCOUNT=my-account');
+        putenv('DBT_KBC_PROD_PASSWORD=super-secret');
+
+        $data = [
+            'type' => '{{ env_var("DBT_KBC_PROD_TYPE") }}',
+            'account' => '{{ env_var("DBT_KBC_PROD_ACCOUNT") }}',
+            'password' => '{{ env_var("DBT_KBC_PROD_PASSWORD") }}',
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+        $masked = ProfilesHelper::maskSensitiveValues($resolved);
+
+        self::assertSame('snowflake', $masked['type']);
+        self::assertSame('my-account', $masked['account']);
+        self::assertSame('****', $masked['password']);
+
+        putenv('DBT_KBC_PROD_TYPE');
+        putenv('DBT_KBC_PROD_ACCOUNT');
+        putenv('DBT_KBC_PROD_PASSWORD');
+    }
 }

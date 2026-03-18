@@ -237,7 +237,8 @@ class Component extends BaseComponent
             return;
         }
 
-        $masked = ProfilesHelper::maskSensitiveValues($profiles);
+        $resolved = ProfilesHelper::resolveEnvVars($profiles);
+        $masked = ProfilesHelper::maskSensitiveValues($resolved);
         $this->getLogger()->info(sprintf("Generated profiles.yml:\n%s", Yaml::dump($masked, 5)));
     }
 

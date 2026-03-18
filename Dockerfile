@@ -21,8 +21,6 @@ WORKDIR /code/
 
 COPY docker/php-prod.ini /usr/local/etc/php/php.ini
 COPY docker/composer-install.sh /tmp/composer-install.sh
-COPY docker/snowflake_logging.py /usr/local/lib/snowflake_logging.py
-ENV PYTHONSTARTUP=/usr/local/lib/snowflake_logging.py
 
 RUN apt-get update && \
     apt-get install -y --fix-missing \

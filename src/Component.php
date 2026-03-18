@@ -99,14 +99,6 @@ class Component extends BaseComponent
         }
 
         $dbtLogService = new DbtLogService($this->getLogger(), $this->projectPath . '/logs/dbt.log');
-        $snowflakeLogService = null;
-
-        if ($config->showDbtLog()) {
-            $snowflakeLogFile = '/tmp/snowflake_connector.log';
-            putenv(sprintf('SNOWFLAKE_CONNECTOR_LOG_FILE=%s', $snowflakeLogFile));
-            putenv('SNOWFLAKE_CONNECTOR_LOG_LEVEL=DEBUG');
-            $snowflakeLogService = new DbtLogService($this->getLogger(), $snowflakeLogFile);
-        }
 
         try {
             foreach ($executeSteps as $step) {
@@ -114,13 +106,11 @@ class Component extends BaseComponent
 
                 if ($config->showDbtLog()) {
                     $dbtLogService->log();
-                    $snowflakeLogService?->log();
                 }
             }
         } finally {
             if ($config->showDbtLog()) {
                 $dbtLogService->log();
-                $snowflakeLogService?->log();
             }
         }
         if ($config->showSqls()) {

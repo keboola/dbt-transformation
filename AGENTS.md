@@ -56,7 +56,9 @@ DbtTransformation\FunctionalTests\ → tests/functional/
 - Unit tests in `tests/phpunit/`, extending `PHPUnit\Framework\TestCase`
 - Test classes named `*Test.php` mirroring source structure
 - Functional tests use datadir pattern with `setUp.php`/`tearDown.php`
+- Functional tests compare stdout against `expected-stdout` files using PHPUnit format strings (`%s`, `%S`, `%A`, `%a`, `%w`). When changing output (e.g., adding log lines), update ALL `tests/functional/*/expected-stdout` files
 - Environment variables for credentials loaded via `tests/phpunit/bootstrap.php`
+- Config definition tests in `ConfigDefinitionTest.php` — when adding config options, update `addDefaultValues()` helper and add both valid config data provider cases and dedicated getter tests
 
 ## Docker
 

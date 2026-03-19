@@ -261,6 +261,7 @@ class DbtYamlCreateTest extends TestCase
             ],
         );
 
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $result */
         $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
 
         // Merged output (from existing profiles.yml) gets host and insecure_mode

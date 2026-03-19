@@ -357,6 +357,7 @@ class Component extends BaseComponent
                 $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
 
                 $manifestJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'manifest.json');
+                /** @var array<string, mixed> $manifest */
                 $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
                 $runResultsJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'run_results.json');
                 /** @var array<string, array<string, mixed>> $runResults */

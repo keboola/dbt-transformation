@@ -29,6 +29,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['default']['outputs']['kbc_prod']['password']);
@@ -48,6 +49,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
+        /** @var array<string, array<string, array<string, mixed>>> $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['outputs']['kbc_prod']['private_key']);
@@ -93,6 +95,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
+        /** @var array<string, array<string, array<string, mixed>>> $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['outputs']['prod']['password']);
@@ -158,6 +161,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
+        /** @var array<string, array<string, array<string, mixed>>> $resolved */
         $resolved = ProfilesHelper::resolveEnvVars($data);
 
         self::assertSame('snowflake', $resolved['outputs']['kbc_prod']['type']);

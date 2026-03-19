@@ -274,6 +274,38 @@ class DbtYamlCreateTest extends TestCase
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }
 
+    public function testInsecureModeNotAddedWhenDisabled(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                [],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+            [
+                'host' => 'test.snowflakecomputing.com',
+            ],
+        );
+
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $result */
+        $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+
+        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['kbc_prod']['host']);
+        self::assertArrayNotHasKey('insecure_mode', $result['default']['outputs']['kbc_prod']);
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    }
+
     /**
      * @throws \Keboola\Component\UserException
      */

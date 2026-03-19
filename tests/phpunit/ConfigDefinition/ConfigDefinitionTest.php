@@ -295,6 +295,56 @@ class ConfigDefinitionTest extends TestCase
             ],
         ];
 
+        yield 'config with remote DWH snowflake with sf_insecure_mode true' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'snowflake',
+                        'host' => 'account.snowflakecomputing.com',
+                        'user' => 'user',
+                        '#password' => 'pass',
+                        'database' => 'db',
+                        'warehouse' => 'wh',
+                        'schema' => 'schema',
+                        'threads' => '4',
+                        'sf_insecure_mode' => true,
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with remote DWH snowflake with sf_insecure_mode false' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'snowflake',
+                        'host' => 'account.snowflakecomputing.com',
+                        'user' => 'user',
+                        '#password' => 'pass',
+                        'database' => 'db',
+                        'warehouse' => 'wh',
+                        'schema' => 'schema',
+                        'threads' => '4',
+                        'sf_insecure_mode' => false,
+                    ],
+                ],
+            ],
+        ];
+
         yield 'config with freshness' => [
             'configData' => [
                 'action' => 'run',
@@ -811,6 +861,51 @@ class ConfigDefinitionTest extends TestCase
         ];
     }
 
+    public function testSnowflakeInsecureModeDefaultsFalse(): void
+    {
+        $config = new Config([
+            'action' => 'run',
+            'parameters' => [
+                'git' => ['repo' => 'https://github.com/my-repo'],
+                'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                'remoteDwh' => [
+                    'type' => 'snowflake',
+                    'host' => 'account.snowflakecomputing.com',
+                    'user' => 'user',
+                    '#password' => 'pass',
+                    'database' => 'db',
+                    'warehouse' => 'wh',
+                    'schema' => 'schema',
+                ],
+            ],
+        ], new ConfigDefinition());
+
+        self::assertFalse($config->getSnowflakeInsecureMode());
+    }
+
+    public function testSnowflakeInsecureModeEnabled(): void
+    {
+        $config = new Config([
+            'action' => 'run',
+            'parameters' => [
+                'git' => ['repo' => 'https://github.com/my-repo'],
+                'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                'remoteDwh' => [
+                    'type' => 'snowflake',
+                    'host' => 'account.snowflakecomputing.com',
+                    'user' => 'user',
+                    '#password' => 'pass',
+                    'database' => 'db',
+                    'warehouse' => 'wh',
+                    'schema' => 'schema',
+                    'sf_insecure_mode' => true,
+                ],
+            ],
+        ], new ConfigDefinition());
+
+        self::assertTrue($config->getSnowflakeInsecureMode());
+    }
+
     /**
      * @param array<string, mixed> $configData
      * @return array<string, mixed>
@@ -842,6 +937,11 @@ class ConfigDefinitionTest extends TestCase
         if (array_key_exists('remoteDwh', $configData['parameters'])
             && !array_key_exists('threads', $configData['parameters']['remoteDwh'])) {
             $configData['parameters']['remoteDwh']['threads'] = 4;
+        }
+
+        if (array_key_exists('remoteDwh', $configData['parameters'])
+            && !array_key_exists('sf_insecure_mode', $configData['parameters']['remoteDwh'])) {
+            $configData['parameters']['remoteDwh']['sf_insecure_mode'] = false;
         }
 
         if (!array_key_exists('generateSources', $configData['parameters'])) {

@@ -16,5 +16,3 @@ Found 2 models%S
 %AFinished running 2 view models in 0 hours 0 minutes and %s seconds (%ss).%A
 Completed successfully%A
 Done. PASS=2 WARN=0 ERROR=0 SKIP=0 %sTOTAL=2
-Executed SQLs:
-%A

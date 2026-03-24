@@ -97,6 +97,7 @@ class ArtifactsService
                         file_put_contents($artifactsPath . '/compiled_sql.json', $compiledSqlContent);
 
                         $manifestJson = (string) file_get_contents($targetPath . '/manifest.json');
+                        /** @var array<string, mixed> $manifest */
                         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
                         $runResultsJson = (string) file_get_contents($targetPath . '/run_results.json');
                         /** @var array<string, array<string, mixed>> $runResults */

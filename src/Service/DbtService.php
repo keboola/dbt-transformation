@@ -7,6 +7,7 @@ namespace DbtTransformation\Service;
 use DbtTransformation\DwhProvider\DwhConnectionTypeEnum;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use Keboola\Component\UserException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -35,6 +36,7 @@ class DbtService
     public function __construct(
         private readonly string $projectPath,
         private readonly DwhConnectionTypeEnum $dwhConnectionType,
+        private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -49,9 +51,14 @@ class DbtService
             $process->mustRun();
             return $process->getOutput();
         } catch (ProcessFailedException $e) {
+            $errorOutput = $e->getProcess()->getErrorOutput();
+            if ($errorOutput !== '' && $this->logger !== null) {
+                $this->logger->error(sprintf('dbt stderr: %s', $errorOutput));
+            }
+
             $output = $e->getProcess()->getOutput();
             if ($output === '') {
-                throw new UserException($e->getProcess()->getErrorOutput());
+                throw new UserException($errorOutput);
             }
             $logs = iterator_to_array(ParseDbtOutputHelper::getMessagesFromOutput($output, 'error'));
             if (empty($logs)) {

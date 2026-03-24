@@ -1,7 +1,9 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-postgres-sources (%s)
 Remote postgres DWH: pgsql
+Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A
+Warning: No packages were found in packages.yml
 Warning: No packages were found in packages.yml
 Executing command "dbt run"
 Running with dbt=%A
@@ -14,4 +16,4 @@ Found 2 models%S
 2 of 2 OK created %Sview model public.fct_model %s [CREATE VIEW in %ss]
 %AFinished running 2 view models in %s hours %s minutes and %s seconds (%ss).%A
 Completed successfully%A
-Done. PASS=2 WARN=0 ERROR=0 SKIP=0%sTOTAL=2
+Done. PASS=2 WARN=0 ERROR=0 SKIP=0 %sTOTAL=2

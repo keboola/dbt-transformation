@@ -130,6 +130,9 @@ class RemoteDwhNode extends ArrayNodeDefinition
                 ->scalarNode('#key_content')
                     ->cannotBeEmpty()
                 ->end()
+                ->booleanNode('sfInsecureMode')
+                    ->defaultFalse()
+                ->end()
             ->end();
         // @formatter:on
     }

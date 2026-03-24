@@ -140,6 +140,11 @@ class Config extends BaseConfig
         return $this->getArrayValue(['parameters', 'remoteDwh']);
     }
 
+    public function getSnowflakeInsecureMode(): bool
+    {
+        return (bool) $this->getValue(['parameters', 'remoteDwh', 'sfInsecureMode'], false);
+    }
+
     public function hasRemoteDwh(): bool
     {
         try {

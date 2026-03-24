@@ -10,6 +10,34 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
 {
     public const DWH_PROVIDER_TYPE = 'snowflake';
 
+    /**
+     * @param array<int, string> $configurationNames
+     * @throws \Keboola\Component\UserException
+     */
+    public function createDbtYamlFiles(string $profilesPath, array $configurationNames = []): void
+    {
+        $this->setEnvVars();
+
+        $workspace = $this->config->getRemoteDwh();
+
+        $additionalOptions = [
+            'host' => $workspace['host'],
+        ];
+
+        if ($this->config->getSnowflakeInsecureMode()) {
+            $additionalOptions['insecure_mode'] = true;
+        }
+
+        $this->createProfilesFileService->dumpYaml(
+            $this->projectPath,
+            $profilesPath,
+            $this->getOutputs($configurationNames, $this->getDbtParams(), $this->projectIds),
+            $additionalOptions,
+        );
+
+        $this->logger->info($this->getConnectionLogMessage());
+    }
+
     public function setEnvVars(): void
     {
         $workspace = $this->config->getRemoteDwh();
@@ -18,6 +46,7 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+        putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
         $account = str_replace(LocalSnowflakeProvider::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
@@ -44,6 +73,7 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
             'database',
             'account',
             'threads',
+            'host',
         ];
 
         if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {

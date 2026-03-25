@@ -3,5 +3,4 @@ Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
-Warning: No packages were found in packages.yml
-Executing command "dbt source freshness"
+%AExecuting command "dbt source freshness"

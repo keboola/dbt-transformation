@@ -3,8 +3,7 @@ Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
-Warning: No packages were found in packages.yml
-Executing command "dbt run --select stg_model"
+%AExecuting command "dbt run --select stg_model"
 Running with dbt=%A
 %s Starting full parse.
 Found 2 models%S
@@ -13,4 +12,4 @@ Found 2 models%S
 1 of 1 OK created %Sview model %s.stg_model %s [SUCCESS 1 in %ss]
 %AFinished running 1 view model in %s hours %s minutes and %s seconds (%ss).%A
 Completed successfully%A
-Done. PASS=1 WARN=0 ERROR=0 SKIP=0 %sTOTAL=1
+Done. PASS=1 WARN=0 ERROR=0 SKIP=0%sTOTAL=1

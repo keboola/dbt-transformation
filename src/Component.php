@@ -528,9 +528,13 @@ class Component extends BaseComponent
             throw new UserException('Absolute path in --profiles-dir option is not allowed.');
         }
 
-        $profilesDir = ltrim($profilesDir, '.');
+        $profilesDir = ltrim($profilesDir, './');
 
-        return $this->projectPath . $profilesDir;
+        if ($profilesDir === '') {
+            return $this->projectPath;
+        }
+
+        return rtrim($this->projectPath, '/') . '/' . $profilesDir;
     }
 
     public static function setEnvironment(): void

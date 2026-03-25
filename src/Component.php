@@ -112,6 +112,7 @@ class Component extends BaseComponent
                 }
             }
         } finally {
+            // Ensure dbt.log is flushed on failure; on success this is a no-op (offset already at EOF)
             if ($isDebugMode) {
                 $dbtLogService->log();
             }

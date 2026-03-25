@@ -9,9 +9,12 @@ class ProfilesHelper
     private const SENSITIVE_KEYS = [
         'password',
         'private_key',
+        'private_key_passphrase',
         'keyfile',
+        'keyfile_json',
         'key_content',
         'token',
+        'secret',
         'client_secret',
     ];
 
@@ -51,24 +54,30 @@ class ProfilesHelper
         return $data;
     }
 
-    private static function resolveEnvVarString(string $value): string|int|bool
+    private static function resolveEnvVarString(string $value): string|int|float|bool
     {
-        $pattern = '/\{\{\s*env_var\(\s*"([^"]+)"\s*\)\s*(?:\|\s*(as_number|as_bool)\s*)?\}\}/';
+        $envVarPattern = '/\{\{\s*env_var\(\s*"([^"]+)"\s*\)\s*(?:\|\s*(as_number|as_bool)\s*)?\}\}/';
 
-        if (preg_match('/^\{\{\s*env_var\(\s*"([^"]+)"\s*\)\s*\|\s*(as_number|as_bool)\s*\}\}$/', $value, $matches)) {
+        // Full-value env_var with filter — cast to the appropriate type
+        if (preg_match('/^' . substr($envVarPattern, 1, -1) . '$/', $value, $matches)
+            && isset($matches[2]) && $matches[2] !== ''
+        ) {
             $envValue = getenv($matches[1]);
             if ($envValue === false) {
                 return $value;
             }
 
             return match ($matches[2]) {
-                'as_number' => is_numeric($envValue) ? (int) $envValue : $envValue,
+                'as_number' => is_numeric($envValue)
+                    ? (str_contains($envValue, '.') ? (float) $envValue : (int) $envValue)
+                    : $envValue,
                 'as_bool' => filter_var($envValue, FILTER_VALIDATE_BOOLEAN),
                 default => $envValue,
             };
         }
 
-        return (string) preg_replace_callback($pattern, function (array $matches): string {
+        // Inline env_var references (possibly embedded in a larger string) — resolve as strings
+        return (string) preg_replace_callback($envVarPattern, function (array $matches): string {
             $envValue = getenv($matches[1]);
             return $envValue !== false ? $envValue : $matches[0];
         }, $value);

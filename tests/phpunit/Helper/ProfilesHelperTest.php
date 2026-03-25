@@ -29,7 +29,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, array<string, array<string, array<string, mixed>>>> $masked */
+        /** @var array<string, mixed> $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['default']['outputs']['kbc_prod']['password']);
@@ -49,7 +49,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, array<string, array<string, mixed>>> $masked */
+        /** @var array<string, mixed> $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['outputs']['kbc_prod']['private_key']);
@@ -60,10 +60,13 @@ class ProfilesHelperTest extends TestCase
         $data = [
             'password' => 'secret1',
             'private_key' => 'secret2',
-            'keyfile' => 'secret3',
-            'key_content' => 'secret4',
-            'token' => 'secret5',
-            'client_secret' => 'secret6',
+            'private_key_passphrase' => 'secret3',
+            'keyfile' => 'secret4',
+            'keyfile_json' => 'secret5',
+            'key_content' => 'secret6',
+            'token' => 'secret7',
+            'secret' => 'secret8',
+            'client_secret' => 'secret9',
             'account' => 'not-secret',
         ];
 
@@ -71,9 +74,12 @@ class ProfilesHelperTest extends TestCase
 
         self::assertSame('****', $masked['password']);
         self::assertSame('****', $masked['private_key']);
+        self::assertSame('****', $masked['private_key_passphrase']);
         self::assertSame('****', $masked['keyfile']);
+        self::assertSame('****', $masked['keyfile_json']);
         self::assertSame('****', $masked['key_content']);
         self::assertSame('****', $masked['token']);
+        self::assertSame('****', $masked['secret']);
         self::assertSame('****', $masked['client_secret']);
         self::assertSame('not-secret', $masked['account']);
     }
@@ -95,7 +101,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, array<string, array<string, mixed>>> $masked */
+        /** @var array<string, mixed> $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['outputs']['prod']['password']);
@@ -161,7 +167,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, array<string, array<string, mixed>>> $resolved */
+        /** @var array<string, mixed> $resolved */
         $resolved = ProfilesHelper::resolveEnvVars($data);
 
         self::assertSame('snowflake', $resolved['outputs']['kbc_prod']['type']);
@@ -211,6 +217,21 @@ class ProfilesHelperTest extends TestCase
         self::assertFalse($resolved['trust_cert']);
 
         putenv('DBT_KBC_PROD_TRUST_CERT');
+    }
+
+    public function testAsNumberWithFloatValue(): void
+    {
+        putenv('DBT_KBC_PROD_TIMEOUT=4.5');
+
+        $data = [
+            'timeout' => '{{ env_var("DBT_KBC_PROD_TIMEOUT")| as_number }}',
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+
+        self::assertSame(4.5, $resolved['timeout']);
+
+        putenv('DBT_KBC_PROD_TIMEOUT');
     }
 
     public function testAsNumberWithNonNumericValueReturnsRawString(): void

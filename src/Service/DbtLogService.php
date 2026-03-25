@@ -41,7 +41,7 @@ class DbtLogService
         fseek($handle, $this->offset);
 
         while (($line = fgets($handle)) !== false) {
-            $line = trim($line);
+            $line = rtrim($line, "\r\n");
             if ($line !== '') {
                 $this->logger->info($line);
             }

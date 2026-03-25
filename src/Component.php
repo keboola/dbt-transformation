@@ -37,6 +37,7 @@ use Psr\Log\LoggerInterface;
 use Retry\Policy\CallableRetryPolicy;
 use Retry\RetryProxy;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Throwable;
 
@@ -234,7 +235,13 @@ class Component extends BaseComponent
             return;
         }
 
-        $profiles = Yaml::parseFile($profilesPath);
+        try {
+            $profiles = Yaml::parseFile($profilesPath);
+        } catch (ParseException $e) {
+            $this->getLogger()->warning(sprintf('Could not parse profiles.yml for logging: %s', $e->getMessage()));
+            return;
+        }
+
         if (!is_array($profiles)) {
             return;
         }

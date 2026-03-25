@@ -51,13 +51,21 @@ class ProfilesHelper
         return $data;
     }
 
-    private static function resolveEnvVarString(string $value): string|int
+    private static function resolveEnvVarString(string $value): string|int|bool
     {
-        $pattern = '/\{\{\s*env_var\(\s*"([^"]+)"\s*\)\s*(?:\|\s*as_number\s*)?\}\}/';
+        $pattern = '/\{\{\s*env_var\(\s*"([^"]+)"\s*\)\s*(?:\|\s*(as_number|as_bool)\s*)?\}\}/';
 
-        if (preg_match('/^\{\{\s*env_var\(\s*"([^"]+)"\s*\)\s*\|\s*as_number\s*\}\}$/', $value, $matches)) {
+        if (preg_match('/^\{\{\s*env_var\(\s*"([^"]+)"\s*\)\s*\|\s*(as_number|as_bool)\s*\}\}$/', $value, $matches)) {
             $envValue = getenv($matches[1]);
-            return $envValue !== false ? (int) $envValue : $value;
+            if ($envValue === false) {
+                return $value;
+            }
+
+            return match ($matches[2]) {
+                'as_number' => is_numeric($envValue) ? (int) $envValue : $envValue,
+                'as_bool' => filter_var($envValue, FILTER_VALIDATE_BOOLEAN),
+                default => $envValue,
+            };
         }
 
         return (string) preg_replace_callback($pattern, function (array $matches): string {

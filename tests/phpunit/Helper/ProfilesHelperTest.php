@@ -183,6 +183,51 @@ class ProfilesHelperTest extends TestCase
         self::assertSame('{{ env_var("DBT_NONEXISTENT_VAR") }}', $resolved['type']);
     }
 
+    public function testResolvesAsBoolFilter(): void
+    {
+        putenv('DBT_KBC_PROD_TRUST_CERT=true');
+
+        $data = [
+            'trust_cert' => '{{ env_var("DBT_KBC_PROD_TRUST_CERT")| as_bool }}',
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+
+        self::assertTrue($resolved['trust_cert']);
+
+        putenv('DBT_KBC_PROD_TRUST_CERT');
+    }
+
+    public function testResolvesAsBoolFilterFalse(): void
+    {
+        putenv('DBT_KBC_PROD_TRUST_CERT=false');
+
+        $data = [
+            'trust_cert' => '{{ env_var("DBT_KBC_PROD_TRUST_CERT")| as_bool }}',
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+
+        self::assertFalse($resolved['trust_cert']);
+
+        putenv('DBT_KBC_PROD_TRUST_CERT');
+    }
+
+    public function testAsNumberWithNonNumericValueReturnsRawString(): void
+    {
+        putenv('DBT_KBC_PROD_THREADS=abc');
+
+        $data = [
+            'threads' => '{{ env_var("DBT_KBC_PROD_THREADS")| as_number }}',
+        ];
+
+        $resolved = ProfilesHelper::resolveEnvVars($data);
+
+        self::assertSame('abc', $resolved['threads']);
+
+        putenv('DBT_KBC_PROD_THREADS');
+    }
+
     public function testResolveAndMaskCombined(): void
     {
         putenv('DBT_KBC_PROD_TYPE=snowflake');

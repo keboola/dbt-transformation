@@ -72,7 +72,6 @@ class ProfilesHelper
                     ? (str_contains($envValue, '.') ? (float) $envValue : (int) $envValue)
                     : $envValue,
                 'as_bool' => filter_var($envValue, FILTER_VALIDATE_BOOLEAN),
-                default => $envValue,
             };
         }
 

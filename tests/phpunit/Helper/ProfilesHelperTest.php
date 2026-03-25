@@ -29,7 +29,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, mixed> $masked */
+        /** @var array{config: array<string, mixed>, default: array{outputs: array{kbc_prod: array<string, mixed>}}} $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['default']['outputs']['kbc_prod']['password']);
@@ -49,7 +49,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, mixed> $masked */
+        /** @var array{outputs: array{kbc_prod: array<string, mixed>}} $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['outputs']['kbc_prod']['private_key']);
@@ -101,7 +101,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, mixed> $masked */
+        /** @var array{outputs: array{prod: array<string, mixed>, dev: array<string, mixed>}} $masked */
         $masked = ProfilesHelper::maskSensitiveValues($data);
 
         self::assertSame('****', $masked['outputs']['prod']['password']);
@@ -167,7 +167,7 @@ class ProfilesHelperTest extends TestCase
             ],
         ];
 
-        /** @var array<string, mixed> $resolved */
+        /** @var array{outputs: array{kbc_prod: array<string, mixed>}} $resolved */
         $resolved = ProfilesHelper::resolveEnvVars($data);
 
         self::assertSame('snowflake', $resolved['outputs']['kbc_prod']['type']);

@@ -1,6 +1,6 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-redshift-sources (%s)
-Generated profiles.yml: %A
 Remote redshift DWH: testing.cx4py8yq28xb.us-east-1.redshift.amazonaws.com
+Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml

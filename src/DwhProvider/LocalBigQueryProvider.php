@@ -8,6 +8,9 @@ use DbtTransformation\Config;
 use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
+use Google\Cloud\BigQuery\BigQueryClient;
+use Google\Cloud\Core\Exception\ServiceException;
+use Keboola\Component\UserException;
 use Keboola\StorageApi\Client;
 use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
@@ -38,6 +41,9 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
         $this->projectPath = $projectPath;
         $this->temp = new Temp('dbt-big-query-local');
     }
+
+    private const DATASET_CHECK_MAX_RETRIES = 10;
+    private const DATASET_CHECK_RETRY_DELAY_SECONDS = 3;
 
     /**
      * @param array<int, string> $configurationNames
@@ -70,6 +76,7 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
             $this->getOutputs($configurationNames, self::getDbtParams()),
         );
         $this->setEnvVars();
+        $this->waitForDatasetAccessibility();
 
         if ($this->config->generateSources()) {
             $this->createSourceFileService->dumpYaml(
@@ -77,6 +84,61 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
                 $tablesData,
                 $this->config->getFreshness(),
             );
+        }
+    }
+
+    /**
+     * Verifies the workspace dataset is accessible to the workspace service account.
+     *
+     * After workspace creation, GCP IAM permissions may not be immediately effective
+     * due to eventual consistency. This pre-flight check retries dataset access
+     * to ensure dbt won't fail with a 403 error on CREATE SCHEMA IF NOT EXISTS.
+     *
+     * @throws \Keboola\Component\UserException
+     */
+    protected function waitForDatasetAccessibility(): void
+    {
+        $workspace = $this->config->getAuthorization()['workspace'];
+        $datasetName = $workspace['schema'];
+
+        $bqClient = new BigQueryClient([
+            'keyFile' => $workspace['credentials'],
+            'location' => $workspace['region'],
+        ]);
+
+        $dataset = $bqClient->dataset($datasetName);
+
+        for ($attempt = 1; $attempt <= self::DATASET_CHECK_MAX_RETRIES; $attempt++) {
+            try {
+                $dataset->reload();
+                $this->logger->info(sprintf(
+                    'Workspace dataset "%s" is accessible (attempt %d/%d).',
+                    $datasetName,
+                    $attempt,
+                    self::DATASET_CHECK_MAX_RETRIES,
+                ));
+                return;
+            } catch (ServiceException $e) {
+                if ($attempt < self::DATASET_CHECK_MAX_RETRIES) {
+                    $this->logger->info(sprintf(
+                        'Workspace dataset "%s" is not yet accessible (attempt %d/%d, HTTP %d).'
+                        . ' Retrying in %d seconds...',
+                        $datasetName,
+                        $attempt,
+                        self::DATASET_CHECK_MAX_RETRIES,
+                        $e->getCode(),
+                        self::DATASET_CHECK_RETRY_DELAY_SECONDS,
+                    ));
+                    sleep(self::DATASET_CHECK_RETRY_DELAY_SECONDS);
+                } else {
+                    throw new UserException(sprintf(
+                        'Workspace dataset "%s" is not accessible after %d attempts: %s',
+                        $datasetName,
+                        self::DATASET_CHECK_MAX_RETRIES,
+                        $e->getMessage(),
+                    ), 0, $e);
+                }
+            }
         }
     }
 

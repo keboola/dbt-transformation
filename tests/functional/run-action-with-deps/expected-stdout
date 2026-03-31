@@ -1,4 +1,5 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-deps (%s)
+Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A
 Installing dbt-labs/dbt_utils

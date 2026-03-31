@@ -1,9 +1,10 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-profiles-dir (%s)
 Remote snowflake DWH: keboola.snowflakecomputing.com
+Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
-Executing command "dbt run --target test --profiles-dir ./config"
+%AExecuting command "dbt run --target test --profiles-dir ./config"
 Running with dbt=%A
 %s Starting full parse.
 Found 2 models%S

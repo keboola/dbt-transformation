@@ -60,6 +60,7 @@ class DbtDocsHelperTest extends TestCase
         $manifestJson = (string) file_get_contents(__DIR__ . '/../data/target/manifest.json');
         $runResultsJson = (string) file_get_contents(__DIR__ . '/../data/target/run_results.json');
 
+        /** @var array<string, mixed> $manifest */
         $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
         /** @var array<string, array<string, mixed>> $runResults */
         $runResults = (array) json_decode($runResultsJson, true, 512, JSON_THROW_ON_ERROR);

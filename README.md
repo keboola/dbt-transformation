@@ -24,6 +24,10 @@ The configuration `config.json` contains following properties in `parameters` ke
         - `period` - positive integer: Number of periods where a data source is still considered "fresh".
         - `count` - string enum: The time period used in the freshness calculation. One of `minute`, `hour` or `day`.
 - `showExecutedSqls` - boolean (optional): Default `false`, if set to `true` SQL queries executed by DBT transformation are printed to output.
+
+### Debug Mode
+
+Running the job in **debug mode** enables more verbose logging — the full `dbt.log` is streamed to output after each step. Additionally, the generated `profiles.yml` is always logged (with sensitive values masked) to help diagnose connection issues.
 - `generateSources` - boolean (optional): Default `true`
   - If `true` sources YAML files are generated. 
   - If `false` generating of sources file is skipped. 

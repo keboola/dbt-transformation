@@ -20,7 +20,9 @@ use DbtTransformation\Helper\DbtCompileHelper;
 use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
+use DbtTransformation\Helper\ProfilesHelper;
 use DbtTransformation\Service\ArtifactsService;
+use DbtTransformation\Service\DbtLogService;
 use DbtTransformation\Service\DbtService;
 use DbtTransformation\Service\GitRepositoryService;
 use ErrorException;
@@ -35,6 +37,7 @@ use Psr\Log\LoggerInterface;
 use Retry\Policy\CallableRetryPolicy;
 use Retry\RetryProxy;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Throwable;
 
@@ -87,15 +90,32 @@ class Component extends BaseComponent
         $executeSteps = $config->getExecuteSteps();
         array_unshift($executeSteps, 'dbt deps');
 
+        $isDebugMode = getenv('KBC_COMPONENT_RUN_MODE') === 'debug';
+
         if ($provider->getDwhConnectionType() === DwhConnectionTypeEnum::REMOTE) {
             $profilesDir = $this->getProfilesPath($executeSteps);
             $provider->createDbtYamlFiles($profilesDir);
+            $this->logProfilesYaml($profilesDir);
         } else {
             $provider->createDbtYamlFiles($this->projectPath);
+            $this->logProfilesYaml($this->projectPath);
         }
 
-        foreach ($executeSteps as $step) {
-            $this->executeStep($step, $provider->getDwhConnectionType());
+        $dbtLogService = new DbtLogService($this->getLogger(), $this->projectPath . '/logs/dbt.log');
+
+        try {
+            foreach ($executeSteps as $step) {
+                $this->executeStep($step, $provider->getDwhConnectionType());
+
+                if ($isDebugMode) {
+                    $dbtLogService->log();
+                }
+            }
+        } finally {
+            // Ensure dbt.log is flushed on failure; on success this is a no-op (offset already at EOF)
+            if ($isDebugMode) {
+                $dbtLogService->log();
+            }
         }
         if ($config->showSqls()) {
             $this->logExecutedSqls();
@@ -209,6 +229,29 @@ class Component extends BaseComponent
         ));
     }
 
+    protected function logProfilesYaml(string $profilesDir): void
+    {
+        $profilesPath = sprintf('%s/profiles.yml', $profilesDir);
+        if (!file_exists($profilesPath)) {
+            return;
+        }
+
+        try {
+            $profiles = Yaml::parseFile($profilesPath);
+        } catch (ParseException $e) {
+            $this->getLogger()->warning(sprintf('Could not parse profiles.yml for logging: %s', $e->getMessage()));
+            return;
+        }
+
+        if (!is_array($profiles)) {
+            return;
+        }
+
+        $resolved = ProfilesHelper::resolveEnvVars($profiles);
+        $masked = ProfilesHelper::maskSensitiveValues($resolved);
+        $this->getLogger()->info(sprintf("Generated profiles.yml:\n%s", Yaml::dump($masked, 5)));
+    }
+
     protected function logExecutedSqls(): void
     {
         $sqls = (new ParseLogFileHelper(sprintf('%s/logs/dbt.log', $this->projectPath)))->getSqls();
@@ -224,7 +267,7 @@ class Component extends BaseComponent
     protected function executeStep(string $step, DwhConnectionTypeEnum $dwhConnectionType): void
     {
         $this->getLogger()->info(sprintf('Executing command "%s"', $step));
-        $dbtService = new DbtService($this->projectPath, $dwhConnectionType);
+        $dbtService = new DbtService($this->projectPath, $dwhConnectionType, $this->getLogger());
         if ($step === DbtService::COMMAND_DEPS) {
             //some deps could be installed from git, so retry for "shallow file has changed" is needed
             /** @var string $output */
@@ -322,6 +365,7 @@ class Component extends BaseComponent
                 $this->artifacts->downloadLastRun($componentId, $configId, $branchId);
 
                 $manifestJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'manifest.json');
+                /** @var array<string, mixed> $manifest */
                 $manifest = (array) json_decode($manifestJson, true, 512, JSON_THROW_ON_ERROR);
                 $runResultsJson = $this->artifacts->readFromFileInStep(DbtService::COMMAND_RUN, 'run_results.json');
                 /** @var array<string, array<string, mixed>> $runResults */
@@ -484,9 +528,13 @@ class Component extends BaseComponent
             throw new UserException('Absolute path in --profiles-dir option is not allowed.');
         }
 
-        $profilesDir = ltrim($profilesDir, '.');
+        $profilesDir = ltrim($profilesDir, './');
 
-        return $this->projectPath . $profilesDir;
+        if ($profilesDir === '') {
+            return $this->projectPath;
+        }
+
+        return rtrim($this->projectPath, '/') . '/' . $profilesDir;
     }
 
     public static function setEnvironment(): void

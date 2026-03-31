@@ -1,8 +1,9 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch main (%s)
+Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A
 Warning: No packages were found in packages.yml
-Executing command "dbt run"
+%AExecuting command "dbt run"
 Running with dbt=%A
 %s Starting full parse.
 Found 2 models%A

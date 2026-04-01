@@ -14,6 +14,9 @@ use Keboola\Component\UserException;
 use Keboola\StorageApi\Client;
 use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
+use Retry\BackOff\FixedBackOffPolicy;
+use Retry\Policy\SimpleRetryPolicy;
+use Retry\RetryProxy;
 use RuntimeException;
 
 class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
@@ -42,8 +45,8 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
         $this->temp = new Temp('dbt-big-query-local');
     }
 
-    private const DATASET_CHECK_MAX_RETRIES = 10;
-    private const DATASET_CHECK_RETRY_DELAY_SECONDS = 3;
+    private const DATASET_CHECK_MAX_ATTEMPTS = 10;
+    private const DATASET_CHECK_RETRY_DELAY_MS = 3000;
 
     /**
      * @param array<int, string> $configurationNames
@@ -108,37 +111,27 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
 
         $dataset = $bqClient->dataset($datasetName);
 
-        for ($attempt = 1; $attempt <= self::DATASET_CHECK_MAX_RETRIES; $attempt++) {
-            try {
+        $retryPolicy = new SimpleRetryPolicy(self::DATASET_CHECK_MAX_ATTEMPTS, [ServiceException::class]);
+        $backOffPolicy = new FixedBackOffPolicy(self::DATASET_CHECK_RETRY_DELAY_MS);
+        $retryProxy = new RetryProxy($retryPolicy, $backOffPolicy, $this->logger);
+
+        try {
+            $retryProxy->call(function () use ($dataset): void {
                 $dataset->reload();
-                $this->logger->info(sprintf(
-                    'Workspace dataset "%s" is accessible (attempt %d/%d).',
-                    $datasetName,
-                    $attempt,
-                    self::DATASET_CHECK_MAX_RETRIES,
-                ));
-                return;
-            } catch (ServiceException $e) {
-                if ($attempt < self::DATASET_CHECK_MAX_RETRIES) {
-                    $this->logger->info(sprintf(
-                        'Workspace dataset "%s" is not yet accessible (attempt %d/%d, HTTP %d).'
-                        . ' Retrying in %d seconds...',
-                        $datasetName,
-                        $attempt,
-                        self::DATASET_CHECK_MAX_RETRIES,
-                        $e->getCode(),
-                        self::DATASET_CHECK_RETRY_DELAY_SECONDS,
-                    ));
-                    sleep(self::DATASET_CHECK_RETRY_DELAY_SECONDS);
-                } else {
-                    throw new UserException(sprintf(
-                        'Workspace dataset "%s" is not accessible after %d attempts: %s',
-                        $datasetName,
-                        self::DATASET_CHECK_MAX_RETRIES,
-                        $e->getMessage(),
-                    ), 0, $e);
-                }
-            }
+            });
+            $this->logger->info(sprintf(
+                'Workspace dataset "%s" is accessible (attempt %d/%d).',
+                $datasetName,
+                $retryProxy->getTryCount(),
+                self::DATASET_CHECK_MAX_ATTEMPTS,
+            ));
+        } catch (ServiceException $e) {
+            throw new UserException(sprintf(
+                'Workspace dataset "%s" is not accessible after %d attempts: %s',
+                $datasetName,
+                self::DATASET_CHECK_MAX_ATTEMPTS,
+                $e->getMessage(),
+            ), 0, $e);
         }
     }
 

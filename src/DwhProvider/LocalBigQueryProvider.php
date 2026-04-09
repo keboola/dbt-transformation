@@ -9,6 +9,7 @@ use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
 use Google\Cloud\BigQuery\BigQueryClient;
+use Google\Cloud\BigQuery\Dataset;
 use Google\Cloud\Core\Exception\ServiceException;
 use Keboola\Component\UserException;
 use Keboola\StorageApi\Client;
@@ -45,8 +46,8 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
         $this->temp = new Temp('dbt-big-query-local');
     }
 
-    private const DATASET_CHECK_MAX_ATTEMPTS = 10;
-    private const DATASET_CHECK_RETRY_DELAY_MS = 3000;
+    protected const DATASET_CHECK_MAX_ATTEMPTS = 10;
+    protected const DATASET_CHECK_RETRY_DELAY_MS = 3000;
 
     /**
      * @param array<int, string> $configurationNames
@@ -104,12 +105,7 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
         $workspace = $this->config->getAuthorization()['workspace'];
         $datasetName = $workspace['schema'];
 
-        $bqClient = new BigQueryClient([
-            'keyFile' => $workspace['credentials'],
-            'location' => $workspace['region'],
-        ]);
-
-        $dataset = $bqClient->dataset($datasetName);
+        $dataset = $this->createBigQueryDataset($workspace, $datasetName);
 
         $retryPolicy = new SimpleRetryPolicy(self::DATASET_CHECK_MAX_ATTEMPTS, [ServiceException::class]);
         $backOffPolicy = new FixedBackOffPolicy(self::DATASET_CHECK_RETRY_DELAY_MS);
@@ -133,6 +129,19 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
                 $e->getMessage(),
             ), 0, $e);
         }
+    }
+
+    /**
+     * @param array<string, mixed> $workspace
+     */
+    protected function createBigQueryDataset(array $workspace, string $datasetName): Dataset
+    {
+        $bqClient = new BigQueryClient([
+            'keyFile' => $workspace['credentials'],
+            'location' => $workspace['region'],
+        ]);
+
+        return $bqClient->dataset($datasetName);
     }
 
     protected function setEnvVars(): void

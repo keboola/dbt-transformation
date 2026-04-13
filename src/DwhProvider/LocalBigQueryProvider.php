@@ -8,9 +8,16 @@ use DbtTransformation\Config;
 use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
 use DbtTransformation\FileDumper\DbtSourcesYaml;
+use Google\Cloud\BigQuery\BigQueryClient;
+use Google\Cloud\BigQuery\Dataset;
+use Google\Cloud\Core\Exception\ServiceException;
+use Keboola\Component\UserException;
 use Keboola\StorageApi\Client;
 use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
+use Retry\BackOff\FixedBackOffPolicy;
+use Retry\Policy\SimpleRetryPolicy;
+use Retry\RetryProxy;
 use RuntimeException;
 
 class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
@@ -38,6 +45,9 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
         $this->projectPath = $projectPath;
         $this->temp = new Temp('dbt-big-query-local');
     }
+
+    protected const DATASET_CHECK_MAX_ATTEMPTS = 10;
+    protected const DATASET_CHECK_RETRY_DELAY_MS = 3000;
 
     /**
      * @param array<int, string> $configurationNames
@@ -70,6 +80,7 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
             $this->getOutputs($configurationNames, self::getDbtParams()),
         );
         $this->setEnvVars();
+        $this->waitForDatasetAccessibility();
 
         if ($this->config->generateSources()) {
             $this->createSourceFileService->dumpYaml(
@@ -78,6 +89,59 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
                 $this->config->getFreshness(),
             );
         }
+    }
+
+    /**
+     * Verifies the workspace dataset is accessible to the workspace service account.
+     *
+     * After workspace creation, GCP IAM permissions may not be immediately effective
+     * due to eventual consistency. This pre-flight check retries dataset access
+     * to ensure dbt won't fail with a 403 error on CREATE SCHEMA IF NOT EXISTS.
+     *
+     * @throws \Keboola\Component\UserException
+     */
+    protected function waitForDatasetAccessibility(): void
+    {
+        $workspace = $this->config->getAuthorization()['workspace'];
+        $datasetName = $workspace['schema'];
+
+        $dataset = $this->createBigQueryDataset($workspace, $datasetName);
+
+        $retryPolicy = new SimpleRetryPolicy(self::DATASET_CHECK_MAX_ATTEMPTS, [ServiceException::class]);
+        $backOffPolicy = new FixedBackOffPolicy(self::DATASET_CHECK_RETRY_DELAY_MS);
+        $retryProxy = new RetryProxy($retryPolicy, $backOffPolicy, $this->logger);
+
+        try {
+            $retryProxy->call(function () use ($dataset): void {
+                $dataset->reload();
+            });
+            $this->logger->info(sprintf(
+                'Workspace dataset "%s" is accessible (attempt %d/%d).',
+                $datasetName,
+                $retryProxy->getTryCount(),
+                self::DATASET_CHECK_MAX_ATTEMPTS,
+            ));
+        } catch (ServiceException $e) {
+            throw new UserException(sprintf(
+                'Workspace dataset "%s" is not accessible after %d attempts: %s',
+                $datasetName,
+                self::DATASET_CHECK_MAX_ATTEMPTS,
+                $e->getMessage(),
+            ), 0, $e);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $workspace
+     */
+    protected function createBigQueryDataset(array $workspace, string $datasetName): Dataset
+    {
+        $bqClient = new BigQueryClient([
+            'keyFile' => $workspace['credentials'],
+            'location' => $workspace['region'],
+        ]);
+
+        return $bqClient->dataset($datasetName);
     }
 
     protected function setEnvVars(): void

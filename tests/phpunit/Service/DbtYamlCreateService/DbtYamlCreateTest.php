@@ -201,80 +201,7 @@ class DbtYamlCreateTest extends TestCase
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function testCreateProfileYamlWithRemoteSnowflakeAddsInsecureMode(): void
-    {
-        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
-
-        $fs = new Filesystem();
-        $fs->copy(
-            sprintf('%s/dbt_project.yml', $this->providerDataDir),
-            sprintf('%s/dbt_project.yml', $this->dataDir),
-        );
-
-        $service = new DbtProfilesYaml();
-        $service->dumpYaml(
-            $this->dataDir,
-            $this->dataDir,
-            RemoteSnowflakeProvider::getOutputs(
-                [],
-                RemoteSnowflakeProvider::getDbtParams(),
-            ),
-            [
-                'host' => 'test.snowflakecomputing.com',
-                'insecure_mode' => true,
-            ],
-        );
-
-        self::assertFileEquals(
-            sprintf('%s/expectedRemoteSnowflakeProfiles.yml', $this->providerDataDir),
-            sprintf('%s/profiles.yml', $this->dataDir),
-        );
-
-        putenv('DBT_KBC_PROD_PRIVATE_KEY');
-    }
-
-    public function testMergedProfilesGetAdditionalOptions(): void
-    {
-        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
-
-        $fs = new Filesystem();
-        $fs->copy(
-            sprintf('%s/dbt_project.yml', $this->providerDataDir),
-            sprintf('%s/dbt_project.yml', $this->dataDir),
-        );
-        $fs->copy(
-            sprintf('%s/profiles.yml', $this->providerDataDir),
-            sprintf('%s/profiles.yml', $this->dataDir),
-        );
-
-        $service = new DbtProfilesYaml();
-        $service->dumpYaml(
-            $this->dataDir,
-            $this->dataDir,
-            RemoteSnowflakeProvider::getOutputs(
-                [],
-                RemoteSnowflakeProvider::getDbtParams(),
-            ),
-            [
-                'host' => 'test.snowflakecomputing.com',
-                'insecure_mode' => true,
-            ],
-        );
-
-        /** @var array<string, array<string, array<string, array<string, mixed>>>> $result */
-        $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
-
-        // Merged output (from existing profiles.yml) gets host and insecure_mode
-        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['prod']['host']);
-        self::assertTrue($result['default']['outputs']['prod']['insecure_mode']);
-        // Generated output gets host and insecure_mode
-        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['kbc_prod']['host']);
-        self::assertTrue($result['default']['outputs']['kbc_prod']['insecure_mode']);
-
-        putenv('DBT_KBC_PROD_PRIVATE_KEY');
-    }
-
-    public function testInsecureModeNotAddedWhenDisabled(): void
+    public function testCreateProfileYamlWithRemoteSnowflakeAddsHost(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
 
@@ -302,6 +229,44 @@ class DbtYamlCreateTest extends TestCase
 
         self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['kbc_prod']['host']);
         self::assertArrayNotHasKey('insecure_mode', $result['default']['outputs']['kbc_prod']);
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    }
+
+    public function testMergedProfilesGetAdditionalHost(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+        $fs->copy(
+            sprintf('%s/profiles.yml', $this->providerDataDir),
+            sprintf('%s/profiles.yml', $this->dataDir),
+        );
+
+        $service = new DbtProfilesYaml();
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            RemoteSnowflakeProvider::getOutputs(
+                [],
+                RemoteSnowflakeProvider::getDbtParams(),
+            ),
+            [
+                'host' => 'test.snowflakecomputing.com',
+            ],
+        );
+
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $result */
+        $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+
+        // Merged output (from existing profiles.yml) gets host
+        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['prod']['host']);
+        // Generated output gets host
+        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['kbc_prod']['host']);
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }

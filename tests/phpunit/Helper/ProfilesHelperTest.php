@@ -115,7 +115,7 @@ class ProfilesHelperTest extends TestCase
         $data = [
             'type' => 'snowflake',
             'account' => 'my-account',
-            'insecure_mode' => true,
+            'host' => 'my-account.snowflakecomputing.com',
             'threads' => 4,
         ];
 
@@ -162,7 +162,7 @@ class ProfilesHelperTest extends TestCase
                 'kbc_prod' => [
                     'type' => '{{ env_var("DBT_KBC_PROD_TYPE") }}',
                     'password' => '{{ env_var("DBT_KBC_PROD_PASSWORD") }}',
-                    'insecure_mode' => true,
+                    'host' => 'my-account.snowflakecomputing.com',
                 ],
             ],
         ];
@@ -172,7 +172,7 @@ class ProfilesHelperTest extends TestCase
 
         self::assertSame('snowflake', $resolved['outputs']['kbc_prod']['type']);
         self::assertSame('secret', $resolved['outputs']['kbc_prod']['password']);
-        self::assertTrue($resolved['outputs']['kbc_prod']['insecure_mode']);
+        self::assertSame('my-account.snowflakecomputing.com', $resolved['outputs']['kbc_prod']['host']);
 
         putenv('DBT_KBC_PROD_TYPE');
         putenv('DBT_KBC_PROD_PASSWORD');

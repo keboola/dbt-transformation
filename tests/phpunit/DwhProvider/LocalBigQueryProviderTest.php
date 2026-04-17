@@ -79,7 +79,8 @@ class LocalBigQueryProviderTest extends TestCase
     {
         $dataset = $this->createMock(Dataset::class);
         $dataset->expects(self::once())
-            ->method('reload');
+            ->method('update')
+            ->with([]);
 
         $provider = $this->createProvider($dataset);
         $provider->callWaitForDatasetAccessibility();
@@ -93,7 +94,8 @@ class LocalBigQueryProviderTest extends TestCase
     {
         $dataset = $this->createMock(Dataset::class);
         $dataset->expects(self::exactly(3))
-            ->method('reload')
+            ->method('update')
+            ->with([])
             ->willReturnOnConsecutiveCalls(
                 self::throwException(new ServiceException('Access denied', 403)),
                 self::throwException(new ServiceException('Access denied', 403)),
@@ -114,7 +116,8 @@ class LocalBigQueryProviderTest extends TestCase
     {
         $dataset = $this->createMock(Dataset::class);
         $dataset->expects(self::exactly(10))
-            ->method('reload')
+            ->method('update')
+            ->with([])
             ->willThrowException(new ServiceException('Permission denied', 403));
 
         $provider = $this->createProvider($dataset);
@@ -131,7 +134,8 @@ class LocalBigQueryProviderTest extends TestCase
     {
         $dataset = $this->createMock(Dataset::class);
         $dataset->expects(self::once())
-            ->method('reload')
+            ->method('update')
+            ->with([])
             ->willThrowException(new RuntimeException('Network error'));
 
         $provider = $this->createProvider($dataset);

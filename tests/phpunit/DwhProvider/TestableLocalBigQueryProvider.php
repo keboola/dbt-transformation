@@ -57,7 +57,7 @@ class TestableLocalBigQueryProvider extends LocalBigQueryProvider
 
         try {
             $retryProxy->call(function () use ($dataset): void {
-                $dataset->reload();
+                $dataset->update([]);
             });
             $this->logger->info(sprintf(
                 'Workspace dataset "%s" is accessible (attempt %d/%d).',

@@ -92,11 +92,16 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
     }
 
     /**
-     * Verifies the workspace dataset is accessible to the workspace service account.
+     * Verifies the workspace dataset is writable by the workspace service account.
      *
      * After workspace creation, GCP IAM permissions may not be immediately effective
-     * due to eventual consistency. This pre-flight check retries dataset access
+     * due to eventual consistency. This pre-flight check retries a dataset write operation
      * to ensure dbt won't fail with a 403 error on CREATE SCHEMA IF NOT EXISTS.
+     *
+     * Uses dataset->update() (datasets.patch API) which requires bigquery.datasets.update
+     * permission — the same IAM role that grants bigquery.datasets.create needed by dbt.
+     * A read-only check (dataset->reload / datasets.get) is insufficient because read
+     * permissions propagate faster than write permissions in GCP IAM.
      *
      * @throws \Keboola\Component\UserException
      */
@@ -113,7 +118,7 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
 
         try {
             $retryProxy->call(function () use ($dataset): void {
-                $dataset->reload();
+                $dataset->update([]);
             });
             $this->logger->info(sprintf(
                 'Workspace dataset "%s" is accessible (attempt %d/%d).',

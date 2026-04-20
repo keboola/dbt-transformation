@@ -204,6 +204,7 @@ class DbtYamlCreateTest extends TestCase
     public function testCreateProfileYamlWithRemoteSnowflakeAddsHost(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+        putenv('DBT_KBC_PROD_HOST=test.privatelink.snowflakecomputing.com');
 
         $fs = new Filesystem();
         $fs->copy(
@@ -220,22 +221,27 @@ class DbtYamlCreateTest extends TestCase
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
             [
-                'host' => 'test.snowflakecomputing.com',
+                'host' => 'test.privatelink.snowflakecomputing.com',
             ],
         );
 
         /** @var array<string, array<string, array<string, array<string, mixed>>>> $result */
         $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
 
-        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['kbc_prod']['host']);
+        self::assertSame(
+            'test.privatelink.snowflakecomputing.com',
+            $result['default']['outputs']['kbc_prod']['host'],
+        );
         self::assertArrayNotHasKey('insecure_mode', $result['default']['outputs']['kbc_prod']);
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
+        putenv('DBT_KBC_PROD_HOST');
     }
 
     public function testMergedProfilesGetAdditionalHost(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+        putenv('DBT_KBC_PROD_HOST=test.privatelink.snowflakecomputing.com');
 
         $fs = new Filesystem();
         $fs->copy(
@@ -256,7 +262,7 @@ class DbtYamlCreateTest extends TestCase
                 RemoteSnowflakeProvider::getDbtParams(),
             ),
             [
-                'host' => 'test.snowflakecomputing.com',
+                'host' => 'test.privatelink.snowflakecomputing.com',
             ],
         );
 
@@ -264,11 +270,18 @@ class DbtYamlCreateTest extends TestCase
         $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
 
         // Merged output (from existing profiles.yml) gets host
-        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['prod']['host']);
+        self::assertSame(
+            'test.privatelink.snowflakecomputing.com',
+            $result['default']['outputs']['prod']['host'],
+        );
         // Generated output gets host
-        self::assertSame('test.snowflakecomputing.com', $result['default']['outputs']['kbc_prod']['host']);
+        self::assertSame(
+            'test.privatelink.snowflakecomputing.com',
+            $result['default']['outputs']['kbc_prod']['host'],
+        );
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
+        putenv('DBT_KBC_PROD_HOST');
     }
 
     /**

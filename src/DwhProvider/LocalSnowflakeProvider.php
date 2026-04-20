@@ -116,6 +116,9 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
             putenv(sprintf('DBT_KBC_PROD_%d_DATABASE=%s_%d', $projectId, $stackPrefix, $projectId));
         }
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+        if (str_contains($workspace['host'], 'privatelink')) {
+            putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
+        }
         $account = str_replace(self::STRING_TO_REMOVE_FROM_HOST, '', $workspace['host']);
         putenv(sprintf('DBT_KBC_PROD_ACCOUNT=%s', $account));
         putenv(sprintf('DBT_KBC_PROD_USER=%s', $workspace['user']));
@@ -144,6 +147,10 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
             'account',
             'threads',
         ];
+
+        if (getenv('DBT_KBC_PROD_HOST') !== false) {
+            $dbtParams[] = 'host';
+        }
 
         if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {
             $dbtParams[] = 'private_key';

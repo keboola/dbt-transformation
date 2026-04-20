@@ -92,16 +92,15 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
     }
 
     /**
-     * Verifies the workspace dataset is writable by the workspace service account.
+     * Verifies the service account has bigquery.datasets.create permission on the project.
      *
      * After workspace creation, GCP IAM permissions may not be immediately effective
-     * due to eventual consistency. This pre-flight check retries a dataset write operation
-     * to ensure dbt won't fail with a 403 error on CREATE SCHEMA IF NOT EXISTS.
+     * due to eventual consistency. dbt runs CREATE SCHEMA IF NOT EXISTS which requires
+     * the project-level bigquery.datasets.create permission.
      *
-     * Uses dataset->update() (datasets.patch API) which requires bigquery.datasets.update
-     * permission — the same IAM role that grants bigquery.datasets.create needed by dbt.
-     * A read-only check (dataset->reload / datasets.get) is insufficient because read
-     * permissions propagate faster than write permissions in GCP IAM.
+     * This check creates a temporary dataset (testing the exact permission dbt needs)
+     * and deletes it immediately. A 409 (already exists) also proves the permission
+     * is available. Only 403 errors are retried.
      *
      * @throws \Keboola\Component\UserException
      */
@@ -110,15 +109,27 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
         $workspace = $this->config->getAuthorization()['workspace'];
         $datasetName = $workspace['schema'];
 
-        $dataset = $this->createBigQueryDataset($workspace, $datasetName);
+        $bqClient = $this->createBigQueryClient($workspace);
 
         $retryPolicy = new SimpleRetryPolicy(self::DATASET_CHECK_MAX_ATTEMPTS, [ServiceException::class]);
         $backOffPolicy = new FixedBackOffPolicy(self::DATASET_CHECK_RETRY_DELAY_MS);
         $retryProxy = new RetryProxy($retryPolicy, $backOffPolicy, $this->logger);
 
+        $probeDatasetName = $datasetName . '_probe_' . getmypid();
+
         try {
-            $retryProxy->call(function () use ($dataset): void {
-                $dataset->update([]);
+            $retryProxy->call(function () use ($bqClient, $probeDatasetName): void {
+                try {
+                    $dataset = $bqClient->createDataset($probeDatasetName);
+                    $dataset->delete();
+                } catch (ServiceException $e) {
+                    if ($e->getCode() === 409) {
+                        // Already exists = we have create permission, clean up
+                        $bqClient->dataset($probeDatasetName)->delete();
+                        return;
+                    }
+                    throw $e;
+                }
             });
             $this->logger->info(sprintf(
                 'Workspace dataset "%s" is accessible (attempt %d/%d).',
@@ -139,14 +150,12 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
     /**
      * @param array<string, mixed> $workspace
      */
-    protected function createBigQueryDataset(array $workspace, string $datasetName): Dataset
+    protected function createBigQueryClient(array $workspace): BigQueryClient
     {
-        $bqClient = new BigQueryClient([
+        return new BigQueryClient([
             'keyFile' => $workspace['credentials'],
             'location' => $workspace['region'],
         ]);
-
-        return $bqClient->dataset($datasetName);
     }
 
     protected function setEnvVars(): void

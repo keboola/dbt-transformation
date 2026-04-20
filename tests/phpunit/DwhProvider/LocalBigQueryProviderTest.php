@@ -9,7 +9,6 @@ use DbtTransformation\Config;
 use DbtTransformation\Configuration\ConfigDefinition;
 use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
-use Google\Cloud\BigQuery\BigQueryClient;
 use Google\Cloud\BigQuery\Dataset;
 use Google\Cloud\Core\Exception\ServiceException;
 use Keboola\Component\UserException;
@@ -59,7 +58,7 @@ class LocalBigQueryProviderTest extends TestCase
         ], new ConfigDefinition());
     }
 
-    private function createProvider(BigQueryClient $bqClient): TestableLocalBigQueryProvider
+    private function createProvider(Dataset $dataset): TestableLocalBigQueryProvider
     {
         $config = $this->createConfig();
 
@@ -72,84 +71,60 @@ class LocalBigQueryProviderTest extends TestCase
             $this->logger,
             $config,
             '/tmp/test-project',
-            $bqClient,
+            $dataset,
         );
     }
 
     public function testDatasetAccessibleOnFirstAttempt(): void
     {
-        $mockDataset = $this->createMock(Dataset::class);
-        $mockDataset->expects(self::once())->method('delete');
+        $dataset = $this->createMock(Dataset::class);
+        $dataset->expects(self::once())
+            ->method('update')
+            ->with([]);
 
-        $bqClient = $this->createMock(BigQueryClient::class);
-        $bqClient->expects(self::once())
-            ->method('createDataset')
-            ->willReturn($mockDataset);
-
-        $provider = $this->createProvider($bqClient);
+        $provider = $this->createProvider($dataset);
         $provider->callWaitForDatasetAccessibility();
 
         self::assertTrue($this->logger->hasInfoThatContains(
-            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 1/10).',
+            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 1/20).',
         ));
     }
 
     public function testDatasetAccessibleAfterRetries(): void
     {
-        $mockDataset = $this->createMock(Dataset::class);
-        $mockDataset->expects(self::once())->method('delete');
-
-        $bqClient = $this->createMock(BigQueryClient::class);
-        $bqClient->expects(self::exactly(3))
-            ->method('createDataset')
+        $dataset = $this->createMock(Dataset::class);
+        $dataset->expects(self::exactly(3))
+            ->method('update')
+            ->with([])
             ->willReturnOnConsecutiveCalls(
                 self::throwException(new ServiceException('Access denied', 403)),
                 self::throwException(new ServiceException('Access denied', 403)),
-                $mockDataset,
+                null,
             );
 
-        $provider = $this->createProvider($bqClient);
+        $provider = $this->createProvider($dataset);
         $provider->callWaitForDatasetAccessibility();
 
         self::assertTrue($this->logger->hasInfoThatContains(
-            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 3/10).',
+            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 3/20).',
         ));
+        // RetryProxy logs retries automatically
         self::assertTrue($this->logger->hasInfoThatContains('Access denied. Retrying... ['));
-    }
-
-    public function testDatasetAccessibleOnConflict(): void
-    {
-        $mockDataset = $this->createMock(Dataset::class);
-        $mockDataset->expects(self::once())->method('delete');
-
-        $bqClient = $this->createMock(BigQueryClient::class);
-        $bqClient->expects(self::once())
-            ->method('createDataset')
-            ->willThrowException(new ServiceException('Already exists', 409));
-        $bqClient->expects(self::once())
-            ->method('dataset')
-            ->willReturn($mockDataset);
-
-        $provider = $this->createProvider($bqClient);
-        $provider->callWaitForDatasetAccessibility();
-
-        self::assertTrue($this->logger->hasInfoThatContains(
-            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 1/10).',
-        ));
     }
 
     public function testDatasetNotAccessibleAfterAllAttempts(): void
     {
-        $bqClient = $this->createMock(BigQueryClient::class);
-        $bqClient->expects(self::exactly(10))
-            ->method('createDataset')
+        $dataset = $this->createMock(Dataset::class);
+        $dataset->expects(self::exactly(20))
+            ->method('update')
+            ->with([])
             ->willThrowException(new ServiceException('Permission denied', 403));
 
-        $provider = $this->createProvider($bqClient);
+        $provider = $this->createProvider($dataset);
 
         $this->expectException(UserException::class);
         $this->expectExceptionMessage(
-            'Workspace dataset "WORKSPACE_12345" is not accessible after 10 attempts: Permission denied',
+            'Workspace dataset "WORKSPACE_12345" is not accessible after 20 attempts: Permission denied',
         );
 
         $provider->callWaitForDatasetAccessibility();
@@ -157,12 +132,13 @@ class LocalBigQueryProviderTest extends TestCase
 
     public function testNonServiceExceptionIsNotRetried(): void
     {
-        $bqClient = $this->createMock(BigQueryClient::class);
-        $bqClient->expects(self::once())
-            ->method('createDataset')
+        $dataset = $this->createMock(Dataset::class);
+        $dataset->expects(self::once())
+            ->method('update')
+            ->with([])
             ->willThrowException(new RuntimeException('Network error'));
 
-        $provider = $this->createProvider($bqClient);
+        $provider = $this->createProvider($dataset);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Network error');

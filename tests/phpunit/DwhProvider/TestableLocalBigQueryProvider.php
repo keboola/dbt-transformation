@@ -8,7 +8,7 @@ use DbtTransformation\Config;
 use DbtTransformation\DwhProvider\LocalBigQueryProvider;
 use DbtTransformation\FileDumper\BigQueryDbtSourcesYaml;
 use DbtTransformation\FileDumper\DbtProfilesYaml;
-use Google\Cloud\BigQuery\BigQueryClient;
+use Google\Cloud\BigQuery\Dataset;
 use Google\Cloud\Core\Exception\ServiceException;
 use Keboola\Component\UserException;
 use Psr\Log\LoggerInterface;
@@ -17,12 +17,12 @@ use Retry\Policy\SimpleRetryPolicy;
 use Retry\RetryProxy;
 
 /**
- * Testable subclass that overrides createBigQueryClient() to return a mock
+ * Testable subclass that overrides createBigQueryDataset() to return a mock
  * and uses NoBackOffPolicy to avoid sleeping during tests.
  */
 class TestableLocalBigQueryProvider extends LocalBigQueryProvider
 {
-    private BigQueryClient $mockBqClient;
+    private Dataset $mockDataset;
 
     public function __construct(
         BigQueryDbtSourcesYaml $createSourceFileService,
@@ -30,18 +30,18 @@ class TestableLocalBigQueryProvider extends LocalBigQueryProvider
         LoggerInterface $logger,
         Config $config,
         string $projectPath,
-        BigQueryClient $mockBqClient,
+        Dataset $mockDataset,
     ) {
         parent::__construct($createSourceFileService, $createProfilesFileService, $logger, $config, $projectPath);
-        $this->mockBqClient = $mockBqClient;
+        $this->mockDataset = $mockDataset;
     }
 
     /**
      * @param array<string, mixed> $workspace
      */
-    protected function createBigQueryClient(array $workspace): BigQueryClient
+    protected function createBigQueryDataset(array $workspace, string $datasetName): Dataset
     {
-        return $this->mockBqClient;
+        return $this->mockDataset;
     }
 
     public function callWaitForDatasetAccessibility(): void
@@ -49,26 +49,15 @@ class TestableLocalBigQueryProvider extends LocalBigQueryProvider
         $workspace = $this->config->getAuthorization()['workspace'];
         $datasetName = $workspace['schema'];
 
-        $bqClient = $this->createBigQueryClient($workspace);
+        $dataset = $this->createBigQueryDataset($workspace, $datasetName);
 
         $retryPolicy = new SimpleRetryPolicy(self::DATASET_CHECK_MAX_ATTEMPTS, [ServiceException::class]);
         $backOffPolicy = new NoBackOffPolicy();
         $retryProxy = new RetryProxy($retryPolicy, $backOffPolicy, $this->logger);
 
-        $probeDatasetName = $datasetName . '_probe_' . getmypid();
-
         try {
-            $retryProxy->call(function () use ($bqClient, $probeDatasetName): void {
-                try {
-                    $dataset = $bqClient->createDataset($probeDatasetName);
-                    $dataset->delete();
-                } catch (ServiceException $e) {
-                    if ($e->getCode() === 409) {
-                        $bqClient->dataset($probeDatasetName)->delete();
-                        return;
-                    }
-                    throw $e;
-                }
+            $retryProxy->call(function () use ($dataset): void {
+                $dataset->update([]);
             });
             $this->logger->info(sprintf(
                 'Workspace dataset "%s" is accessible (attempt %d/%d).',

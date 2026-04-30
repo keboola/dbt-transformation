@@ -404,7 +404,7 @@ YAML;
         self::assertIsArray($generated['default']);
         self::assertArrayHasKey('outputs', $generated['default']);
         self::assertIsArray($generated['default']['outputs']);
-        self::assertSame(['KBC_DEV_CHOCHO'], array_keys($generated['default']['outputs']));
+        self::assertSame(['kbc_dev_chocho'], array_keys($generated['default']['outputs']));
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }

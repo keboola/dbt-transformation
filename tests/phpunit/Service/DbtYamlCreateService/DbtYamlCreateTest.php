@@ -366,6 +366,46 @@ class DbtYamlCreateTest extends TestCase
         }
     }
 
+    public function testDumpYamlIgnoresExistingProfilesWithJinjaTemplating(): void
+    {
+        putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
+
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $jinjaProfilesYaml = <<<YAML
+default:
+    target: dev
+    outputs:
+        dev:
+            type: snowflake
+            private_key_path: "{{ env_var('DBT_KBC_DEV_PRIVATE_KEY_PATH') }}"
+YAML;
+        $fs->dumpFile(sprintf('%s/profiles.yml', $this->dataDir), $jinjaProfilesYaml);
+
+        $logger = new TestLogger();
+        $service = new DbtProfilesYaml($logger);
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertTrue($logger->hasWarningThatContains('Could not parse existing profiles.yml'));
+
+        $generated = (array) Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+        self::assertArrayHasKey('default', $generated);
+        self::assertSame(['KBC_DEV_CHOCHO'], array_keys($generated['default']['outputs']));
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    }
+
     /**
      * @throws \Keboola\Component\UserException
      */

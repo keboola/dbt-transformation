@@ -401,6 +401,9 @@ YAML;
 
         $generated = (array) Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
         self::assertArrayHasKey('default', $generated);
+        self::assertIsArray($generated['default']);
+        self::assertArrayHasKey('outputs', $generated['default']);
+        self::assertIsArray($generated['default']['outputs']);
         self::assertSame(['KBC_DEV_CHOCHO'], array_keys($generated['default']['outputs']));
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');

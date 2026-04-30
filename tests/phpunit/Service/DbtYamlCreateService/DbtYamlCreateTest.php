@@ -382,7 +382,7 @@ default:
     outputs:
         dev:
             type: snowflake
-            private_key_path: "{{ env_var('DBT_KBC_DEV_PRIVATE_KEY_PATH') }}"
+            private_key_path: {{ env_var('DBT_KBC_DEV_PRIVATE_KEY_PATH') }}
 YAML;
         $fs->dumpFile(sprintf('%s/profiles.yml', $this->dataDir), $jinjaProfilesYaml);
 

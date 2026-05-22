@@ -57,17 +57,14 @@ class RemoteDwhNode extends ArrayNodeDefinition
             })
             ->then(function (array $v): array {
                 $hasPrivateKey = array_key_exists(self::NODE_PRIVATE_KEY, $v);
-                $hasPassword = array_key_exists(self::NODE_PASSWORD, $v);
 
-                if (!$hasPrivateKey && !$hasPassword) {
+                if (!$hasPrivateKey) {
                     throw new InvalidConfigurationException(
-                        'For Snowflake, you must provide either "#password" OR "#privateKey"',
+                        'For Snowflake, you must provide "#privateKey"',
                     );
                 }
 
-                if ($hasPrivateKey) {
-                    unset($v[self::NODE_PASSWORD]);
-                }
+                unset($v[self::NODE_PASSWORD]);
 
                 return $v;
             })

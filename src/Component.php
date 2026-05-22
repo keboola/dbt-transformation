@@ -154,9 +154,7 @@ class Component extends BaseComponent
                 $quoteIdentifier,
             );
         } else {
-            if (isset($workspaceCredentials['privateKey'])) {
-                $workspaceCredentials['password'] = '';
-            }
+            $workspaceCredentials['password'] = '';
 
             $connectionConfig = array_intersect_key(
                 $workspaceCredentials,

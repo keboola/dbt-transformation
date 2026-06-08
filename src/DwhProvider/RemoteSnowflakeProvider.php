@@ -20,6 +20,8 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
 
         $workspace = $this->config->getRemoteDwh();
 
+        // For privatelink connections dbt derives the wrong hostname from the account name,
+        // so inject the real host into every output (generated and user-merged) after merge.
         $additionalOptions = [];
         if (str_contains($workspace['host'], 'privatelink')) {
             $additionalOptions['host'] = $workspace['host'];
@@ -43,6 +45,8 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
         putenv(sprintf('DBT_KBC_PROD_SCHEMA=%s', $workspace['schema']));
         putenv(sprintf('DBT_KBC_PROD_DATABASE=%s', $workspace['database']));
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+        // Exported for profiles-dir users whose own profiles.yml references {{ env_var("DBT_KBC_PROD_HOST") }};
+        // privatelink connections need the real host because dbt derives a wrong one from the account name.
         if (str_contains($workspace['host'], 'privatelink')) {
             putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
         }
@@ -73,10 +77,6 @@ class RemoteSnowflakeProvider extends RemoteProvider implements DwhProviderInter
             'account',
             'threads',
         ];
-
-        if (getenv('DBT_KBC_PROD_HOST') !== false) {
-            $dbtParams[] = 'host';
-        }
 
         if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {
             $dbtParams[] = 'private_key';

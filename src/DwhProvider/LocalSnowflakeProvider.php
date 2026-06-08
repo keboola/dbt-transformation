@@ -88,10 +88,18 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
 
         $this->setEnvVars();
 
+        // For privatelink connections dbt derives the wrong hostname from the account name,
+        // so inject the real host into every output (generated and user-merged) after merge.
+        $additionalOptions = [];
+        if (str_contains($workspace['host'], 'privatelink')) {
+            $additionalOptions['host'] = $workspace['host'];
+        }
+
         $this->createProfilesFileService->dumpYaml(
             $this->projectPath,
             $profilesPath,
             $this->getOutputs($configurationNames, self::getDbtParams(), $this->projectIds),
+            $additionalOptions,
         );
 
         if ($this->config->generateSources()) {
@@ -116,6 +124,8 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
             putenv(sprintf('DBT_KBC_PROD_%d_DATABASE=%s_%d', $projectId, $stackPrefix, $projectId));
         }
         putenv(sprintf('DBT_KBC_PROD_WAREHOUSE=%s', $workspace['warehouse']));
+        // Exported for profiles-dir users whose own profiles.yml references {{ env_var("DBT_KBC_PROD_HOST") }};
+        // privatelink connections need the real host because dbt derives a wrong one from the account name.
         if (str_contains($workspace['host'], 'privatelink')) {
             putenv(sprintf('DBT_KBC_PROD_HOST=%s', $workspace['host']));
         }
@@ -147,10 +157,6 @@ class LocalSnowflakeProvider extends DwhProvider implements DwhProviderInterface
             'account',
             'threads',
         ];
-
-        if (getenv('DBT_KBC_PROD_HOST') !== false) {
-            $dbtParams[] = 'host';
-        }
 
         if (getenv('DBT_KBC_PROD_PRIVATE_KEY') !== false) {
             $dbtParams[] = 'private_key';

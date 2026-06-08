@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Tests\Service\DbtYamlCreateService;
 
+use ColinODell\PsrTestLogger\TestLogger;
+use DbtTransformation\Config;
+use DbtTransformation\Configuration\ConfigDefinition;
 use DbtTransformation\DwhProvider\LocalSnowflakeProvider;
 use DbtTransformation\DwhProvider\RemoteBigQueryProvider;
 use DbtTransformation\DwhProvider\RemoteSnowflakeProvider;
@@ -204,7 +207,6 @@ class DbtYamlCreateTest extends TestCase
     public function testCreateProfileYamlWithRemoteSnowflakeAddsHost(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
-        putenv('DBT_KBC_PROD_HOST=test.privatelink.snowflakecomputing.com');
 
         $fs = new Filesystem();
         $fs->copy(
@@ -235,13 +237,11 @@ class DbtYamlCreateTest extends TestCase
         self::assertArrayNotHasKey('insecure_mode', $result['default']['outputs']['kbc_prod']);
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
-        putenv('DBT_KBC_PROD_HOST');
     }
 
     public function testMergedProfilesGetAdditionalHost(): void
     {
         putenv('DBT_KBC_PROD_PRIVATE_KEY=private_key');
-        putenv('DBT_KBC_PROD_HOST=test.privatelink.snowflakecomputing.com');
 
         $fs = new Filesystem();
         $fs->copy(
@@ -281,7 +281,89 @@ class DbtYamlCreateTest extends TestCase
         );
 
         putenv('DBT_KBC_PROD_PRIVATE_KEY');
-        putenv('DBT_KBC_PROD_HOST');
+    }
+
+    /**
+     * Exercises the provider decision logic end-to-end for a privatelink connection:
+     *  - the host is injected into the component-generated profiles.yml (non-profiles-dir users), and
+     *  - DBT_KBC_PROD_HOST is exported so profiles-dir users' own profiles.yml can resolve it.
+     *
+     * @throws \Keboola\Component\UserException
+     */
+    public function testRemoteSnowflakeProviderInjectsHostForPrivatelink(): void
+    {
+        $host = 'my_account.privatelink.snowflakecomputing.com';
+        $this->createRemoteSnowflakeProvider($host)->createDbtYamlFiles($this->dataDir);
+
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $result */
+        $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+
+        self::assertSame($host, $result['default']['outputs']['kbc_prod']['host']);
+        self::assertSame($host, getenv('DBT_KBC_PROD_HOST'));
+
+        $this->cleanRemoteSnowflakeEnvVars();
+    }
+
+    /**
+     * Exercises the provider decision logic end-to-end for a regular connection: the host is neither
+     * injected into the generated profiles.yml nor exported, so dbt derives it from the account as before.
+     *
+     * @throws \Keboola\Component\UserException
+     */
+    public function testRemoteSnowflakeProviderDoesNotInjectHostForRegularConnection(): void
+    {
+        putenv('DBT_KBC_PROD_HOST'); // ensure no leakage from a previous test
+
+        $host = 'my_account.snowflakecomputing.com';
+        $this->createRemoteSnowflakeProvider($host)->createDbtYamlFiles($this->dataDir);
+
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $result */
+        $result = Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+
+        self::assertArrayNotHasKey('host', $result['default']['outputs']['kbc_prod']);
+        self::assertFalse(getenv('DBT_KBC_PROD_HOST'));
+
+        $this->cleanRemoteSnowflakeEnvVars();
+    }
+
+    private function createRemoteSnowflakeProvider(string $host): RemoteSnowflakeProvider
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $config = new Config([
+            'parameters' => [
+                'git' => ['repo' => 'https://github.com/keboola/dbt-test-project-public.git'],
+                'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                'remoteDwh' => [
+                    'type' => 'snowflake',
+                    'host' => $host,
+                    'warehouse' => 'warehouse',
+                    'database' => 'database',
+                    'schema' => 'schema',
+                    'user' => 'user',
+                    '#privateKey' => 'private_key',
+                ],
+            ],
+        ], new ConfigDefinition());
+
+        return new RemoteSnowflakeProvider(
+            new DbtProfilesYaml(),
+            new TestLogger(),
+            $config,
+            $this->dataDir,
+        );
+    }
+
+    private function cleanRemoteSnowflakeEnvVars(): void
+    {
+        $names = ['TYPE', 'SCHEMA', 'DATABASE', 'WAREHOUSE', 'HOST', 'ACCOUNT', 'USER', 'PRIVATE_KEY', 'THREADS'];
+        foreach ($names as $name) {
+            putenv(sprintf('DBT_KBC_PROD_%s', $name));
+        }
     }
 
     /**

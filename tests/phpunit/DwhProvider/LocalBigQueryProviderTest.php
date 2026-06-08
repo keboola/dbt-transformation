@@ -79,14 +79,13 @@ class LocalBigQueryProviderTest extends TestCase
     {
         $dataset = $this->createMock(Dataset::class);
         $dataset->expects(self::once())
-            ->method('update')
-            ->with([]);
+            ->method('reload');
 
         $provider = $this->createProvider($dataset);
         $provider->callWaitForDatasetAccessibility();
 
         self::assertTrue($this->logger->hasInfoThatContains(
-            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 1/20).',
+            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 1/10).',
         ));
     }
 
@@ -94,8 +93,7 @@ class LocalBigQueryProviderTest extends TestCase
     {
         $dataset = $this->createMock(Dataset::class);
         $dataset->expects(self::exactly(3))
-            ->method('update')
-            ->with([])
+            ->method('reload')
             ->willReturnOnConsecutiveCalls(
                 self::throwException(new ServiceException('Access denied', 403)),
                 self::throwException(new ServiceException('Access denied', 403)),
@@ -106,7 +104,7 @@ class LocalBigQueryProviderTest extends TestCase
         $provider->callWaitForDatasetAccessibility();
 
         self::assertTrue($this->logger->hasInfoThatContains(
-            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 3/20).',
+            'Workspace dataset "WORKSPACE_12345" is accessible (attempt 3/10).',
         ));
         // RetryProxy logs retries automatically
         self::assertTrue($this->logger->hasInfoThatContains('Access denied. Retrying... ['));
@@ -115,16 +113,15 @@ class LocalBigQueryProviderTest extends TestCase
     public function testDatasetNotAccessibleAfterAllAttempts(): void
     {
         $dataset = $this->createMock(Dataset::class);
-        $dataset->expects(self::exactly(20))
-            ->method('update')
-            ->with([])
+        $dataset->expects(self::exactly(10))
+            ->method('reload')
             ->willThrowException(new ServiceException('Permission denied', 403));
 
         $provider = $this->createProvider($dataset);
 
         $this->expectException(UserException::class);
         $this->expectExceptionMessage(
-            'Workspace dataset "WORKSPACE_12345" is not accessible after 20 attempts: Permission denied',
+            'Workspace dataset "WORKSPACE_12345" is not accessible after 10 attempts: Permission denied',
         );
 
         $provider->callWaitForDatasetAccessibility();
@@ -134,8 +131,7 @@ class LocalBigQueryProviderTest extends TestCase
     {
         $dataset = $this->createMock(Dataset::class);
         $dataset->expects(self::once())
-            ->method('update')
-            ->with([])
+            ->method('reload')
             ->willThrowException(new RuntimeException('Network error'));
 
         $provider = $this->createProvider($dataset);

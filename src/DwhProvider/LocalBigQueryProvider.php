@@ -46,8 +46,8 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
         $this->temp = new Temp('dbt-big-query-local');
     }
 
-    protected const DATASET_CHECK_MAX_ATTEMPTS = 20;
-    protected const DATASET_CHECK_RETRY_DELAY_MS = 5000;
+    protected const DATASET_CHECK_MAX_ATTEMPTS = 10;
+    protected const DATASET_CHECK_RETRY_DELAY_MS = 3000;
 
     /**
      * @param array<int, string> $configurationNames
@@ -92,14 +92,11 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
     }
 
     /**
-     * Waits for the workspace dataset to become writable after workspace creation.
+     * Verifies the workspace dataset is accessible to the workspace service account.
      *
-     * GCP IAM permissions have eventual consistency — after workspace creation,
-     * the service account may not immediately have access. This retries a no-op
-     * dataset update (requires bigquery.datasets.update) as a proxy signal that
-     * IAM permissions have propagated. dbt also needs bigquery.datasets.create
-     * at the project level, which is granted at the same time but may take
-     * slightly longer to propagate.
+     * After workspace creation, GCP IAM permissions may not be immediately effective
+     * due to eventual consistency. This pre-flight check retries dataset access
+     * to ensure dbt won't fail with a 403 error on CREATE SCHEMA IF NOT EXISTS.
      *
      * @throws \Keboola\Component\UserException
      */
@@ -116,7 +113,7 @@ class LocalBigQueryProvider extends DwhProvider implements DwhProviderInterface
 
         try {
             $retryProxy->call(function () use ($dataset): void {
-                $dataset->update([]);
+                $dataset->reload();
             });
             $this->logger->info(sprintf(
                 'Workspace dataset "%s" is accessible (attempt %d/%d).',

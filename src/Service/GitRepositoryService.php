@@ -158,7 +158,8 @@ class GitRepositoryService
             } else {
                 $process->mustRun();
             }
-        } catch (ProcessTimedOutException $e) { // @phpstan-ignore catch.neverThrown (thrown via mustRun->run->wait->checkTimeout)
+        // @phpstan-ignore-next-line thrown via mustRun->run->wait->checkTimeout
+        } catch (ProcessTimedOutException $e) {
             throw new UserException(sprintf(
                 'Git clone of repository "%s" timed out after %d seconds.'
                 . ' Please check that the repository URL is accessible and the server is responsive.',

@@ -9,6 +9,7 @@ use Retry\RetryProxy;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class GitRepositoryService
@@ -157,6 +158,13 @@ class GitRepositoryService
             } else {
                 $process->mustRun();
             }
+        } catch (ProcessTimedOutException $e) { // @phpstan-ignore catch.neverThrown (thrown via mustRun->run->wait->checkTimeout)
+            throw new UserException(sprintf(
+                'Git clone of repository "%s" timed out after %d seconds.'
+                . ' Please check that the repository URL is accessible and the server is responsive.',
+                $repositoryUrl,
+                (int) $e->getProcess()->getTimeout(),
+            ));
         } catch (ProcessFailedException $e) {
             $match = preg_match('/remote: (.*)/', $e->getProcess()->getErrorOutput(), $matches);
             throw new UserException(sprintf(

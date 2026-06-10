@@ -90,7 +90,7 @@ class GitRepositoryServiceTest extends TestCase
         $gitService = new GitRepositoryService($this->dataDir);
 
         $processMock = $this->getMockBuilder(Process::class)
-            ->disableOriginalConstructor()
+            ->setConstructorArgs([['git', 'clone']])
             ->onlyMethods(['mustRun', 'getTimeout', 'isStarted'])
             ->getMock();
 

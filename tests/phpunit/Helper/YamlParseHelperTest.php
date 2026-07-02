@@ -46,17 +46,37 @@ class YamlParseHelperTest extends TestCase
     /**
      * @dataProvider containsJinjaProvider
      */
-    public function testContainsJinja(string $content, bool $expected): void
+    public function testContainsJinja(ParseException $exception, bool $expected): void
     {
-        self::assertSame($expected, YamlParseHelper::containsJinja($content));
+        self::assertSame($expected, YamlParseHelper::containsJinja($exception));
     }
 
     public function containsJinjaProvider(): Generator
     {
-        yield 'double curly expression' => ['content' => "key: {{ env_var('X') }}", 'expected' => true];
-        yield 'statement block' => ['content' => '{% if true %}key: 1{% endif %}', 'expected' => true];
-        yield 'comment block' => ['content' => 'key: 1 {# comment #}', 'expected' => true];
-        yield 'plain yaml' => ['content' => "key: value\nother: 1", 'expected' => false];
+        yield 'double curly expression in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 1, "key: {{ env_var('X') }}"),
+            'expected' => true,
+        ];
+
+        yield 'statement block in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 1, '{% if true %}key: 1{% endif %}'),
+            'expected' => true,
+        ];
+
+        yield 'comment block in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 1, 'key: 1 {# comment #}'),
+            'expected' => true,
+        ];
+
+        yield 'plain yaml snippet' => [
+            'exception' => new ParseException('Duplicate key "dev" detected.', 7, '    type: snowflake'),
+            'expected' => false,
+        ];
+
+        yield 'no snippet available' => [
+            'exception' => new ParseException('Unable to parse.'),
+            'expected' => false,
+        ];
     }
 
     public function testToUserExceptionDoesNotLeakFileContentOrPath(): void

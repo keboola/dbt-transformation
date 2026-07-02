@@ -39,10 +39,14 @@ class DbtProfilesYaml extends FilesystemAwareDumper
         if (!array_key_exists('profile', $dbtProjectYaml)) {
             throw new UserException('Missing key "profile" in "dbt_project.yml"');
         }
+        if (!is_string($dbtProjectYaml['profile'])) {
+            throw new UserException('Key "profile" in "dbt_project.yml" must be a string');
+        }
+        $profile = $dbtProjectYaml['profile'];
 
         $profilesYamlPath = sprintf('%s/profiles.yml', $profilesPath);
         if ($this->filesystem->exists($profilesYamlPath)) {
-            $outputs = $this->mergeExistingOutputs($profilesYamlPath, (string) $dbtProjectYaml['profile'], $outputs);
+            $outputs = $this->mergeExistingOutputs($profilesYamlPath, $profile, $outputs);
         }
 
         if ($additionalOptions !== []) {
@@ -57,7 +61,7 @@ class DbtProfilesYaml extends FilesystemAwareDumper
             $profilesYamlPath,
             Yaml::dump([
                 'config' => ['send_anonymous_usage_stats' => false],
-                $dbtProjectYaml['profile'] => [
+                $profile => [
                     'target' => 'dev',
                     'outputs' => $outputs,
                 ],
@@ -75,8 +79,7 @@ class DbtProfilesYaml extends FilesystemAwareDumper
         try {
             $profiles = (array) Yaml::parseFile($profilesYamlPath);
         } catch (ParseException $e) {
-            $rawContent = (string) file_get_contents($profilesYamlPath);
-            if (!YamlParseHelper::containsJinja($rawContent)) {
+            if (!YamlParseHelper::containsJinja($e)) {
                 throw YamlParseHelper::toUserException($e, 'profiles.yml');
             }
             $this->logger->warning(sprintf(
@@ -95,7 +98,8 @@ class DbtProfilesYaml extends FilesystemAwareDumper
             return $outputs;
         }
 
-        if (!is_array($profiles[$profile]['outputs'])) {
+        $existingOutputs = $profiles[$profile]['outputs'];
+        if (!is_array($existingOutputs) || array_is_list($existingOutputs)) {
             $this->logger->warning(sprintf(
                 'Existing profiles.yml has no valid "outputs" mapping for profile "%s"; nothing to merge. ' .
                 'The file will be replaced by the generated profiles.yml.',
@@ -104,6 +108,6 @@ class DbtProfilesYaml extends FilesystemAwareDumper
             return $outputs;
         }
 
-        return array_merge($profiles[$profile]['outputs'], $outputs);
+        return array_merge($existingOutputs, $outputs);
     }
 }

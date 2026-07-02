@@ -312,8 +312,6 @@ class DbtYamlCreateTest extends TestCase
      */
     public function testRemoteSnowflakeProviderDoesNotInjectHostForRegularConnection(): void
     {
-        putenv('DBT_KBC_PROD_HOST'); // ensure no leakage from a previous test
-
         $host = 'my_account.snowflakecomputing.com';
         $this->createRemoteSnowflakeProvider($host)->createDbtYamlFiles($this->dataDir);
 
@@ -447,6 +445,99 @@ YAML;
             self::assertStringNotContainsString('(near', $e->getMessage());
             self::assertStringNotContainsString($this->dataDir, $e->getMessage());
         }
+    }
+
+    public function testDumpYamlThrowsUserExceptionForBrokenProfilesWithUnrelatedJinjaElsewhere(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $brokenProfilesYaml = <<<YAML
+        # example: {{ env_var('UNRELATED') }}
+        default:
+            target: dev
+            outputs:
+                dev:
+                    type: snowflake
+                dev:
+                    type: snowflake
+        YAML;
+        $fs->dumpFile(sprintf('%s/profiles.yml', $this->dataDir), $brokenProfilesYaml);
+
+        $service = new DbtProfilesYaml(new NullLogger());
+
+        try {
+            $service->dumpYaml(
+                $this->dataDir,
+                $this->dataDir,
+                LocalSnowflakeProvider::getOutputs(
+                    ['KBC_DEV_CHOCHO'],
+                    LocalSnowflakeProvider::getDbtParams(),
+                ),
+            );
+            self::fail('UserException was not thrown');
+        } catch (UserException $e) {
+            self::assertStringContainsString('Duplicate key "dev" detected at line', $e->getMessage());
+        }
+    }
+
+    public function testDumpYamlSkipsMergeWhenExistingOutputsIsList(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+        $fs->dumpFile(
+            sprintf('%s/profiles.yml', $this->dataDir),
+            "default:\n    target: dev\n    outputs:\n        - dev\n        - prod\n",
+        );
+
+        $logger = new TestLogger();
+        $service = new DbtProfilesYaml($logger);
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertTrue($logger->hasWarningThatContains(
+            'no valid "outputs" mapping for profile "default"',
+        ));
+
+        $generated = (array) Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+        self::assertArrayHasKey('default', $generated);
+        self::assertIsArray($generated['default']);
+        self::assertArrayHasKey('outputs', $generated['default']);
+        self::assertIsArray($generated['default']['outputs']);
+        self::assertSame(['kbc_dev_chocho'], array_keys($generated['default']['outputs']));
+    }
+
+    public function testDumpYamlThrowsUserExceptionForNonScalarProfileKey(): void
+    {
+        $fs = new Filesystem();
+        $fs->dumpFile(
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+            "name: test\nprofile:\n    nested: value\n",
+        );
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Key "profile" in "dbt_project.yml" must be a string');
+
+        (new DbtProfilesYaml(new NullLogger()))->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
     }
 
     public function testDumpYamlSkipsMergeWhenExistingOutputsIsNotArray(): void

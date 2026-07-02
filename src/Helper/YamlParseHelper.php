@@ -31,11 +31,17 @@ class YamlParseHelper
         ), 0, $e);
     }
 
-    public static function containsJinja(string $content): bool
+    /**
+     * Checks only the snippet of the line that failed to parse (not the whole file), so a Jinja example
+     * elsewhere in the file (e.g. in a comment) can't misclassify an unrelated YAML syntax error as Jinja.
+     */
+    public static function containsJinja(ParseException $e): bool
     {
-        return str_contains($content, '{{')
-            || str_contains($content, '{%')
-            || str_contains($content, '{#');
+        $snippet = (string) $e->getSnippet();
+
+        return str_contains($snippet, '{{')
+            || str_contains($snippet, '{%')
+            || str_contains($snippet, '{#');
     }
 
     /**

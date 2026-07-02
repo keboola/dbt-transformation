@@ -16,6 +16,7 @@ use DbtTransformation\FileDumper\SnowflakeDbtSourcesYaml;
 use Generator;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
@@ -30,6 +31,11 @@ class DbtYamlCreateTest extends TestCase
         $fs = new Filesystem();
         $finder = new Finder();
         $fs->remove($finder->in($this->dataDir));
+
+        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+        putenv('DBT_KBC_PROD_PASSWORD');
+        putenv('DBT_KBC_PROD_LOCATION');
+        $this->cleanRemoteSnowflakeEnvVars();
     }
 
     /**
@@ -45,7 +51,7 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/dbt_project.yml', $this->dataDir),
         );
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,
@@ -59,8 +65,6 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/expectedProfiles.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
-
-        putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }
 
     /**
@@ -76,7 +80,7 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/dbt_project.yml', $this->dataDir),
         );
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,
@@ -90,12 +94,12 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/expectedProfilesPassword.yml', $this->providerDataDir),
             sprintf('%s/profiles.yml', $this->dataDir),
         );
-
-        putenv('DBT_KBC_PROD_PASSWORD');
     }
 
     public function testMergeProfilesYaml(): void
     {
+        putenv('DBT_KBC_PROD_LOCATION=EU');
+
         $fs = new Filesystem();
         $fs->copy(
             sprintf('%s/dbt_project.yml', $this->providerDataDir),
@@ -107,7 +111,7 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/profiles.yml', $this->dataDir),
         );
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,
@@ -125,6 +129,8 @@ class DbtYamlCreateTest extends TestCase
 
     public function testMergeProfilesYamlAtSpecifiedPath(): void
     {
+        putenv('DBT_KBC_PROD_LOCATION=EU');
+
         $fs = new Filesystem();
         $fs->copy(
             sprintf('%s/dbt_project.yml', $this->providerDataDir),
@@ -136,7 +142,7 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/profiles/profiles.yml', $this->dataDir),
         );
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir . '/profiles',
@@ -169,7 +175,7 @@ class DbtYamlCreateTest extends TestCase
             putenv('DBT_KBC_PROD_LOCATION');
         }
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,
@@ -214,7 +220,7 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/dbt_project.yml', $this->dataDir),
         );
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,
@@ -235,8 +241,6 @@ class DbtYamlCreateTest extends TestCase
             $result['default']['outputs']['kbc_prod']['host'],
         );
         self::assertArrayNotHasKey('insecure_mode', $result['default']['outputs']['kbc_prod']);
-
-        putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }
 
     public function testMergedProfilesGetAdditionalHost(): void
@@ -253,7 +257,7 @@ class DbtYamlCreateTest extends TestCase
             sprintf('%s/profiles.yml', $this->dataDir),
         );
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,
@@ -279,8 +283,6 @@ class DbtYamlCreateTest extends TestCase
             'test.privatelink.snowflakecomputing.com',
             $result['default']['outputs']['kbc_prod']['host'],
         );
-
-        putenv('DBT_KBC_PROD_PRIVATE_KEY');
     }
 
     /**
@@ -300,8 +302,6 @@ class DbtYamlCreateTest extends TestCase
 
         self::assertSame($host, $result['default']['outputs']['kbc_prod']['host']);
         self::assertSame($host, getenv('DBT_KBC_PROD_HOST'));
-
-        $this->cleanRemoteSnowflakeEnvVars();
     }
 
     /**
@@ -322,8 +322,6 @@ class DbtYamlCreateTest extends TestCase
 
         self::assertArrayNotHasKey('host', $result['default']['outputs']['kbc_prod']);
         self::assertFalse(getenv('DBT_KBC_PROD_HOST'));
-
-        $this->cleanRemoteSnowflakeEnvVars();
     }
 
     private function createRemoteSnowflakeProvider(string $host): RemoteSnowflakeProvider
@@ -351,7 +349,7 @@ class DbtYamlCreateTest extends TestCase
         ], new ConfigDefinition());
 
         return new RemoteSnowflakeProvider(
-            new DbtProfilesYaml(),
+            new DbtProfilesYaml(new NullLogger()),
             new TestLogger(),
             $config,
             $this->dataDir,
@@ -397,7 +395,12 @@ YAML;
             ),
         );
 
-        self::assertTrue($logger->hasWarningThatContains('Could not parse existing profiles.yml'));
+        self::assertTrue($logger->hasWarningThatContains(
+            'Could not parse existing profiles.yml because it contains Jinja templating',
+        ));
+        self::assertTrue($logger->hasWarningThatContains(
+            'will be replaced by the profiles.yml generated by the component',
+        ));
 
         $generated = (array) Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
         self::assertArrayHasKey('default', $generated);
@@ -405,8 +408,101 @@ YAML;
         self::assertArrayHasKey('outputs', $generated['default']);
         self::assertIsArray($generated['default']['outputs']);
         self::assertSame(['kbc_dev_chocho'], array_keys($generated['default']['outputs']));
+    }
 
-        putenv('DBT_KBC_PROD_PRIVATE_KEY');
+    public function testDumpYamlThrowsUserExceptionForBrokenProfilesWithoutJinja(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $brokenProfilesYaml = <<<YAML
+        default:
+            target: dev
+            outputs:
+                dev:
+                    type: snowflake
+                dev:
+                    type: snowflake
+        YAML;
+        $fs->dumpFile(sprintf('%s/profiles.yml', $this->dataDir), $brokenProfilesYaml);
+
+        $service = new DbtProfilesYaml(new NullLogger());
+
+        try {
+            $service->dumpYaml(
+                $this->dataDir,
+                $this->dataDir,
+                LocalSnowflakeProvider::getOutputs(
+                    ['KBC_DEV_CHOCHO'],
+                    LocalSnowflakeProvider::getDbtParams(),
+                ),
+            );
+            self::fail('UserException was not thrown');
+        } catch (UserException $e) {
+            self::assertStringContainsString('Invalid YAML in "profiles.yml"', $e->getMessage());
+            self::assertStringContainsString('Duplicate key "dev" detected at line', $e->getMessage());
+            self::assertStringNotContainsString('(near', $e->getMessage());
+            self::assertStringNotContainsString($this->dataDir, $e->getMessage());
+        }
+    }
+
+    public function testDumpYamlSkipsMergeWhenExistingOutputsIsNotArray(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+        $fs->dumpFile(
+            sprintf('%s/profiles.yml', $this->dataDir),
+            "default:\n    target: dev\n    outputs:\n",
+        );
+
+        $logger = new TestLogger();
+        $service = new DbtProfilesYaml($logger);
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertTrue($logger->hasWarningThatContains(
+            'no valid "outputs" mapping for profile "default"',
+        ));
+
+        $generated = (array) Yaml::parseFile(sprintf('%s/profiles.yml', $this->dataDir));
+        self::assertArrayHasKey('default', $generated);
+        self::assertIsArray($generated['default']);
+        self::assertArrayHasKey('outputs', $generated['default']);
+        self::assertIsArray($generated['default']['outputs']);
+        self::assertSame(['kbc_dev_chocho'], array_keys($generated['default']['outputs']));
+    }
+
+    public function testDumpYamlThrowsUserExceptionForUnparseableDbtProjectYaml(): void
+    {
+        $fs = new Filesystem();
+        $fs->dumpFile(
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+            "name: test\nprofile: {{ env_var('DBT_PROFILE') }}\n",
+        );
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Invalid YAML in "dbt_project.yml"');
+
+        (new DbtProfilesYaml(new NullLogger()))->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
     }
 
     /**
@@ -420,7 +516,7 @@ YAML;
         $fs = new Filesystem();
         $fs->touch(sprintf('%s/dbt_project.yml', $this->dataDir));
 
-        $service = new DbtProfilesYaml();
+        $service = new DbtProfilesYaml(new NullLogger());
         $service->dumpYaml(
             $this->dataDir,
             $this->dataDir,

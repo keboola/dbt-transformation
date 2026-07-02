@@ -12,12 +12,9 @@ use Symfony\Component\Yaml\Yaml;
 
 class DbtProfilesYaml extends FilesystemAwareDumper
 {
-    private LoggerInterface $logger;
-
-    public function __construct(LoggerInterface $logger)
+    public function __construct(private readonly LoggerInterface $logger)
     {
         parent::__construct();
-        $this->logger = $logger;
     }
 
     /**

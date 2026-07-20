@@ -6,8 +6,10 @@ ENV DBT_VERSION=${DBT_VERSION}
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG SNOWFLAKE_ODBC_VERSION=3.10.0
-ARG SNOWFLAKE_GPG_KEY=2A3149C82551A34A
+ARG SNOWFLAKE_ODBC_VERSION=3.18.0
+# Full 40-char fingerprint of the Snowflake signing key for 3.18.0 (key id
+# 3C98F63C9292CE02); trixie's debsig-verify resolves the policy dir by full fingerprint
+ARG SNOWFLAKE_GPG_KEY=6C983AB7AFE2E5951C6C47B13C98F63C9292CE02
 
 ENV LANGUAGE=en_US.UTF-8
 ENV LANG=en_US.UTF-8
@@ -47,6 +49,7 @@ RUN apt-get update && \
             debsig-verify \
             unixodbc \
             unixodbc-dev \
+            odbcinst \
     && apt-get clean
 
 # Compile and install Python 3.11 from source

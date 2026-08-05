@@ -9,6 +9,7 @@ use Retry\RetryProxy;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class GitRepositoryService
@@ -157,6 +158,13 @@ class GitRepositoryService
             } else {
                 $process->mustRun();
             }
+        } catch (ProcessTimedOutException $e) {
+            throw new UserException(sprintf(
+                'Failed to clone your repository "%s": the git clone process timed out after %d seconds. '
+                . 'Check that the repository is reachable from Keboola and that it is not too large.',
+                $repositoryUrl,
+                (int) $e->getExceededTimeout(),
+            ));
         } catch (ProcessFailedException $e) {
             $match = preg_match('/remote: (.*)/', $e->getProcess()->getErrorOutput(), $matches);
             throw new UserException(sprintf(

@@ -15,6 +15,7 @@ use Retry\RetryProxy;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 use Throwable;
 
@@ -82,6 +83,33 @@ class GitRepositoryServiceTest extends TestCase
                 sprintf('shallow file has changed since we read it. Retrying... [%dx]', $i),
             ));
         }
+    }
+
+    public function testCloneTimeoutIsReportedAsUserException(): void
+    {
+        $gitService = new GitRepositoryService($this->dataDir);
+        $processMock = $this->getMockBuilder(Process::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['mustRun', 'getTimeout', 'getCommandLine'])
+            ->getMock();
+
+        $processMock->method('getTimeout')->willReturn(60.0);
+        $processMock->method('getCommandLine')->willReturn('git clone');
+        $processMock->method('mustRun')->willThrowException(
+            new ProcessTimedOutException($processMock, ProcessTimedOutException::TYPE_GENERAL),
+        );
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            'Failed to clone your repository "https://github.com/keboola/dbt-test-project-public.git": '
+            . 'the git clone process timed out after 60 seconds. Check that the repository is reachable '
+            . 'from Keboola and that it is not too large.',
+        );
+
+        $gitService->runGitCloneProcess(
+            $processMock,
+            'https://github.com/keboola/dbt-test-project-public.git',
+        );
     }
 
     public function testListBranches(): void

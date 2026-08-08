@@ -233,30 +233,6 @@ class ConfigDefinitionTest extends TestCase
             ],
         ];
 
-        yield 'config with remote DWH snowflake with password' => [
-            'configData' => [
-                'action' => 'run',
-                'parameters' => [
-                    'git' => [
-                        'repo' => 'https://github.com/my-repo',
-                    ],
-                    'dbt' => [
-                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
-                    ],
-                    'remoteDwh' => [
-                        'type' => 'snowflake',
-                        'host' => 'account.snowflakecomputing.com',
-                        'user' => 'user',
-                        '#password' => 'pass',
-                        'database' => 'db',
-                        'warehouse' => 'wh',
-                        'schema' => 'schema',
-                        'threads' => '4',
-                    ],
-                ],
-            ],
-        ];
-
         yield 'config with remote DWH snowflake with private key' => [
             'configData' => [
                 'action' => 'run',
@@ -772,7 +748,7 @@ class ConfigDefinitionTest extends TestCase
                 'value, but got "".',
         ];
 
-        yield 'config with remote DWH snowflake with neither password nor private key' => [
+        yield 'config with remote DWH snowflake without private key' => [
             'configData' => [
                 'action' => 'run',
                 'parameters' => [
@@ -793,7 +769,32 @@ class ConfigDefinitionTest extends TestCase
                     ],
                 ],
             ],
-            'expectedError' => 'For Snowflake, you must provide either "#password" OR "#privateKey"',
+            'expectedError' => 'For Snowflake, you must provide "#privateKey"',
+        ];
+
+        yield 'config with remote DWH snowflake with password only' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                    'remoteDwh' => [
+                        'type' => 'snowflake',
+                        'host' => 'account.snowflakecomputing.com',
+                        'user' => 'user',
+                        '#password' => 'pass',
+                        'database' => 'db',
+                        'warehouse' => 'wh',
+                        'schema' => 'schema',
+                        'threads' => '4',
+                    ],
+                ],
+            ],
+            'expectedError' => 'For Snowflake, you must provide "#privateKey"',
         ];
     }
 

@@ -18,15 +18,6 @@ env:
     SNOWFLAKE_SCHEMA: "WORKSPACE_1276600464"
     SNOWFLAKE_WAREHOUSE: "KEBOOLA_PROD_SMALL"
 
-    # Snowflake legacy credentials
-    SNOWFLAKE_LEGACY_HOST: "keboola.snowflakecomputing.com"
-    SNOWFLAKE_LEGACY_PORT: 443
-    SNOWFLAKE_LEGACY_USER: "SAPI_WORKSPACE_1276599905"
-    SNOWFLAKE_LEGACY_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-    SNOWFLAKE_LEGACY_DATABASE: "SAPI_9317"
-    SNOWFLAKE_LEGACY_SCHEMA: "WORKSPACE_1276599905"
-    SNOWFLAKE_LEGACY_WAREHOUSE: "KEBOOLA_PROD_SMALL"
-
     # BigQuery
     BIGQUERY_PROJECT_ID: devel-249608
     BIGQUERY_DATASET: dbt
@@ -171,13 +162,6 @@ jobs:
                     -e SNOWFLAKE_SCHEMA \
                     -e SNOWFLAKE_USER \
                     -e SNOWFLAKE_PRIVATE_KEY \
-                    -e SNOWFLAKE_LEGACY_HOST \
-                    -e SNOWFLAKE_LEGACY_PORT \
-                    -e SNOWFLAKE_LEGACY_WAREHOUSE \
-                    -e SNOWFLAKE_LEGACY_DATABASE \
-                    -e SNOWFLAKE_LEGACY_SCHEMA \
-                    -e SNOWFLAKE_LEGACY_USER \
-                    -e SNOWFLAKE_LEGACY_PASSWORD \
                     -e BIGQUERY_PROJECT_ID \
                     -e BIGQUERY_DATASET \
                     -e BIGQUERY_LOCATION \

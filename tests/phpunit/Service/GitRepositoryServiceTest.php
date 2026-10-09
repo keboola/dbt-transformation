@@ -215,6 +215,116 @@ class GitRepositoryServiceTest extends TestCase
         );
     }
 
+    public function testCloneWithGitHubAppTokenKeepsTokenOutOfRepository(): void
+    {
+        $askPassScriptsBefore = $this->findAskPassScripts();
+        $gitService = new GitRepositoryService($this->dataDir);
+        $gitService->clone(
+            repositoryUrl: 'https://github.com/keboola/dbt-test-project-public.git',
+            gitHubAppToken: 'secret-app-token',
+        );
+
+        $gitConfig = (string) file_get_contents($this->dataDir . '/dbt-project/.git/config');
+        self::assertStringNotContainsString('secret-app-token', $gitConfig);
+        self::assertStringContainsString('url = https://github.com/keboola/dbt-test-project-public.git', $gitConfig);
+        self::assertSame($askPassScriptsBefore, $this->findAskPassScripts());
+    }
+
+    public function testCloneWithGitHubAppTokenPrivateRepository(): void
+    {
+        $token = getenv('GITHUB_PASSWORD');
+        if (!$token) {
+            self::markTestSkipped('GITHUB_PASSWORD is not set.');
+        }
+
+        $gitService = new GitRepositoryService($this->dataDir);
+        $gitService->clone(
+            repositoryUrl: 'https://github.com/keboola/dbt-test-project.git',
+            gitHubAppToken: $token,
+        );
+
+        self::assertFileExists($this->dataDir . '/dbt-project/dbt_project.yml');
+    }
+
+    public function testCloneWithInvalidGitHubAppToken(): void
+    {
+        $askPassScriptsBefore = $this->findAskPassScripts();
+        $gitService = new GitRepositoryService($this->dataDir);
+
+        try {
+            $gitService->clone(
+                repositoryUrl: 'https://github.com/keboola/dbt-test-project.git',
+                gitHubAppToken: 'invalid-app-token',
+            );
+            self::fail('Clone with an invalid token should fail.');
+        } catch (UserException $e) {
+            self::assertStringStartsWith(
+                'Failed to clone your repository "https://github.com/keboola/dbt-test-project.git"',
+                $e->getMessage(),
+            );
+            self::assertStringEndsWith(
+                'Check that the GitHub App is installed for this repository and that the installation '
+                . 'is not suspended.',
+                $e->getMessage(),
+            );
+            self::assertStringNotContainsString('invalid-app-token', $e->getMessage());
+        }
+
+        self::assertSame($askPassScriptsBefore, $this->findAskPassScripts());
+    }
+
+    /**
+     * @dataProvider failureHintProvider
+     */
+    public function testCloneFailureHint(string $errorOutput, string $expectedMessage): void
+    {
+        $gitService = new GitRepositoryService($this->dataDir);
+        $processMock = $this->getMockBuilder(Process::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([
+                'mustRun',
+                'getOutput',
+                'getErrorOutput',
+                'isStarted',
+                'getCommandLine',
+                'getWorkingDirectory',
+            ])
+            ->getMock();
+        $processMock->expects(self::any())->method('isStarted')->willReturn(true);
+        $processMock->expects(self::any())->method('getOutput')->willReturn('');
+        $processMock->expects(self::any())->method('getErrorOutput')->willReturn($errorOutput);
+        $processMock->expects(self::once())
+            ->method('mustRun')
+            ->willThrowException(new ProcessFailedException($processMock));
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage($expectedMessage);
+
+        $gitService->runGitCloneProcess($processMock, 'https://slsp.ghe.com/org/repo.git', 'Check the app.');
+    }
+
+    public function failureHintProvider(): Generator
+    {
+        yield 'remote message' => [
+            "remote: Repository not found.\nfatal: repository not found",
+            'Failed to clone your repository "https://slsp.ghe.com/org/repo.git": Repository not found. '
+            . 'Check the app.',
+        ];
+
+        yield 'no remote message' => [
+            'fatal: unable to access',
+            'Failed to clone your repository "https://slsp.ghe.com/org/repo.git". Check the app.',
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    private function findAskPassScripts(): array
+    {
+        return glob(sys_get_temp_dir() . '/git-askpass-*') ?: [];
+    }
+
     /**
      * @return Generator<string, array<string, string>>
      */

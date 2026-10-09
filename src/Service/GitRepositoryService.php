@@ -14,6 +14,17 @@ use Symfony\Component\Process\Process;
 
 class GitRepositoryService
 {
+    private const GITHUB_APP_TOKEN_ENV = 'GIT_GITHUB_APP_TOKEN';
+    private const GITHUB_APP_TOKEN_USERNAME = 'x-access-token';
+    private const ASK_PASS_SCRIPT = <<<'SH'
+        #!/bin/sh
+        case "$1" in
+            Username*) printf '%s\n' '%username%' ;;
+            *) printf '%s\n' "$%tokenEnv%" ;;
+        esac
+
+        SH;
+
     private string $dataDir;
     private string $projectPath;
     private ?RetryProxy $retryProxy;
@@ -34,6 +45,7 @@ class GitRepositoryService
         ?string $username = null,
         ?string $password = null,
         ?string $folder = null,
+        ?string $gitHubAppToken = null,
     ): void {
         $fs = new Filesystem();
         if ($fs->exists($this->projectPath)) {
@@ -51,9 +63,13 @@ class GitRepositoryService
 
         $gitFolder = $folder === null ? 'dbt-project' : 'temp';
 
-        $url = $this->getUrl($repositoryUrl, $username, $password);
-        $process = new Process(['git', 'clone', ...$branchArgument, $url, $gitFolder], $this->dataDir);
-        $this->runGitCloneProcess($process, $repositoryUrl);
+        if ($gitHubAppToken === null) {
+            $url = $this->getUrl($repositoryUrl, $username, $password);
+            $process = new Process(['git', 'clone', ...$branchArgument, $url, $gitFolder], $this->dataDir);
+            $this->runGitCloneProcess($process, $repositoryUrl);
+        } else {
+            $this->cloneWithGitHubAppToken($repositoryUrl, $branchArgument, $gitFolder, $gitHubAppToken);
+        }
 
         if ($folder !== null) {
             $folderPath = sprintf('%s/temp/%s', $this->dataDir, $folder);
@@ -66,6 +82,54 @@ class GitRepositoryService
                 sprintf('%s/dbt-project', $this->dataDir),
             );
         }
+    }
+
+    /**
+     * The token is passed to git only through the environment of the clone process and read back by
+     * the GIT_ASKPASS script, so it never appears in the URL, the command line, .git/config or logs.
+     *
+     * @param string[] $branchArgument
+     * @throws \Keboola\Component\UserException
+     */
+    private function cloneWithGitHubAppToken(
+        string $repositoryUrl,
+        array $branchArgument,
+        string $gitFolder,
+        string $token,
+    ): void {
+        $fs = new Filesystem();
+        $askPassScript = $this->createAskPassScript($fs);
+        try {
+            $process = new Process(
+                ['git', '-c', 'credential.helper=', 'clone', ...$branchArgument, $repositoryUrl, $gitFolder],
+                $this->dataDir,
+                [
+                    'GIT_ASKPASS' => $askPassScript,
+                    'GIT_TERMINAL_PROMPT' => '0',
+                    self::GITHUB_APP_TOKEN_ENV => $token,
+                ],
+            );
+            $this->runGitCloneProcess(
+                $process,
+                $repositoryUrl,
+                'Check that the GitHub App is installed for this repository and that the installation '
+                . 'is not suspended.',
+            );
+        } finally {
+            $fs->remove($askPassScript);
+        }
+    }
+
+    private function createAskPassScript(Filesystem $fs): string
+    {
+        $path = $fs->tempnam(sys_get_temp_dir(), 'git-askpass-', '.sh');
+        $fs->dumpFile($path, strtr(self::ASK_PASS_SCRIPT, [
+            '%username%' => self::GITHUB_APP_TOKEN_USERNAME,
+            '%tokenEnv%' => self::GITHUB_APP_TOKEN_ENV,
+        ]));
+        $fs->chmod($path, 0700);
+
+        return $path;
     }
 
     /**
@@ -148,7 +212,7 @@ class GitRepositoryService
     /**
      * @throws \Keboola\Component\UserException
      */
-    public function runGitCloneProcess(Process $process, string $repositoryUrl): void
+    public function runGitCloneProcess(Process $process, string $repositoryUrl, ?string $failureHint = null): void
     {
         try {
             if ($this->retryProxy) {
@@ -167,11 +231,15 @@ class GitRepositoryService
             ));
         } catch (ProcessFailedException $e) {
             $match = preg_match('/remote: (.*)/', $e->getProcess()->getErrorOutput(), $matches);
-            throw new UserException(sprintf(
+            $message = sprintf(
                 'Failed to clone your repository "%s"%s',
                 $repositoryUrl,
                 !$match ? '' : (': ' . $matches[1]),
-            ));
+            );
+            if ($failureHint !== null) {
+                $message = sprintf('%s%s %s', $message, $match ? '' : '.', $failureHint);
+            }
+            throw new UserException($message);
         }
     }
 }

@@ -1,0 +1,25 @@
+{
+  "authorization": {
+    "workspace": {
+      "host": "%env(string:SNOWFLAKE_HOST)%",
+      "warehouse": "%env(string:SNOWFLAKE_WAREHOUSE)%",
+      "database": "%env(string:SNOWFLAKE_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_SCHEMA)%",
+      "user": "%env(string:SNOWFLAKE_USER)%",
+      "privateKey": "%env(string:SNOWFLAKE_PRIVATE_KEY)%"
+    },
+    "githubApp": {
+      "#token": "invalid-app-token",
+      "expiresAt": "2026-10-09T11:00:00+00:00"
+    }
+  },
+  "parameters": {
+    "git": {
+      "repo": "https://github.com/keboola/dbt-test-project.git",
+      "auth": "githubApp"
+    },
+    "dbt": {
+      "executeSteps": ["dbt run"]
+    }
+  }
+}

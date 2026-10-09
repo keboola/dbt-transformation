@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
+use DbtTransformation\Configuration\GitAuthTypeEnum;
 use InvalidArgumentException;
 use Keboola\Component\Config\BaseConfig;
 use RuntimeException;
@@ -37,6 +38,24 @@ class Config extends BaseConfig
     {
         try {
             return $this->getStringValue(['parameters', 'git', '#password']);
+        } catch (InvalidArgumentException $e) {
+            return null;
+        }
+    }
+
+    public function getGitAuthType(): GitAuthTypeEnum
+    {
+        try {
+            return GitAuthTypeEnum::from($this->getStringValue(['parameters', 'git', 'auth']));
+        } catch (InvalidArgumentException $e) {
+            return GitAuthTypeEnum::PASSWORD;
+        }
+    }
+
+    public function getGitHubAppToken(): ?string
+    {
+        try {
+            return $this->getStringValue(['authorization', 'githubApp', '#token']);
         } catch (InvalidArgumentException $e) {
             return null;
         }

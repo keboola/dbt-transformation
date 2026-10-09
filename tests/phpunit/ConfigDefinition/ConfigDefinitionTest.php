@@ -6,6 +6,7 @@ namespace DbtTransformation\Tests\ConfigDefinition;
 
 use DbtTransformation\Config;
 use DbtTransformation\Configuration\ConfigDefinition;
+use DbtTransformation\Configuration\GitAuthTypeEnum;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -38,6 +39,71 @@ class ConfigDefinitionTest extends TestCase
     }
 
     /**
+     * @dataProvider gitAuthTypeProvider
+     */
+    public function testGitAuthType(?string $auth, GitAuthTypeEnum $expected): void
+    {
+        $git = ['repo' => 'https://github.com/my-repo'];
+        if ($auth !== null) {
+            $git['auth'] = $auth;
+        }
+        $config = new Config(
+            [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => $git,
+                    'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                ],
+            ],
+            new ConfigDefinition(),
+        );
+
+        self::assertSame($expected, $config->getGitAuthType());
+    }
+
+    public function gitAuthTypeProvider(): Generator
+    {
+        yield 'not set' => [null, GitAuthTypeEnum::PASSWORD];
+        yield 'password' => ['password', GitAuthTypeEnum::PASSWORD];
+        yield 'GitHub App' => ['githubApp', GitAuthTypeEnum::GITHUB_APP];
+    }
+
+    public function testGitHubAppTokenFromAuthorization(): void
+    {
+        $config = new Config(
+            [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => ['repo' => 'https://slsp.ghe.com/org/repo.git', 'auth' => 'githubApp'],
+                    'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                ],
+                'authorization' => [
+                    'githubApp' => ['#token' => 'app-token', 'expiresAt' => '2026-10-09T11:00:00+00:00'],
+                ],
+            ],
+            new ConfigDefinition(),
+        );
+
+        self::assertSame('app-token', $config->getGitHubAppToken());
+    }
+
+    public function testGitHubAppTokenIsNullWithoutAuthorization(): void
+    {
+        $config = new Config(
+            [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => ['repo' => 'https://slsp.ghe.com/org/repo.git', 'auth' => 'githubApp'],
+                    'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                ],
+            ],
+            new ConfigDefinition(),
+        );
+
+        self::assertNull($config->getGitHubAppToken());
+    }
+
+    /**
      * @return Generator<string, array<string, mixed>>
      */
     public function validConfigsData(): Generator
@@ -66,6 +132,38 @@ class ConfigDefinitionTest extends TestCase
                     'dbt' => [
                         'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'threads' => 1,
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with GitHub App auth on a custom host' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://slsp.ghe.com/org/repo.git',
+                        'auth' => 'githubApp',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with password auth' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'auth' => 'password',
+                        'username' => 'test',
+                        '#password' => 'test',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                 ],
             ],
@@ -485,6 +583,72 @@ class ConfigDefinitionTest extends TestCase
                 ],
             ],
             'expectedError' => 'Both username and password has to be set.',
+        ];
+
+        yield 'unknown git auth' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'auth' => 'token',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'The value "token" is not allowed for path "root.parameters.git.auth".',
+        ];
+
+        yield 'GitHub App auth with username and password' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'auth' => 'githubApp',
+                        'username' => 'test',
+                        '#password' => 'test',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'GitHub App authentication cannot be used together with username and password.',
+        ];
+
+        yield 'GitHub App auth with SSH URL' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'git@slsp.ghe.com:org/repo.git',
+                        'auth' => 'githubApp',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'GitHub App authentication requires an HTTPS repository URL without credentials.',
+        ];
+
+        yield 'GitHub App auth with credentials in URL' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://user:secret@slsp.ghe.com/org/repo.git',
+                        'auth' => 'githubApp',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'GitHub App authentication requires an HTTPS repository URL without credentials.',
         ];
 
         yield 'missing dbt node' => [

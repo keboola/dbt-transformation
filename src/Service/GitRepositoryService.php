@@ -16,14 +16,9 @@ class GitRepositoryService
 {
     private const GITHUB_APP_TOKEN_ENV = 'GIT_GITHUB_APP_TOKEN';
     private const GITHUB_APP_TOKEN_USERNAME = 'x-access-token';
-    private const ASK_PASS_SCRIPT = <<<'SH'
-        #!/bin/sh
-        case "$1" in
-            Username*) printf '%s\n' '%username%' ;;
-            *) printf '%s\n' "$%tokenEnv%" ;;
-        esac
-
-        SH;
+    // git calls the helper with "get", "store" or "erase"; only "get" returns the credentials
+    private const GITHUB_APP_CREDENTIAL_HELPER
+        = '!f() { test "$1" = get || exit 0; echo username=%s; echo "password=$%s"; }; f';
 
     private string $dataDir;
     private string $projectPath;
@@ -86,7 +81,7 @@ class GitRepositoryService
 
     /**
      * The token is passed to git only through the environment of the clone process and read back by
-     * the GIT_ASKPASS script, so it never appears in the URL, the command line, .git/config or logs.
+     * an inline credential helper, so it never appears in the URL, the command line, .git/config or logs.
      *
      * @param string[] $branchArgument
      * @throws \Keboola\Component\UserException
@@ -97,39 +92,35 @@ class GitRepositoryService
         string $gitFolder,
         string $token,
     ): void {
-        $fs = new Filesystem();
-        $askPassScript = $this->createAskPassScript($fs);
-        try {
-            $process = new Process(
-                ['git', '-c', 'credential.helper=', 'clone', ...$branchArgument, $repositoryUrl, $gitFolder],
-                $this->dataDir,
-                [
-                    'GIT_ASKPASS' => $askPassScript,
-                    'GIT_TERMINAL_PROMPT' => '0',
-                    self::GITHUB_APP_TOKEN_ENV => $token,
-                ],
-            );
-            $this->runGitCloneProcess(
-                $process,
+        $credentialHelper = sprintf(
+            self::GITHUB_APP_CREDENTIAL_HELPER,
+            self::GITHUB_APP_TOKEN_USERNAME,
+            self::GITHUB_APP_TOKEN_ENV,
+        );
+        $process = new Process(
+            [
+                'git',
+                '-c',
+                'credential.helper=',
+                '-c',
+                'credential.helper=' . $credentialHelper,
+                'clone',
+                ...$branchArgument,
                 $repositoryUrl,
-                'Check that the GitHub App is installed for this repository and that the installation '
-                . 'is not suspended.',
-            );
-        } finally {
-            $fs->remove($askPassScript);
-        }
-    }
-
-    private function createAskPassScript(Filesystem $fs): string
-    {
-        $path = $fs->tempnam(sys_get_temp_dir(), 'git-askpass-', '.sh');
-        $fs->dumpFile($path, strtr(self::ASK_PASS_SCRIPT, [
-            '%username%' => self::GITHUB_APP_TOKEN_USERNAME,
-            '%tokenEnv%' => self::GITHUB_APP_TOKEN_ENV,
-        ]));
-        $fs->chmod($path, 0700);
-
-        return $path;
+                $gitFolder,
+            ],
+            $this->dataDir,
+            [
+                'GIT_TERMINAL_PROMPT' => '0',
+                self::GITHUB_APP_TOKEN_ENV => $token,
+            ],
+        );
+        $this->runGitCloneProcess(
+            $process,
+            $repositoryUrl,
+            'Check that the GitHub App is installed for this repository and that the installation '
+            . 'is not suspended.',
+        );
     }
 
     /**

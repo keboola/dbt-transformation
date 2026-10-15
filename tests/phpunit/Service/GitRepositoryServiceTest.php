@@ -217,7 +217,6 @@ class GitRepositoryServiceTest extends TestCase
 
     public function testCloneWithGitHubAppTokenKeepsTokenOutOfRepository(): void
     {
-        $askPassScriptsBefore = $this->findAskPassScripts();
         $gitService = new GitRepositoryService($this->dataDir);
         $gitService->clone(
             repositoryUrl: 'https://github.com/keboola/dbt-test-project-public.git',
@@ -226,8 +225,8 @@ class GitRepositoryServiceTest extends TestCase
 
         $gitConfig = (string) file_get_contents($this->dataDir . '/dbt-project/.git/config');
         self::assertStringNotContainsString('secret-app-token', $gitConfig);
+        self::assertStringNotContainsString('credential', $gitConfig);
         self::assertStringContainsString('url = https://github.com/keboola/dbt-test-project-public.git', $gitConfig);
-        self::assertSame($askPassScriptsBefore, $this->findAskPassScripts());
     }
 
     public function testCloneWithGitHubAppTokenPrivateRepository(): void
@@ -248,7 +247,6 @@ class GitRepositoryServiceTest extends TestCase
 
     public function testCloneWithInvalidGitHubAppToken(): void
     {
-        $askPassScriptsBefore = $this->findAskPassScripts();
         $gitService = new GitRepositoryService($this->dataDir);
 
         try {
@@ -269,8 +267,6 @@ class GitRepositoryServiceTest extends TestCase
             );
             self::assertStringNotContainsString('invalid-app-token', $e->getMessage());
         }
-
-        self::assertSame($askPassScriptsBefore, $this->findAskPassScripts());
     }
 
     /**
@@ -315,14 +311,6 @@ class GitRepositoryServiceTest extends TestCase
             'fatal: unable to access',
             'Failed to clone your repository "https://slsp.ghe.com/org/repo.git". Check the app.',
         ];
-    }
-
-    /**
-     * @return string[]
-     */
-    private function findAskPassScripts(): array
-    {
-        return glob(sys_get_temp_dir() . '/git-askpass-*') ?: [];
     }
 
     /**

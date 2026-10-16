@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation\Configuration\NodeDefinition;
 
+use DbtTransformation\Configuration\GitAuthTypeEnum;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeParentInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -32,10 +33,32 @@ class GitNode extends ArrayNodeDefinition
                 ) {
                     throw new InvalidConfigurationException('Both username and password has to be set.');
                 }
+                if (($item['auth'] ?? null) === GitAuthTypeEnum::GITHUB_APP->value) {
+                    $this->validateGitHubAppCredentials($item);
+                }
                 return $item;
             })
             ->end();
         // @formatter:on
+    }
+
+    /**
+     * @param array<string, string> $item
+     */
+    private function validateGitHubAppCredentials(array $item): void
+    {
+        if (!empty($item['username']) || !empty($item['#password'])) {
+            throw new InvalidConfigurationException(
+                'GitHub App authentication cannot be used together with username and password.',
+            );
+        }
+
+        $url = parse_url($item['repo']);
+        if (!$url || ($url['scheme'] ?? null) !== 'https' || isset($url['user']) || isset($url['pass'])) {
+            throw new InvalidConfigurationException(
+                'GitHub App authentication requires an HTTPS repository URL without credentials.',
+            );
+        }
     }
 
     protected function build(): void
@@ -49,6 +72,9 @@ class GitNode extends ArrayNodeDefinition
                     ->cannotBeEmpty()
                 ->end()
                 ->scalarNode('branch')
+                ->end()
+                ->enumNode('auth')
+                    ->values(array_column(GitAuthTypeEnum::cases(), 'value'))
                 ->end()
                 ->scalarNode('username')
                 ->end()

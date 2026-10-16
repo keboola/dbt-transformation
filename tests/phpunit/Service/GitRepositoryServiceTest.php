@@ -217,16 +217,22 @@ class GitRepositoryServiceTest extends TestCase
 
     public function testCloneWithGitHubAppTokenKeepsTokenOutOfRepository(): void
     {
+        // a private repository, so git really asks the credential helper for the token
+        $token = getenv('GITHUB_PASSWORD');
+        if (!$token) {
+            self::markTestSkipped('GITHUB_PASSWORD is not set.');
+        }
+
         $gitService = new GitRepositoryService($this->dataDir);
         $gitService->clone(
-            repositoryUrl: 'https://github.com/keboola/dbt-test-project-public.git',
-            gitHubAppToken: 'secret-app-token',
+            repositoryUrl: 'https://github.com/keboola/dbt-test-project.git',
+            gitHubAppToken: $token,
         );
 
         $gitConfig = (string) file_get_contents($this->dataDir . '/dbt-project/.git/config');
-        self::assertStringNotContainsString('secret-app-token', $gitConfig);
+        self::assertStringNotContainsString($token, $gitConfig);
         self::assertStringNotContainsString('credential', $gitConfig);
-        self::assertStringContainsString('url = https://github.com/keboola/dbt-test-project-public.git', $gitConfig);
+        self::assertStringContainsString('url = https://github.com/keboola/dbt-test-project.git', $gitConfig);
     }
 
     public function testCloneWithGitHubAppTokenPrivateRepository(): void

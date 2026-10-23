@@ -62,6 +62,7 @@ class ConfigDefinitionTest extends TestCase
     {
         yield 'not set' => [[], false];
         yield 'null' => [['authType' => null], false];
+        yield 'empty string' => [['authType' => ''], false];
         yield 'organization' => [['authType' => 'organization'], true];
     }
 

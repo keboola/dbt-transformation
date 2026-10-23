@@ -74,7 +74,7 @@ class GitNode extends ArrayNodeDefinition
                 ->scalarNode('branch')
                 ->end()
                 ->enumNode('authType')
-                    ->values([self::AUTH_TYPE_ORGANIZATION, null])
+                    ->values([self::AUTH_TYPE_ORGANIZATION, '', null])
                 ->end()
                 ->scalarNode('username')
                 ->end()

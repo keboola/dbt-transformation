@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DbtTransformation;
 
 use DbtTransformation\Configuration\ConfigDefinition;
-use DbtTransformation\Configuration\GitAuthTypeEnum;
 use DbtTransformation\Configuration\SyncAction\DbtCompileDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtDocsDefinition;
 use DbtTransformation\Configuration\SyncAction\DbtRunResultsDefinition;
@@ -207,7 +206,7 @@ class Component extends BaseComponent
      */
     private function getGitHubAppToken(Config $config): ?string
     {
-        if ($config->getGitAuthType() !== GitAuthTypeEnum::GITHUB_APP) {
+        if (!$config->isGitOrganizationAuth()) {
             return null;
         }
         $token = $config->getGitHubAppToken();

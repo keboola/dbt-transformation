@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
-use DbtTransformation\Configuration\GitAuthTypeEnum;
+use DbtTransformation\Configuration\NodeDefinition\GitNode;
 use InvalidArgumentException;
 use Keboola\Component\Config\BaseConfig;
 use RuntimeException;
@@ -43,13 +43,9 @@ class Config extends BaseConfig
         }
     }
 
-    public function getGitAuthType(): GitAuthTypeEnum
+    public function isGitOrganizationAuth(): bool
     {
-        try {
-            return GitAuthTypeEnum::from($this->getStringValue(['parameters', 'git', 'auth']));
-        } catch (InvalidArgumentException $e) {
-            return GitAuthTypeEnum::PASSWORD;
-        }
+        return ($this->getParameters()['git']['authType'] ?? null) === GitNode::AUTH_TYPE_ORGANIZATION;
     }
 
     public function getGitHubAppToken(): ?string

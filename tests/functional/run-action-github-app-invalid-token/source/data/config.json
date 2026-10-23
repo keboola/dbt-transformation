@@ -16,7 +16,7 @@
   "parameters": {
     "git": {
       "repo": "https://github.com/keboola/dbt-test-project.git",
-      "auth": "githubApp"
+      "authType": "organization"
     },
     "dbt": {
       "executeSteps": ["dbt run"]

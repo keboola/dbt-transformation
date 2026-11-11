@@ -40,6 +40,8 @@ class DbtDocsHelper
     {
         /** @var array<string, array<string, array<string, array<string, mixed>>>> $nodes */
         $nodes = $manifest['nodes'];
+        /** @var array<string, array<string, array<string, array<string, mixed>>>> $unitTests */
+        $unitTests = $manifest['unit_tests'] ?? [];
         $result = [];
 
         /** @var array{
@@ -50,11 +52,14 @@ class DbtDocsHelper
          * } $run
          */
         foreach ($runResults['results'] as $run) {
+            $node = $nodes[$run['unique_id']] ?? $unitTests[$run['unique_id']] ?? null;
+            if ($node === null) {
+                continue;
+            }
             /** @var array{
              *     'depends_on': array{'nodes'?: array<string>, 'macros'?: array<string>}
              * } $node
              */
-            $node = $nodes[$run['unique_id']];
 
             $executeTimings = array_filter($run['timing'], function ($item) {
                 return $item['name'] === 'execute';

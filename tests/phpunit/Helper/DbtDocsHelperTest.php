@@ -212,6 +212,53 @@ class DbtDocsHelperTest extends TestCase
         ], $modelTiming);
     }
 
+    public function testGetModelTimingWithUnitTestAndUnknownNode(): void
+    {
+        $manifest = [
+            'nodes' => [
+                'model.my_project.customers' => [
+                    'depends_on' => ['macros' => [], 'nodes' => ['model.my_project.stg_customers']],
+                ],
+            ],
+            'unit_tests' => [
+                'unit_test.my_project.customers.test_customers' => [
+                    'depends_on' => ['macros' => [], 'nodes' => ['model.my_project.customers']],
+                ],
+            ],
+        ];
+        /** @var array<string, array<string, mixed>> $runResults */
+        $runResults = [
+            'results' => [
+                self::runResult('model.my_project.customers', 'Thread-1', '10:00:00', '10:00:01'),
+                self::runResult('unit_test.my_project.customers.test_customers', 'Thread-1', '10:00:02', '10:00:03'),
+                self::runResult('operation.my_project.unknown-hook', 'Thread-1', '10:00:04', '10:00:05'),
+            ],
+        ];
+
+        $modelTiming = DbtDocsHelper::getModelTiming($manifest, $runResults);
+
+        self::assertSame([
+            [
+                'id' => 'model.my_project.customers',
+                'name' => 'customers',
+                'status' => 'success',
+                'thread' => 'Thread-1',
+                'timeStarted' => '2026-11-11T10:00:00Z',
+                'timeCompleted' => '2026-11-11T10:00:01Z',
+                'dependsOn' => ['model.my_project.stg_customers'],
+            ],
+            [
+                'id' => 'unit_test.my_project.customers.test_customers',
+                'name' => 'test_customers',
+                'status' => 'success',
+                'thread' => 'Thread-1',
+                'timeStarted' => '2026-11-11T10:00:02Z',
+                'timeCompleted' => '2026-11-11T10:00:03Z',
+                'dependsOn' => ['model.my_project.customers'],
+            ],
+        ], $modelTiming);
+    }
+
     /**
      * @return array<string, mixed>
      */

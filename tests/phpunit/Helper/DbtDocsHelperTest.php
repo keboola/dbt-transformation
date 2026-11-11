@@ -148,4 +148,91 @@ class DbtDocsHelperTest extends TestCase
 
         self::assertSame($expected, $modelTiming);
     }
+
+    public function testGetModelTimingWithSeed(): void
+    {
+        $manifest = [
+            'nodes' => [
+                'seed.my_project.country_codes' => [
+                    'depends_on' => ['macros' => []],
+                ],
+                'model.my_project.customers' => [
+                    'depends_on' => [
+                        'macros' => [],
+                        'nodes' => ['seed.my_project.country_codes', 'model.my_project.stg_customers'],
+                    ],
+                ],
+                'test.my_project.not_null_customers_id' => [
+                    'depends_on' => [
+                        'macros' => ['macro.dbt.test_not_null'],
+                        'nodes' => ['model.my_project.customers'],
+                    ],
+                ],
+            ],
+        ];
+        /** @var array<string, array<string, mixed>> $runResults */
+        $runResults = [
+            'results' => [
+                self::runResult('seed.my_project.country_codes', 'Thread-1', '10:00:00', '10:00:01'),
+                self::runResult('model.my_project.customers', 'Thread-2', '10:00:02', '10:00:03'),
+                self::runResult('test.my_project.not_null_customers_id', 'Thread-1', '10:00:04', '10:00:05'),
+            ],
+        ];
+
+        $modelTiming = DbtDocsHelper::getModelTiming($manifest, $runResults);
+
+        self::assertSame([
+            [
+                'id' => 'seed.my_project.country_codes',
+                'name' => 'country_codes',
+                'status' => 'success',
+                'thread' => 'Thread-1',
+                'timeStarted' => '2026-11-11T10:00:00Z',
+                'timeCompleted' => '2026-11-11T10:00:01Z',
+                'dependsOn' => [],
+            ],
+            [
+                'id' => 'model.my_project.customers',
+                'name' => 'customers',
+                'status' => 'success',
+                'thread' => 'Thread-2',
+                'timeStarted' => '2026-11-11T10:00:02Z',
+                'timeCompleted' => '2026-11-11T10:00:03Z',
+                'dependsOn' => [1 => 'model.my_project.stg_customers'],
+            ],
+            [
+                'id' => 'test.my_project.not_null_customers_id',
+                'name' => 'not_null_customers_id',
+                'status' => 'success',
+                'thread' => 'Thread-1',
+                'timeStarted' => '2026-11-11T10:00:04Z',
+                'timeCompleted' => '2026-11-11T10:00:05Z',
+                'dependsOn' => ['model.my_project.customers'],
+            ],
+        ], $modelTiming);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function runResult(string $uniqueId, string $threadId, string $started, string $completed): array
+    {
+        return [
+            'unique_id' => $uniqueId,
+            'status' => 'success',
+            'thread_id' => $threadId,
+            'timing' => [
+                [
+                    'name' => 'compile',
+                    'started_at' => '2026-11-11T09:59:59Z',
+                    'completed_at' => '2026-11-11T09:59:59Z',
+                ],
+                [
+                    'name' => 'execute',
+                    'started_at' => '2026-11-11T' . $started . 'Z',
+                    'completed_at' => '2026-11-11T' . $completed . 'Z',
+                ],
+            ],
+        ];
+    }
 }

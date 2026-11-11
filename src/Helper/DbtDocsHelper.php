@@ -51,7 +51,7 @@ class DbtDocsHelper
          */
         foreach ($runResults['results'] as $run) {
             /** @var array{
-             *     'depends_on': array<string, array<string>>
+             *     'depends_on': array{'nodes'?: array<string>, 'macros'?: array<string>}
              * } $node
              */
             $node = $nodes[$run['unique_id']];
@@ -68,7 +68,7 @@ class DbtDocsHelper
 
             $idArray = explode('.', $run['unique_id']);
 
-            $dependsOn = array_filter($node['depends_on']['nodes'], function ($node) {
+            $dependsOn = array_filter($node['depends_on']['nodes'] ?? [], function ($node) {
                 $idArray = explode('.', $node);
                 return array_shift($idArray) === 'model';
             });

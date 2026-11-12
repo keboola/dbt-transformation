@@ -11,6 +11,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 class GitNode extends ArrayNodeDefinition
 {
     public const NODE_NAME = 'git';
+    public const AUTH_TYPE_ORGANIZATION = 'organization';
 
     public function __construct(?NodeParentInterface $parent = null)
     {
@@ -32,10 +33,32 @@ class GitNode extends ArrayNodeDefinition
                 ) {
                     throw new InvalidConfigurationException('Both username and password has to be set.');
                 }
+                if (($item['authType'] ?? null) === self::AUTH_TYPE_ORGANIZATION) {
+                    $this->validateOrganizationCredentials($item);
+                }
                 return $item;
             })
             ->end();
         // @formatter:on
+    }
+
+    /**
+     * @param array<string, string> $item
+     */
+    private function validateOrganizationCredentials(array $item): void
+    {
+        if (!empty($item['username']) || !empty($item['#password'])) {
+            throw new InvalidConfigurationException(
+                'Organization GitHub authentication cannot be used together with username and password.',
+            );
+        }
+
+        $url = parse_url($item['repo']);
+        if (!$url || ($url['scheme'] ?? null) !== 'https' || isset($url['user']) || isset($url['pass'])) {
+            throw new InvalidConfigurationException(
+                'Organization GitHub authentication requires an HTTPS URL without credentials.',
+            );
+        }
     }
 
     protected function build(): void
@@ -49,6 +72,9 @@ class GitNode extends ArrayNodeDefinition
                     ->cannotBeEmpty()
                 ->end()
                 ->scalarNode('branch')
+                ->end()
+                ->enumNode('authType')
+                    ->values([self::AUTH_TYPE_ORGANIZATION, '', null])
                 ->end()
                 ->scalarNode('username')
                 ->end()

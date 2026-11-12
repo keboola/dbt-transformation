@@ -3,3 +3,7 @@ parameters:
         - '#Cannot call method end\(\) on Symfony\\Component\\Config\\Definition\\Builder\\NodeParentInterface\|null.#'
         - '#Cannot call method integerNode\(\) on Symfony\\Component\\Config\\Definition\\Builder\\NodeParentInterface\|null.#'
         - '#Cannot call method scalarNode\(\) on Symfony\\Component\\Config\\Definition\\Builder\\NodeParentInterface\|null.#'
+        -
+            # Process::mustRun() does not declare it, but it does throw ProcessTimedOutException
+            message: '#Dead catch - Symfony\\Component\\Process\\Exception\\ProcessTimedOutException is never thrown in the try block.#'
+            path: src/Service/GitRepositoryService.php

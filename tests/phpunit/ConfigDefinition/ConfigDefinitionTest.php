@@ -38,6 +38,70 @@ class ConfigDefinitionTest extends TestCase
     }
 
     /**
+     * @dataProvider gitOrganizationAuthProvider
+     * @param array<string, string|null> $authType
+     */
+    public function testGitOrganizationAuth(array $authType, bool $expected): void
+    {
+        $git = ['repo' => 'https://github.com/my-repo'] + $authType;
+        $config = new Config(
+            [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => $git,
+                    'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                ],
+            ],
+            new ConfigDefinition(),
+        );
+
+        self::assertSame($expected, $config->isGitOrganizationAuth());
+    }
+
+    public function gitOrganizationAuthProvider(): Generator
+    {
+        yield 'not set' => [[], false];
+        yield 'null' => [['authType' => null], false];
+        yield 'empty string' => [['authType' => ''], false];
+        yield 'organization' => [['authType' => 'organization'], true];
+    }
+
+    public function testGitHubAppTokenFromAuthorization(): void
+    {
+        $config = new Config(
+            [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => ['repo' => 'https://slsp.ghe.com/org/repo.git', 'authType' => 'organization'],
+                    'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                ],
+                'authorization' => [
+                    'githubApp' => ['#token' => 'app-token', 'expiresAt' => '2026-10-09T11:00:00+00:00'],
+                ],
+            ],
+            new ConfigDefinition(),
+        );
+
+        self::assertSame('app-token', $config->getGitHubAppToken());
+    }
+
+    public function testGitHubAppTokenIsNullWithoutAuthorization(): void
+    {
+        $config = new Config(
+            [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => ['repo' => 'https://slsp.ghe.com/org/repo.git', 'authType' => 'organization'],
+                    'dbt' => ['executeSteps' => [['step' => 'dbt run', 'active' => true]]],
+                ],
+            ],
+            new ConfigDefinition(),
+        );
+
+        self::assertNull($config->getGitHubAppToken());
+    }
+
+    /**
      * @return Generator<string, array<string, mixed>>
      */
     public function validConfigsData(): Generator
@@ -66,6 +130,38 @@ class ConfigDefinitionTest extends TestCase
                     'dbt' => [
                         'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                         'threads' => 1,
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with organization auth on a custom host' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://slsp.ghe.com/org/repo.git',
+                        'authType' => 'organization',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'config with password auth and null authType' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'authType' => null,
+                        'username' => 'test',
+                        '#password' => 'test',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
                     ],
                 ],
             ],
@@ -485,6 +581,72 @@ class ConfigDefinitionTest extends TestCase
                 ],
             ],
             'expectedError' => 'Both username and password has to be set.',
+        ];
+
+        yield 'unknown git authType' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'authType' => 'githubApp',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'The value "githubApp" is not allowed for path "root.parameters.git.authType".',
+        ];
+
+        yield 'organization auth with username and password' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://github.com/my-repo',
+                        'authType' => 'organization',
+                        'username' => 'test',
+                        '#password' => 'test',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'Organization GitHub authentication cannot be used together with username and password.',
+        ];
+
+        yield 'organization auth with SSH URL' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'git@slsp.ghe.com:org/repo.git',
+                        'authType' => 'organization',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'Organization GitHub authentication requires an HTTPS URL without credentials.',
+        ];
+
+        yield 'organization auth with credentials in URL' => [
+            'configData' => [
+                'action' => 'run',
+                'parameters' => [
+                    'git' => [
+                        'repo' => 'https://user:secret@slsp.ghe.com/org/repo.git',
+                        'authType' => 'organization',
+                    ],
+                    'dbt' => [
+                        'executeSteps' => [['step' => 'dbt run', 'active' => true]],
+                    ],
+                ],
+            ],
+            'expectedError' => 'Organization GitHub authentication requires an HTTPS URL without credentials.',
         ];
 
         yield 'missing dbt node' => [

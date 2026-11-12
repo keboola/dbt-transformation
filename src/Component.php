@@ -206,6 +206,22 @@ class Component extends BaseComponent
         };
     }
 
+    /**
+     * @throws \Keboola\Component\UserException
+     */
+    private function getGitHubAppToken(Config $config): ?string
+    {
+        if (!$config->isGitOrganizationAuth()) {
+            return null;
+        }
+        $token = $config->getGitHubAppToken();
+        if ($token === null) {
+            throw new UserException('GitHub App credentials are missing in the job configuration.');
+        }
+
+        return $token;
+    }
+
     protected function setProjectPath(string $dataDir): void
     {
         $this->projectPath = sprintf('%s/%s', $dataDir, 'dbt-project');
@@ -222,6 +238,7 @@ class Component extends BaseComponent
             $config->getGitRepositoryUsername(),
             $config->getGitRepositoryPassword(),
             $config->getGitRepositoryFolder(),
+            $this->getGitHubAppToken($config),
         );
 
         $branch = $this->gitRepositoryService->getCurrentBranch($this->projectPath);
@@ -443,6 +460,7 @@ class Component extends BaseComponent
             $config->getGitRepositoryBranch(),
             $config->getGitRepositoryUsername(),
             $config->getGitRepositoryPassword(),
+            gitHubAppToken: $this->getGitHubAppToken($config),
         );
 
         $branches = $this->gitRepositoryService->listRemoteBranches($this->projectPath);

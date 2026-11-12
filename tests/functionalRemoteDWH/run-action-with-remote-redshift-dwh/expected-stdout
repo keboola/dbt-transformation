@@ -1,5 +1,5 @@
 Successfully cloned repository https://github.com/keboola/dbt-test-project-public.git from branch branch-with-redshift-sources (%s)
-Remote redshift DWH: testing.cx4py8yq28xb.us-east-1.redshift.amazonaws.com
+Remote redshift DWH: testing.213856284345.us-east-1.redshift-serverless.amazonaws.com
 Generated profiles.yml: %A
 Executing command "dbt deps"
 Running with dbt=%A

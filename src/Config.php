@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DbtTransformation;
 
+use DbtTransformation\Configuration\NodeDefinition\GitNode;
 use InvalidArgumentException;
 use Keboola\Component\Config\BaseConfig;
 use RuntimeException;
@@ -37,6 +38,20 @@ class Config extends BaseConfig
     {
         try {
             return $this->getStringValue(['parameters', 'git', '#password']);
+        } catch (InvalidArgumentException $e) {
+            return null;
+        }
+    }
+
+    public function isGitOrganizationAuth(): bool
+    {
+        return ($this->getParameters()['git']['authType'] ?? null) === GitNode::AUTH_TYPE_ORGANIZATION;
+    }
+
+    public function getGitHubAppToken(): ?string
+    {
+        try {
+            return $this->getStringValue(['authorization', 'githubApp', '#token']);
         } catch (InvalidArgumentException $e) {
             return null;
         }

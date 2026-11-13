@@ -1,0 +1,145 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DbtTransformation\Tests\Helper;
+
+use DbtTransformation\Helper\YamlParseHelper;
+use Generator;
+use Keboola\Component\UserException;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
+
+class YamlParseHelperTest extends TestCase
+{
+    /**
+     * @dataProvider sanitizeParseErrorMessageProvider
+     */
+    public function testSanitizeParseErrorMessage(ParseException $exception, string $expectedMessage): void
+    {
+        self::assertSame($expectedMessage, YamlParseHelper::sanitizeParseErrorMessage($exception));
+    }
+
+    public function sanitizeParseErrorMessageProvider(): Generator
+    {
+        yield 'message with file and snippet' => [
+            'exception' => new ParseException(
+                'Duplicate key "dev" detected.',
+                6,
+                '        dev:',
+                '/data/profiles.yml',
+            ),
+            'expectedMessage' => 'Duplicate key "dev" detected at line 6.',
+        ];
+
+        yield 'message without snippet' => [
+            'exception' => new ParseException('Unable to parse.', 3, null, '/data/profiles.yml'),
+            'expectedMessage' => 'Unable to parse at line 3.',
+        ];
+
+        yield 'message without file or line' => [
+            'exception' => new ParseException('Unable to parse.'),
+            'expectedMessage' => 'Unable to parse.',
+        ];
+    }
+
+    /**
+     * @dataProvider containsJinjaProvider
+     */
+    public function testContainsJinja(ParseException $exception, string $source, bool $expected): void
+    {
+        self::assertSame($expected, YamlParseHelper::containsJinja($exception, $source));
+    }
+
+    public function containsJinjaProvider(): Generator
+    {
+        yield 'double curly expression in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 1, "key: {{ env_var('X') }}"),
+            'source' => "key: {{ env_var('X') }}",
+            'expected' => true,
+        ];
+
+        yield 'statement block in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 1, '{% if true %}key: 1{% endif %}'),
+            'source' => '{% if true %}key: 1{% endif %}',
+            'expected' => true,
+        ];
+
+        yield 'comment block in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 1, 'key: 1 {# comment #}'),
+            'source' => 'key: 1 {# comment #}',
+            'expected' => true,
+        ];
+
+        yield 'closing expression delimiter of a multiline expression' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 4, '}}'),
+            'source' => "key: {{\n  env_var('X')\n}}",
+            'expected' => true,
+        ];
+
+        yield 'closing statement delimiter in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 4, '  %}'),
+            'source' => "key: {%\n  if true\n  %}",
+            'expected' => true,
+        ];
+
+        yield 'closing comment delimiter in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 4, '#}'),
+            'source' => "key: {#\n  comment\n#}",
+            'expected' => true,
+        ];
+
+        yield 'closing delimiters of nested inline maps without an opening delimiter' => [
+            'exception' => new ParseException(
+                'Duplicate key "dev" detected.',
+                5,
+                '    dev: {type: snowflake, session_parameters: {QUERY_TAG: nightly}}',
+            ),
+            'source' => "dev: {type: snowflake}\ndev: {type: snowflake, session_parameters: {QUERY_TAG: nightly}}",
+            'expected' => false,
+        ];
+
+        yield 'plain yaml snippet' => [
+            'exception' => new ParseException('Duplicate key "dev" detected.', 7, '    type: snowflake'),
+            'source' => '    type: snowflake',
+            'expected' => false,
+        ];
+
+        yield 'no snippet available' => [
+            'exception' => new ParseException('Unable to parse.'),
+            'source' => '',
+            'expected' => false,
+        ];
+    }
+
+    public function testContainsJinjaForRealMultilineExpressionParseFailure(): void
+    {
+        $source = "default:\n  private_key_path: {{\n    env_var('X')\n  }}\n";
+
+        try {
+            Yaml::parse($source);
+            self::fail('Expected ParseException');
+        } catch (ParseException $e) {
+            self::assertTrue(YamlParseHelper::containsJinja($e, $source));
+        }
+    }
+
+    public function testToUserExceptionDoesNotLeakFileContentOrPath(): void
+    {
+        $exception = new ParseException(
+            'Duplicate key "dev" detected.',
+            6,
+            '        password: super-secret',
+            '/data/profiles.yml',
+        );
+
+        $userException = YamlParseHelper::toUserException($exception, 'profiles.yml');
+
+        self::assertInstanceOf(UserException::class, $userException);
+        self::assertStringContainsString('Invalid YAML in "profiles.yml"', $userException->getMessage());
+        self::assertStringContainsString('Duplicate key "dev" detected at line 6', $userException->getMessage());
+        self::assertStringNotContainsString('super-secret', $userException->getMessage());
+        self::assertStringNotContainsString('/data/profiles.yml', $userException->getMessage());
+    }
+}

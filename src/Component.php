@@ -21,6 +21,7 @@ use DbtTransformation\Helper\DbtDocsHelper;
 use DbtTransformation\Helper\ParseDbtOutputHelper;
 use DbtTransformation\Helper\ParseLogFileHelper;
 use DbtTransformation\Helper\ProfilesHelper;
+use DbtTransformation\Helper\YamlParseHelper;
 use DbtTransformation\Service\ArtifactsService;
 use DbtTransformation\Service\DbtLogService;
 use DbtTransformation\Service\DbtService;
@@ -129,6 +130,7 @@ class Component extends BaseComponent
     /**
      * @param array<string, string> $workspaceCredentials
      * @throws \Keboola\SnowflakeDbAdapter\Exception\SnowflakeDbAdapterException
+     * @throws UserException
      */
     public function getOutputManifest(array $workspaceCredentials): OutputManifestInterface
     {
@@ -136,7 +138,10 @@ class Component extends BaseComponent
         $manifestConverter = new DbtManifestParser($this->projectPath);
 
         /** @var array<string, array<string, bool>> $dbtProjectYaml */
-        $dbtProjectYaml = Yaml::parseFile(sprintf('%s/dbt_project.yml', $this->projectPath));
+        $dbtProjectYaml = YamlParseHelper::parseUserYamlFile(
+            sprintf('%s/dbt_project.yml', $this->projectPath),
+            'dbt_project.yml',
+        );
         $quoteIdentifier = $dbtProjectYaml['quoting']['identifier'] ?? false;
 
         if ($this->config->getEnvKbcComponentId() === 'keboola.dbt-transformation-local-bigquery') {

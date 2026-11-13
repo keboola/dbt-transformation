@@ -76,7 +76,7 @@ class DbtProfilesYaml extends FilesystemAwareDumper
         try {
             $profiles = (array) Yaml::parseFile($profilesYamlPath);
         } catch (ParseException $e) {
-            if (!YamlParseHelper::containsJinja($e)) {
+            if (!YamlParseHelper::containsJinja($e, (string) file_get_contents($profilesYamlPath))) {
                 throw YamlParseHelper::toUserException($e, 'profiles.yml');
             }
             $this->logger->warning(sprintf(

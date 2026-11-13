@@ -34,19 +34,21 @@ class YamlParseHelper
     /**
      * Checks only the snippet of the line that failed to parse (not the whole file), so a Jinja example
      * elsewhere in the file (e.g. in a comment) can't misclassify an unrelated YAML syntax error as Jinja.
-     * Closing delimiters count too: for an expression spanning several lines Symfony reports only the line
-     * with the closing delimiter as the snippet.
+     * Closing delimiters count only when the source has a matching opening delimiter: for an expression
+     * spanning several lines Symfony reports only the line with the closing delimiter as the snippet, but
+     * nested inline YAML maps such as "{a: {b: c}}" end in "}}" as well.
      */
-    public static function containsJinja(ParseException $e): bool
+    public static function containsJinja(ParseException $e, string $source): bool
     {
         $snippet = (string) $e->getSnippet();
 
-        return str_contains($snippet, '{{')
-            || str_contains($snippet, '{%')
-            || str_contains($snippet, '{#')
-            || str_contains($snippet, '}}')
-            || str_contains($snippet, '%}')
-            || str_contains($snippet, '#}');
+        if (str_contains($snippet, '{{') || str_contains($snippet, '{%') || str_contains($snippet, '{#')) {
+            return true;
+        }
+
+        return (str_contains($snippet, '}}') && str_contains($source, '{{'))
+            || (str_contains($snippet, '%}') && str_contains($source, '{%'))
+            || (str_contains($snippet, '#}') && str_contains($source, '{#'));
     }
 
     /**

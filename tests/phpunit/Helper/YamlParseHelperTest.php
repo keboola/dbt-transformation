@@ -47,61 +47,81 @@ class YamlParseHelperTest extends TestCase
     /**
      * @dataProvider containsJinjaProvider
      */
-    public function testContainsJinja(ParseException $exception, bool $expected): void
+    public function testContainsJinja(ParseException $exception, string $source, bool $expected): void
     {
-        self::assertSame($expected, YamlParseHelper::containsJinja($exception));
+        self::assertSame($expected, YamlParseHelper::containsJinja($exception, $source));
     }
 
     public function containsJinjaProvider(): Generator
     {
         yield 'double curly expression in snippet' => [
             'exception' => new ParseException('Malformed inline YAML string.', 1, "key: {{ env_var('X') }}"),
+            'source' => "key: {{ env_var('X') }}",
             'expected' => true,
         ];
 
         yield 'statement block in snippet' => [
             'exception' => new ParseException('Malformed inline YAML string.', 1, '{% if true %}key: 1{% endif %}'),
+            'source' => '{% if true %}key: 1{% endif %}',
             'expected' => true,
         ];
 
         yield 'comment block in snippet' => [
             'exception' => new ParseException('Malformed inline YAML string.', 1, 'key: 1 {# comment #}'),
+            'source' => 'key: 1 {# comment #}',
             'expected' => true,
         ];
 
         yield 'closing expression delimiter of a multiline expression' => [
             'exception' => new ParseException('Malformed inline YAML string.', 4, '}}'),
+            'source' => "key: {{\n  env_var('X')\n}}",
             'expected' => true,
         ];
 
         yield 'closing statement delimiter in snippet' => [
             'exception' => new ParseException('Malformed inline YAML string.', 4, '  %}'),
+            'source' => "key: {%\n  if true\n  %}",
             'expected' => true,
         ];
 
         yield 'closing comment delimiter in snippet' => [
             'exception' => new ParseException('Malformed inline YAML string.', 4, '#}'),
+            'source' => "key: {#\n  comment\n#}",
             'expected' => true,
+        ];
+
+        yield 'closing delimiters of nested inline maps without an opening delimiter' => [
+            'exception' => new ParseException(
+                'Duplicate key "dev" detected.',
+                5,
+                '    dev: {type: snowflake, session_parameters: {QUERY_TAG: nightly}}',
+            ),
+            'source' => "dev: {type: snowflake}\ndev: {type: snowflake, session_parameters: {QUERY_TAG: nightly}}",
+            'expected' => false,
         ];
 
         yield 'plain yaml snippet' => [
             'exception' => new ParseException('Duplicate key "dev" detected.', 7, '    type: snowflake'),
+            'source' => '    type: snowflake',
             'expected' => false,
         ];
 
         yield 'no snippet available' => [
             'exception' => new ParseException('Unable to parse.'),
+            'source' => '',
             'expected' => false,
         ];
     }
 
     public function testContainsJinjaForRealMultilineExpressionParseFailure(): void
     {
+        $source = "default:\n  private_key_path: {{\n    env_var('X')\n  }}\n";
+
         try {
-            Yaml::parse("default:\n  private_key_path: {{\n    env_var('X')\n  }}\n");
+            Yaml::parse($source);
             self::fail('Expected ParseException');
         } catch (ParseException $e) {
-            self::assertTrue(YamlParseHelper::containsJinja($e));
+            self::assertTrue(YamlParseHelper::containsJinja($e, $source));
         }
     }
 

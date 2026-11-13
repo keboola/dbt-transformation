@@ -520,6 +520,44 @@ YAML;
         }
     }
 
+    public function testDumpYamlThrowsUserExceptionForDuplicateKeyWithNestedInlineMaps(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $brokenProfilesYaml = <<<YAML
+        default:
+          outputs:
+            dev: {type: snowflake}
+            dev: {type: snowflake, session_parameters: {QUERY_TAG: nightly}}
+        YAML;
+        $profilesYamlPath = sprintf('%s/profiles.yml', $this->dataDir);
+        $fs->dumpFile($profilesYamlPath, $brokenProfilesYaml);
+
+        $logger = new TestLogger();
+        $service = new DbtProfilesYaml($logger);
+
+        try {
+            $service->dumpYaml(
+                $this->dataDir,
+                $this->dataDir,
+                LocalSnowflakeProvider::getOutputs(
+                    ['KBC_DEV_CHOCHO'],
+                    LocalSnowflakeProvider::getDbtParams(),
+                ),
+            );
+            self::fail('UserException was not thrown');
+        } catch (UserException $e) {
+            self::assertStringContainsString('Duplicate key "dev" detected at line', $e->getMessage());
+        }
+
+        self::assertFalse($logger->hasWarningThatContains('contains Jinja templating'));
+        self::assertSame($brokenProfilesYaml, file_get_contents($profilesYamlPath));
+    }
+
     public function testDumpYamlSkipsMergeWhenExistingOutputsIsList(): void
     {
         $fs = new Filesystem();

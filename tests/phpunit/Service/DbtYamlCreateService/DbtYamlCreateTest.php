@@ -408,6 +408,42 @@ YAML;
         self::assertSame(['kbc_dev_chocho'], array_keys($generated['default']['outputs']));
     }
 
+    public function testDumpYamlIgnoresExistingProfilesWithMultilineJinjaTemplating(): void
+    {
+        $fs = new Filesystem();
+        $fs->copy(
+            sprintf('%s/dbt_project.yml', $this->providerDataDir),
+            sprintf('%s/dbt_project.yml', $this->dataDir),
+        );
+
+        $jinjaProfilesYaml = <<<YAML
+default:
+    target: dev
+    outputs:
+        dev:
+            type: snowflake
+            private_key_path: {{
+                env_var('DBT_KBC_DEV_PRIVATE_KEY_PATH')
+            }}
+YAML;
+        $fs->dumpFile(sprintf('%s/profiles.yml', $this->dataDir), $jinjaProfilesYaml);
+
+        $logger = new TestLogger();
+        $service = new DbtProfilesYaml($logger);
+        $service->dumpYaml(
+            $this->dataDir,
+            $this->dataDir,
+            LocalSnowflakeProvider::getOutputs(
+                ['KBC_DEV_CHOCHO'],
+                LocalSnowflakeProvider::getDbtParams(),
+            ),
+        );
+
+        self::assertTrue($logger->hasWarningThatContains(
+            'Could not parse existing profiles.yml because it contains Jinja templating',
+        ));
+    }
+
     public function testDumpYamlThrowsUserExceptionForBrokenProfilesWithoutJinja(): void
     {
         $fs = new Filesystem();

@@ -9,6 +9,7 @@ use Generator;
 use Keboola\Component\UserException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 class YamlParseHelperTest extends TestCase
 {
@@ -68,6 +69,21 @@ class YamlParseHelperTest extends TestCase
             'expected' => true,
         ];
 
+        yield 'closing expression delimiter of a multiline expression' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 4, '}}'),
+            'expected' => true,
+        ];
+
+        yield 'closing statement delimiter in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 4, '  %}'),
+            'expected' => true,
+        ];
+
+        yield 'closing comment delimiter in snippet' => [
+            'exception' => new ParseException('Malformed inline YAML string.', 4, '#}'),
+            'expected' => true,
+        ];
+
         yield 'plain yaml snippet' => [
             'exception' => new ParseException('Duplicate key "dev" detected.', 7, '    type: snowflake'),
             'expected' => false,
@@ -77,6 +93,16 @@ class YamlParseHelperTest extends TestCase
             'exception' => new ParseException('Unable to parse.'),
             'expected' => false,
         ];
+    }
+
+    public function testContainsJinjaForRealMultilineExpressionParseFailure(): void
+    {
+        try {
+            Yaml::parse("default:\n  private_key_path: {{\n    env_var('X')\n  }}\n");
+            self::fail('Expected ParseException');
+        } catch (ParseException $e) {
+            self::assertTrue(YamlParseHelper::containsJinja($e));
+        }
     }
 
     public function testToUserExceptionDoesNotLeakFileContentOrPath(): void

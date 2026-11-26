@@ -61,4 +61,20 @@ class DatadirTest extends DatadirTestCase
     {
         parent::testDatadir($specification);
     }
+
+    protected function assertMatchesSpecification(
+        DatadirTestSpecificationInterface $specification,
+        Process $runProcess,
+        string $tempDatadir,
+    ): void {
+        parent::assertMatchesSpecification($specification, $runProcess, $tempDatadir);
+
+        // The Snowflake connector version depends on the dbt version, and each version reports a bad key differently.
+        if ($this->dataName() === 'run-action-with-remote-snowflake-with-wrong-key-pair-failed') {
+            self::assertMatchesRegularExpression(
+                '/JWT token is invalid|Could not parse DER private key/',
+                $runProcess->getErrorOutput(),
+            );
+        }
+    }
 }

@@ -175,6 +175,55 @@ class ArtifactsServiceTest extends TestCase
         self::assertArrayHasKey('results', $runResults);
     }
 
+    /**
+     * @dataProvider runResultsStepsProvider
+     * @param array<string, string> $generatedAtByStep
+     */
+    public function testFindLatestRunResultsStep(array $generatedAtByStep, string $expectedStep): void
+    {
+        $temp = new Temp();
+        $artifacts = new ArtifactsService(
+            new StorageClient(['url' => 'https://connection.keboola.com', 'token' => 'not-used']),
+            $temp->getTmpFolder(),
+        );
+        foreach ($generatedAtByStep as $step => $generatedAt) {
+            $stepDir = $artifacts->getDownloadDir() . '/' . $step;
+            mkdir($stepDir, 0777, true);
+            file_put_contents(
+                $stepDir . '/run_results.json',
+                (string) json_encode(['metadata' => ['generated_at' => $generatedAt], 'results' => []]),
+            );
+        }
+
+        self::assertSame($expectedStep, $artifacts->findLatestRunResultsStep());
+    }
+
+    /**
+     * @return array<string, array{array<string, string>, string}>
+     */
+    public function runResultsStepsProvider(): array
+    {
+        return [
+            'only run' => [['dbt run' => '2026-11-26T08:00:00.000000Z'], 'dbt run'],
+            'only build' => [['dbt build' => '2026-11-26T08:00:00.000000Z'], 'dbt build'],
+            'build after run' => [
+                [
+                    'dbt run' => '2026-11-26T08:00:00.000000Z',
+                    'dbt build' => '2026-11-26T08:05:00.000000Z',
+                ],
+                'dbt build',
+            ],
+            'run after build' => [
+                [
+                    'dbt run' => '2026-11-26T08:05:00.000000Z',
+                    'dbt build' => '2026-11-26T08:00:00.000000Z',
+                ],
+                'dbt run',
+            ],
+            'neither' => [['dbt test' => '2026-11-26T08:00:00.000000Z'], 'dbt run'],
+        ];
+    }
+
     public function testReadFromFileNoZip(): void
     {
         $temp = new Temp();

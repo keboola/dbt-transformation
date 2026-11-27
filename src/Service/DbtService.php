@@ -31,6 +31,7 @@ class DbtService
     public const COMMAND_DOCS_GENERATE = 'dbt docs generate';
     public const COMMAND_DEBUG = 'dbt debug';
     public const COMMAND_RUN = 'dbt run';
+    public const COMMAND_BUILD = 'dbt build';
     public const COMMAND_DEPS = 'dbt deps';
 
     public function __construct(

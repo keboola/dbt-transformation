@@ -227,6 +227,29 @@ class ArtifactsService
     }
 
     /**
+     * A config can run both `dbt run` and `dbt build`; the step whose run_results.json dbt wrote last wins.
+     */
+    public function findLatestRunResultsStep(): string
+    {
+        $latestStep = null;
+        $latestGeneratedAt = '';
+        foreach ([DbtService::COMMAND_RUN, DbtService::COMMAND_BUILD] as $step) {
+            $path = sprintf('%s/%s/run_results.json', $this->getDownloadDir(), $step);
+            if (!is_file($path)) {
+                continue;
+            }
+
+            $generatedAt = $this->getRunResultsGeneratedAt($path);
+            if ($latestStep === null || $generatedAt > $latestGeneratedAt) {
+                $latestStep = $step;
+                $latestGeneratedAt = $generatedAt;
+            }
+        }
+
+        return $latestStep ?? DbtService::COMMAND_RUN;
+    }
+
+    /**
      * @throws \Keboola\Component\UserException
      */
     public function readFromFile(string $filename): string
@@ -236,6 +259,16 @@ class ArtifactsService
             throw new UserException(sprintf('Missing "%s" file in downloaded artifact', $filename));
         }
         return (string) file_get_contents($file->getPathname());
+    }
+
+    private function getRunResultsGeneratedAt(string $path): string
+    {
+        $runResults = json_decode((string) file_get_contents($path), true);
+        if (!is_array($runResults) || !is_array($runResults['metadata'] ?? null)) {
+            return '';
+        }
+        $generatedAt = $runResults['metadata']['generated_at'] ?? '';
+        return is_string($generatedAt) ? $generatedAt : '';
     }
 
     private function extractArchive(string $sourcePath, string $targetPath): void

@@ -85,7 +85,7 @@ class DbtDocsHelper
                 'thread' => $run['thread_id'],
                 'timeStarted' => $executeTiming['started_at'],
                 'timeCompleted' => $executeTiming['completed_at'],
-                'dependsOn' => array_unique($dependsOn),
+                'dependsOn' => array_values(array_unique($dependsOn)),
             ];
         }
 

@@ -198,7 +198,7 @@ class DbtDocsHelperTest extends TestCase
                 'thread' => 'Thread-2',
                 'timeStarted' => '2026-11-11T10:00:02Z',
                 'timeCompleted' => '2026-11-11T10:00:03Z',
-                'dependsOn' => [1 => 'model.my_project.stg_customers'],
+                'dependsOn' => ['model.my_project.stg_customers'],
             ],
             [
                 'id' => 'test.my_project.not_null_customers_id',
@@ -210,6 +210,10 @@ class DbtDocsHelperTest extends TestCase
                 'dependsOn' => ['model.my_project.customers'],
             ],
         ], $modelTiming);
+        self::assertSame(
+            '["model.my_project.stg_customers"]',
+            json_encode($modelTiming[1]['dependsOn']),
+        );
     }
 
     public function testGetModelTimingWithUnitTestAndUnknownNode(): void
